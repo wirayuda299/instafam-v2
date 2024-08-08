@@ -1,6 +1,5 @@
 
 export type Post = {
-
   post_id: string;
   author_id: string;
   author_name: string;
@@ -16,6 +15,7 @@ export type Like = {
   liked_by: string;
   postId: string;
 };
+
 export interface Comment {
   comment_id: string;
   author: string;
@@ -49,7 +49,7 @@ export type ConversationMessage = {
   profile_image: string;
   media_image: string;
   media_image_asset_id: string;
-  created_at: string; // ISO 8601 date format
-  update_at: string; // ISO 8601 date format
+  created_at: string;
+  update_at: string;
   username: string;
 }
