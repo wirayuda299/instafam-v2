@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { addCommentSchema, AddCommentSchema } from 'src/common/validation';
 
-type Comment ={
+type Comment = {
   comment_id: string;
   author: string;
   comment: string;
@@ -12,8 +12,7 @@ type Comment ={
   username: string;
   profile_image: string;
   post_id: string;
-}
-
+};
 
 @Injectable()
 export class CommentsService {
@@ -101,7 +100,7 @@ export class CommentsService {
 
       return comments.rows as Comment[];
     } catch (error) {
-     console.log(error);
+      console.log(error);
 
       throw error;
     }

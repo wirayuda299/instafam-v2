@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,7 +18,7 @@ type User = {
 
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async createUser(values: CreateUserType) {
     try {
@@ -29,22 +31,25 @@ export class UsersService {
 
       const { id, username, email, image } = validatedValue.data;
 
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       await this.db.pool.query(
         `insert into users(id, email, username, profile_image)
         values($1,$2,$3,$4)`,
         [id, email, username, image],
       );
 
-      await this.db.pool.query(`insert into user_settings (userId) values($1)`, [id])
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(
+        `insert into user_settings (userId) values($1)`,
+        [id],
+      );
+      await this.db.pool.query(`commit`);
 
       return {
         messages: 'User created',
         error: false,
       };
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
 
       throw error;
     }
@@ -52,9 +57,8 @@ export class UsersService {
 
   async searchUser(query: string): Promise<User[]> {
     try {
-
-      if(!query) {
-        throw new BadRequestException("username is required")
+      if (!query) {
+        throw new BadRequestException('username is required');
       }
 
       const users = await this.db.pool.query(
@@ -74,6 +78,34 @@ export class UsersService {
     }
   }
 
+  async updateUserSetting(
+    userId: string,
+    userSessionId: string,
+    show_mention: boolean,
+    show_saved_post: boolean,
+    show_draft_posts: boolean,
+  ) {
+    try {
+      if (userId !== userSessionId) {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+
+      await this.db.pool.query(
+        `update user_settings
+      set show_mention = $1,
+          show_draft_posts = $2,
+          show_saved_post=$3
+      where userid=$4`,
+        [show_mention, show_draft_posts, show_saved_post, userId],
+      );
+      return {
+        message: 'User setting has been updated',
+      };
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async getUserById(id: string) {
     try {
       const user = await this.db.pool.query(
@@ -85,9 +117,12 @@ export class UsersService {
         return new NotFoundException('User not found');
       }
 
-      const userSettings= await this.db.pool.query(`select * from user_settings where userId= $1`, [user.rows[0].id])
+      const userSettings = await this.db.pool.query(
+        `select * from user_settings where userId= $1`,
+        [user.rows[0].id],
+      );
 
-      user.rows[0].settings= userSettings.rows[0]
+      user.rows[0].settings = userSettings.rows[0];
 
       return user.rows[0];
     } catch (error) {

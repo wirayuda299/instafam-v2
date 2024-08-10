@@ -1,13 +1,10 @@
+import { User } from "@/types";
 import { ApiRequest } from "@/utils/api";
+import { revalidate } from "@/utils/cache";
+import { toast } from "sonner";
 
 const api = new ApiRequest();
 
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  profile_image: string;
-};
 
 export async function getUser(id: string) {
   try {
@@ -16,6 +13,7 @@ export async function getUser(id: string) {
     throw error;
   }
 }
+
 export async function showUsers(userId: string, limit: number = 8) {
   try {
     if (!userId) return [];
@@ -35,6 +33,7 @@ export async function getUserFollowers(userId: string) {
     throw e;
   }
 }
+
 export async function getUserFollowing(userId: string) {
   try {
     const following = await api.getData<{ following_id: string }[]>(
@@ -57,3 +56,25 @@ export async function searchUser(
     };
   }
 }
+
+
+
+export async function updateUserSetting(userId: string, userSessionId: string, show_mention: boolean, show_saved_post: boolean, show_draft_posts: boolean, pathname:string) {
+  try {
+    await api.update('/users/update/setting', {
+      userId,
+      userSessionId,
+      show_mention,
+      show_saved_post,
+      show_draft_posts
+    }, "PUT")
+      .then(() => {
+        revalidate(pathname)
+        toast.success("User setting has been updated")
+      })
+
+  } catch (e) {
+    toast.error((e as Error).message || "Failed to update")
+  }
+}
+

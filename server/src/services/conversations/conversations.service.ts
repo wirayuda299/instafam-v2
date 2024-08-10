@@ -1,7 +1,12 @@
-import { HttpException, Injectable, HttpStatus, BadRequestException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
-import { SendMessageSchema, sendMessageSchema } from '../../common/validation'
+import { SendMessageSchema, sendMessageSchema } from '../../common/validation';
 
 type UserConversation = {
   conversationId: string;
@@ -14,14 +19,9 @@ type UserConversation = {
   recipientImage: string;
 };
 
-
-
-
-
-
 @Injectable()
 export class ConversationsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async getUserConversations(userId: string): Promise<UserConversation[]> {
     try {
@@ -85,21 +85,26 @@ export class ConversationsService {
     }
   }
 
-  async sendPersonalMessage(
-    data: SendMessageSchema) {
+  async sendPersonalMessage(data: SendMessageSchema) {
     try {
-      const validatedValue = sendMessageSchema.safeParse(data)
+      const validatedValue = sendMessageSchema.safeParse(data);
 
       if (!validatedValue.success) {
-        throw new BadRequestException("Data is not valid")
+        throw new BadRequestException('Data is not valid');
       }
 
-      const { conversationId, message, recipient_id, sendedBy, parent_id, attachmentId, attachmentUrl } = validatedValue.data
-
+      const {
+        conversationId,
+        message,
+        recipient_id,
+        sendedBy,
+        parent_id,
+        attachmentId,
+        attachmentUrl,
+      } = validatedValue.data;
 
       await this.db.pool.query(`BEGIN`);
-      const currentConversations = await this.getUserConversations(sendedBy)
-
+      const currentConversations = await this.getUserConversations(sendedBy);
 
       if (currentConversations.length > 0) {
         await this.send({
@@ -109,9 +114,8 @@ export class ConversationsService {
           attachmentUrl,
           message,
           parent_id,
-          recipient_id
-        })
-
+          recipient_id,
+        });
       } else {
         const {
           rows: [conversation],
@@ -119,20 +123,18 @@ export class ConversationsService {
           `INSERT INTO conversations (sender_id, recipient_id)
            VALUES ($1, $2)
            RETURNING id`,
-          [sendedBy, ],
+          [sendedBy],
         );
-         await this.send({
+        await this.send({
           sendedBy,
           conversationId: conversation.rows[0].id,
           attachmentId,
           attachmentUrl,
           message,
           parent_id,
-          recipient_id
-        })
-
+          recipient_id,
+        });
       }
-
 
       await this.db.pool.query(`COMMIT`);
     } catch (error) {
@@ -143,27 +145,38 @@ export class ConversationsService {
 
   async send(data: SendMessageSchema) {
     try {
-
-      const validatedValue = sendMessageSchema.safeParse(data)
+      const validatedValue = sendMessageSchema.safeParse(data);
 
       if (!validatedValue.success) {
-        throw new BadRequestException("Data is not valid")
+        throw new BadRequestException('Data is not valid');
       }
 
-
-      const { conversationId, message, sendedBy, parent_id, attachmentId, attachmentUrl } = validatedValue.data
+      const {
+        conversationId,
+        message,
+        sendedBy,
+        parent_id,
+        attachmentId,
+        attachmentUrl,
+      } = validatedValue.data;
 
       await this.db.pool.query(
         `INSERT INTO messages("content", user_id, image_url, image_asset_id, conversation_id, parent_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id`,
-        [message, sendedBy, attachmentUrl, attachmentId, conversationId, parent_id],
+        [
+          message,
+          sendedBy,
+          attachmentUrl,
+          attachmentId,
+          conversationId,
+          parent_id,
+        ],
       );
     } catch (e) {
-      throw e
+      throw e;
     }
   }
-
 
   async fetchReplies(
     messageId: string,
@@ -200,12 +213,10 @@ export class ConversationsService {
     }
   }
 
-  async getPersonalMessage(
-    userId: string | null,
-  ) {
+  async getPersonalMessage(userId: string | null) {
     try {
       const messages = [];
-      const conversations = await this.getUserConversations(userId)
+      const conversations = await this.getUserConversations(userId);
 
       const baseMessages = await this.db.pool.query(
         `SELECT

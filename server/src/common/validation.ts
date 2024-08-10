@@ -27,14 +27,13 @@ export const sendMessageSchema = z.object({
   attachmentUrl: z.string().url().optional().nullable(),
   attachmentId: z.string(),
   parent_id: z.string().nullable(),
-  recipient_id:z.string()
+  recipient_id: z.string(),
 });
 
 export const createConversationSchema = sendMessageSchema.extend({
   members: z.array(z.string()),
   createdBy: z.string(),
 });
-
 
 export type CreateConversationSchema = z.infer<typeof createConversationSchema>;
 
