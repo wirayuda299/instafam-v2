@@ -37,9 +37,14 @@ export type User = {
   username: string;
   email: string;
   profile_image: string;
+  bio:  string
+   settings: {
+    userid: string,
+    show_saved_post :boolean
+    show_mention: boolean,
+    show_draft_posts: boolean
+  }
 };
-
-
 export type ConversationMessage = {
   conversation_id: string;
   message: string;

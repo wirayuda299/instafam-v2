@@ -14,8 +14,3 @@ export type PostLike = {
   post_id: string;
   liked_by: string;
 };
-
-
-
-
-

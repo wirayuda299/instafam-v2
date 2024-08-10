@@ -1,11 +1,20 @@
-import { Controller, Get, Param, Post, Req, Query, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  Query,
+  Body,
+  Put,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 import { UsersService } from 'src/services/users/users.service';
 
 @Controller('api/v1/users')
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(private userService: UsersService) { }
 
   @Get()
   showUsers(@Query('userId') id: string, @Query('limit') limit: number) {
@@ -44,5 +53,23 @@ export class UsersController {
   @Post('/create')
   createNewUser(@Req() req: Request) {
     return this.userService.createUser(req.body);
+  }
+
+  @Put('/update/setting')
+  updateSetting(
+    @Body('userId') userId: string,
+    @Body('userSessionId') userSessionId: string,
+    @Body('show_mention') showMention: boolean,
+    @Body('show_saved_post') showSavedPost: boolean,
+    @Body('show_draft_posts') showDraftPosts: boolean,
+  ) {
+    console.log({ userId, userSessionId, showMention, showSavedPost, showDraftPosts })
+    return this.userService.updateUserSetting(
+      userId,
+      userSessionId,
+      showMention,
+      showSavedPost,
+      showDraftPosts,
+    );
   }
 }

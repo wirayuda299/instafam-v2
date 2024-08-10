@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Cog, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,6 +12,7 @@ import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
 import LoadMore from "@/components/load-more/posts";
 import { currentUser } from "@clerk/nextjs/server";
 import FollowButton from "@/components/shared/post-card/follow-button";
+import UserSetting from "@/components/profile/user-settings";
 
 type Props = {
   params: { id: string };
@@ -58,9 +59,10 @@ export default async function UserProfile({ searchParams, params }: Props) {
                   >
                     Edit Profile
                   </Button>
-                  <button className="bg-black-1/50 hover:bg-black-1/60">
-                    <Cog />
-                  </button>
+                  <UserSetting
+                    settings={user.settings}
+                    userId={params.id}
+                    userSessionId={userSession?.id} />
                 </>
               ) : (
                 <>
@@ -89,7 +91,9 @@ export default async function UserProfile({ searchParams, params }: Props) {
               </p>
             </div>
             <p className="text-lg font-semibold">{user?.username}</p>
-            <p>User bio</p>
+            {user.bio && (
+              <p>User bio</p>
+            )}
           </div>
         </header>
       </div>
