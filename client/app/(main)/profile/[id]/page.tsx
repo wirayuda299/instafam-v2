@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { Button } from "@/components/ui/button";
 import { shimmer, toBase64 } from "@/utils/image-loader";
 import ProfileTab from "@/components/profile/tab";
 import { getSavedPosts, getUserPosts } from "@/helper/posts";
@@ -13,6 +12,7 @@ import LoadMore from "@/components/load-more/posts";
 import { currentUser } from "@clerk/nextjs/server";
 import FollowButton from "@/components/shared/post-card/follow-button";
 import UserSetting from "@/components/profile/user-settings";
+import UpdateUser from "@/components/profile/update-user";
 
 type Props = {
   params: { id: string };
@@ -53,12 +53,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
               <h2 className="text-2xl font-semibold">{user?.username}</h2>
               {userSession?.id === params.id ? (
                 <>
-                  <Button
-                    size={"sm"}
-                    className="bg-black-1/50 hover:bg-black-1/60"
-                  >
-                    Edit Profile
-                  </Button>
+                  <UpdateUser />
                   <UserSetting
                     settings={user.settings}
                     userId={params.id}
