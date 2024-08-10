@@ -10,15 +10,13 @@ import { SendMessageSchema } from 'src/common/validation';
 
 import { ConversationsService } from 'src/services/conversations/conversations.service';
 
-
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
 })
 export class SocketGateway implements OnModuleInit {
-
-  constructor(private messageService: ConversationsService) { }
+  constructor(private messageService: ConversationsService) {}
 
   @WebSocketServer()
   server: Server;
@@ -36,29 +34,25 @@ export class SocketGateway implements OnModuleInit {
   async getUserMessages(
     @MessageBody()
     payload: {
-      userId: string,
-    }
+      userId: string;
+    },
   ) {
     try {
-
-      const messages = await this.messageService.getPersonalMessage(payload.userId)
-      this.server.emit("set_messages", messages)
+      const messages = await this.messageService.getPersonalMessage(
+        payload.userId,
+      );
+      this.server.emit('set_messages', messages);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
-
-  @SubscribeMessage("send_message")
-  async sendMessage(
-    @MessageBody() payload: SendMessageSchema
-  ) {
+  @SubscribeMessage('send_message')
+  async sendMessage(@MessageBody() payload: SendMessageSchema) {
     try {
-      await this.messageService.sendPersonalMessage(payload)
-
+      await this.messageService.sendPersonalMessage(payload);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
-
 }
