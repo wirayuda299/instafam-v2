@@ -21,22 +21,25 @@ export const addCommentSchema = z.object({
   post_id: z.string().min(1, 'Post id is required'),
 });
 
+  //conversationId: '',
+  //message: 'ss',
+  //userId: 'user_2kM92cZs2T24VqobCz3h2MdBZWp',
+  //image_url: '',
+  //image_asset_id: '',
+  //recipient_id: 'user_2kVnmwE9TqhhUJqHAyWSQ0ahBrs',
+  //parent_id: ''
+  //
+
 export const sendMessageSchema = z.object({
-  sendedBy: z.string(),
-  conversationId: z.string(),
+  conversationId: z.string().optional(),
   message: z.string().min(1, 'Please add message'),
-  attachmentUrl: z.string().url().optional().nullable(),
-  attachmentId: z.string(),
-  parent_id: z.string().nullable(),
+  image_url: z.string(),
+  image_asset_id: z.string().optional(),
   recipient_id: z.string(),
+  parent_id:z.string().nullable(),
+  userId:z.string()
 });
 
-export const createConversationSchema = sendMessageSchema.extend({
-  members: z.array(z.string()),
-  createdBy: z.string(),
-});
-
-export type CreateConversationSchema = z.infer<typeof createConversationSchema>;
 
 export type SendMessageSchema = z.infer<typeof sendMessageSchema>;
 
