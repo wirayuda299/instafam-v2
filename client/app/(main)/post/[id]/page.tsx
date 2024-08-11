@@ -15,7 +15,6 @@ type Params = {
 };
 
 
-
 export default async function PostDetail({ params }: Params) {
   const post = await getPostById(params.id);
   if (!post) return notFound();

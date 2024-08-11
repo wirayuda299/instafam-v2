@@ -3,12 +3,10 @@ import dynamic from "next/dynamic";
 import PostCard from "@/components/shared/post-card";
 import Recommendations from "@/components/shared/recommendations/recommendations";
 import { getAllPosts } from "@/helper/posts";
+
 const LoadMorePost = dynamic(() => import("@/components/load-more/posts"), {
   ssr: false,
 });
-
-
-
 
 
 export default async function Home() {
