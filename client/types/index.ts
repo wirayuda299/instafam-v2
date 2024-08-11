@@ -37,24 +37,24 @@ export type User = {
   username: string;
   email: string;
   profile_image: string;
-  bio:  string
-   settings: {
+  bio: string
+  settings: {
     userid: string,
-    show_saved_post :boolean
+    show_saved_post: boolean
     show_mention: boolean,
     show_draft_posts: boolean
   }
 };
 export type ConversationMessage = {
-  conversation_id: string;
+  id: string;
   message: string;
-  is_read: boolean;
-  author: string;
-  message_id: string;
-  profile_image: string;
-  media_image: string;
-  media_image_asset_id: string;
-  created_at: string;
-  update_at: string;
+  attachment_url: string;
+  attachment_id: string;
+  parent_id: string | null;
   username: string;
+  profile_image: string;
+  author: string;
+  level: number;
+  created_at:string,
+  updated_at:string
 }
