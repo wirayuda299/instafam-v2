@@ -10,8 +10,7 @@ import dynamic from "next/dynamic";
 import { Post } from "@/types";
 import { shimmer, toBase64 } from "@/utils/image-loader";
 
-const PostCard =dynamic(()=> import('../shared/post-card'), {ssr:false})
-
+const PostCard = dynamic(() => import('../shared/post-card'), { ssr: false })
 
 const RenderComponentBasedOnType = (type: string, post: Post) => {
   switch (type) {
@@ -123,7 +122,7 @@ export default function LoadMore({
     <>
       {posts?.map((post) => RenderComponentBasedOnType(type, post))}
 
-      {hasMorePosts && (
+      {hasMorePosts && prevPosts.length >= 10 && (
         <div
           className="flex w-full min-w-[400px] items-center justify-center pt-5"
           ref={ref}

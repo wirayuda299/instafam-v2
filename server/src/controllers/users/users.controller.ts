@@ -55,6 +55,11 @@ export class UsersController {
     return this.userService.createUser(req.body);
   }
 
+  @Put('/update/bio')
+  updateUserBio(@Body('bio') bio: string, @Body('userId') id: string) {
+    return this.userService.updateBio(bio, id)
+  }
+
   @Put('/update/setting')
   updateSetting(
     @Body('userId') userId: string,
@@ -63,7 +68,6 @@ export class UsersController {
     @Body('show_saved_post') showSavedPost: boolean,
     @Body('show_draft_posts') showDraftPosts: boolean,
   ) {
-    console.log({ userId, userSessionId, showMention, showSavedPost, showDraftPosts })
     return this.userService.updateUserSetting(
       userId,
       userSessionId,
@@ -72,4 +76,5 @@ export class UsersController {
       showDraftPosts,
     );
   }
+
 }
