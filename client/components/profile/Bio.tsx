@@ -13,6 +13,12 @@ export default function Bio({ bio, userId }: { bio: string, userId: string }) {
     try {
       // @ts-ignore
       const bio = e.target.bio.value
+      if(bio.length > 100) {
+
+        toast.error("Bio too long")
+        return 
+      } 
+
       await updateUserBio(bio, userId, window.location.pathname)
 
     } catch (error) {
@@ -27,7 +33,7 @@ export default function Bio({ bio, userId }: { bio: string, userId: string }) {
   return (
     isOpen ? (
       <form onSubmit={handleSubmitForm} className="space-y-2">
-        <textarea className="bg-transparent text-wrap focus-visible:outline-none" rows={1} cols={50} placeholder="Add bio..." name="bio" autoComplete="off" defaultValue={bio} />
+        <textarea maxLength={50} minLength={1} className="bg-transparent text-wrap focus-visible:outline-none" rows={1} cols={50} placeholder="Add bio..." name="bio" autoComplete="off" defaultValue={bio} />
         <div className="flex items-center gap-2" >
           <button type="submit" className="text-sm text-blue-600">Submit</button>
           <button type="button" onClick={toogle} className="text-sm text-red-500">Cancel</button>
