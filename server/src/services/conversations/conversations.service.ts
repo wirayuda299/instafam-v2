@@ -61,6 +61,7 @@ export class ConversationsService {
           HttpStatus.UNAUTHORIZED,
         );
       }
+      await this.db.pool.query(`begin`)
       const message = await this.db.pool.query(
         `select * from messages where id = $1`,
         [messageId],
@@ -76,11 +77,13 @@ export class ConversationsService {
           where id = $2`,
         [content, messageId],
       );
+      await this.db.pool.query(`commit`)
       return {
         message: 'Message updated',
         error: false,
       };
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
@@ -197,7 +200,7 @@ export class ConversationsService {
           m.created_at as created_at,
           m.updated_at as update_at,
           u.username as username,
-            u.profile_image as profile_image
+          u.profile_image as profile_image
           FROM messages_replies as mr
           JOIN messages as m ON m.id = mr.message_id
           JOIN users as u on u.id = m.user_id

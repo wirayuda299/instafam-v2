@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { showUsers } from "@/helper/users";
 import UserListItem from "./user-list-item";
 import { User } from "@/types";
 
@@ -22,6 +21,7 @@ export default function AllUsers() {
     (async () => {
       try {
         setIsLoading(true);
+        const { showUsers } = await import('@/helper/users')
         const users = await showUsers(userId, 0);
         if (users) {
           setAllUsers(users);
