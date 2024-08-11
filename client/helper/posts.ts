@@ -31,14 +31,15 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
 
 export async function getUserPosts(
   userId: string,
+  published: boolean = true,
   cursor?: string,
   createdAt?: string,
 ) {
   try {
     const query =
       cursor && createdAt
-        ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}`
-        : `/posts?userId=${userId}`;
+        ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}&published=${published}`
+        : `/posts?userId=${userId}&published=${published}`;
 
     return await api.getData<{
       posts: Post[];

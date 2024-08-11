@@ -3,37 +3,42 @@ import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-
-import { shimmer, toBase64 } from "@/utils/image-loader";
-import ProfileTab from "@/components/profile/tab";
-import { getSavedPosts, getUserPosts } from "@/helper/posts";
-import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
-import LoadMore from "@/components/load-more/posts";
 import { currentUser } from "@clerk/nextjs/server";
+import dynamic from "next/dynamic";
+
+import ProfileTab from "@/components/profile/tab";
 import FollowButton from "@/components/shared/post-card/follow-button";
 import UserSetting from "@/components/profile/user-settings";
-import UpdateUser from "@/components/profile/update-user";
+const SavedPosts = dynamic(() => import("@/components/profile/SavedPosts"))
+import UserPosts from "@/components/profile/UserPosts";
+
+import { shimmer, toBase64 } from "@/utils/image-loader";
+import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
+import { getUserPosts } from "@/helper/posts";
+import Bio from "@/components/profile/Bio";
+
 
 type Props = {
   params: { id: string };
-  searchParams: { tab: "saved" | "posts" };
+  searchParams: { tab: "mention" | "saved" | "posts" | "draft" };
 };
+
 
 export default async function UserProfile({ searchParams, params }: Props) {
   const userSession = await currentUser();
 
-  const [user, { posts, totalPosts }, savedPosts, followers, following] =
+  const [user, followers, following, { posts, totalPosts }] =
     await Promise.all([
       getUser(params.id),
-      getUserPosts(params?.id),
-      getSavedPosts(params?.id),
       getUserFollowers(params.id),
       getUserFollowing(params.id),
+      getUserPosts(params.id, searchParams.tab === 'draft' ? false : true)
     ]);
 
   if (!user) {
     notFound();
   }
+
 
   return (
     <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
@@ -53,7 +58,6 @@ export default async function UserProfile({ searchParams, params }: Props) {
               <h2 className="text-2xl font-semibold">{user?.username}</h2>
               {userSession?.id === params.id ? (
                 <>
-                  <UpdateUser />
                   <UserSetting
                     settings={user.settings}
                     userId={params.id}
@@ -86,64 +90,40 @@ export default async function UserProfile({ searchParams, params }: Props) {
               </p>
             </div>
             <p className="text-lg font-semibold">{user?.username}</p>
-            {user.bio && (
-              <p>User bio</p>
+            {userSession?.id === user.id && (
+              <Bio bio={user.bio} userId={params.id} />
             )}
           </div>
         </header>
       </div>
-      <ProfileTab />
+      <div className="overflow-x-auto">
+        <ProfileTab />
+      </div>
       <Suspense
         fallback={<p className="text-white">Loading...</p>}
         key={searchParams.tab}
       >
         <div className="flex flex-wrap gap-3">
-          {searchParams.tab === "posts" ? (
-            <>
-              {posts?.map((post) => (
-                <Link
-                  href={`/post/${post.post_id}`}
-                  key={post.post_id}
-                  className="block min-w-[300px]"
-                >
-                  <Image
-                    className="aspect-square h-full max-h-[300px] w-full max-w-[300px] rounded-lg border border-gray-600 object-cover object-center"
-                    sizes="400px"
-                    src={post.media_url}
-                    priority={true}
-                    loading={"eager"}
-                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(500, 500))}`}
-                    width={500}
-                    height={500}
-                    alt="attachment"
-                  />
-                </Link>
-              ))}
+          {searchParams.tab === "posts" && (
+            <Suspense fallback={'Loading posts...'} key={searchParams.tab}>
+              <UserPosts totalPosts={totalPosts} posts={posts} />
+            </Suspense>
+          )}
 
-              <LoadMore
-                totalPosts={totalPosts}
-                type="profile"
-                prevPosts={posts}
-              />
-            </>
-          ) : savedPosts.length > 0 ? (
-            savedPosts?.map((post) => (
-              <Link href={`/post/${post.post_id}`} key={post.post_id}>
-                <Image
-                  className="aspect-square h-full max-h-[300px] w-full max-w-[300px] rounded-lg border border-gray-600 object-cover object-center"
-                  sizes="400px"
-                  src={post.media_url}
-                  priority={true}
-                  loading={"eager"}
-                  placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500, 400))}`}
-                  width={500}
-                  height={500}
-                  alt="attachment"
-                />
-              </Link>
-            ))
-          ) : (
-            <p>Nothing here</p>
+
+          {searchParams.tab === 'saved' && (
+            <Suspense fallback={'Loading saved posts...'} key={searchParams.tab}>
+              <SavedPosts userId={params.id} />
+            </Suspense>
+          )
+          }
+          {searchParams.tab === 'draft' && (
+            <Suspense fallback={'Loading draft posts...'} key={searchParams.tab}>
+              <UserPosts totalPosts={totalPosts} posts={posts} />
+            </Suspense>
+          )}
+          {searchParams.tab === 'mention' && (
+            <p>mention</p>
           )}
         </div>
       </Suspense>

@@ -9,7 +9,7 @@ import { deleteFile } from "./files";
 
 const api = new ApiRequest();
 
-export async function createPost(value: CreatePostType) {
+export async function createPost(value: CreatePostType, isDraft: boolean) {
   try {
     const validatedValues = createPostSchema.safeParse(value);
     if (!validatedValues.success) {
@@ -31,6 +31,7 @@ export async function createPost(value: CreatePostType) {
           media_url: media,
           media_asset_id,
           author: userId,
+          isDraft
         },
         "POST",
       )
@@ -52,6 +53,7 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
       return {
         errors: "Unauthorized",
       };
+
     await api.update(
       "/posts/like_or_dislike",
       {
