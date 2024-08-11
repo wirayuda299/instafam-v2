@@ -27,17 +27,15 @@ type Props = {
 export default async function UserProfile({ searchParams, params }: Props) {
   const userSession = await currentUser();
 
-  const [user, followers, following, { posts, totalPosts }] =
+  const user = await getUser(params.id)
+  if (!user) notFound();
+
+  const [followers, following, { posts, totalPosts }] =
     await Promise.all([
-      getUser(params.id),
       getUserFollowers(params.id),
       getUserFollowing(params.id),
       getUserPosts(params.id, searchParams.tab === 'draft' ? false : true)
     ]);
-
-  if (!user) {
-    notFound();
-  }
 
 
   return (
@@ -97,7 +95,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
         </header>
       </div>
       <div className="overflow-x-auto">
-        <ProfileTab />
+        <ProfileTab userSession={userSession?.id!} userId={params.id} settings={user.settings} />
       </div>
       <Suspense
         fallback={<p className="text-white">Loading...</p>}
@@ -115,8 +113,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
             <Suspense fallback={'Loading saved posts...'} key={searchParams.tab}>
               <SavedPosts userId={params.id} />
             </Suspense>
-          )
-          }
+          )}
           {searchParams.tab === 'draft' && (
             <Suspense fallback={'Loading draft posts...'} key={searchParams.tab}>
               <UserPosts totalPosts={totalPosts} posts={posts} />
