@@ -6,8 +6,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { SendMessageSchema } from 'src/common/validation';
 
+import { SendMessageSchema } from 'src/common/validation';
 import { ConversationsService } from 'src/services/conversations/conversations.service';
 
 @WebSocketGateway({

@@ -32,15 +32,16 @@ function ChatForm({ memberId, conversationId, reloadMessage }: Props) {
   const handleCreateOrSendMessage = (data: ChatFormSchema) => {
     try {
       if (!socket || !userId) return;
-
-      socket?.emit("send_message", {
+      const values = {
         conversationId,
         message: data.message,
         userId: userId!,
         image_url: "",
         image_asset_id: "",
         recipient_id: memberId,
-      });
+        parent_id: null
+      }
+      socket?.emit("send_message", values);
 
       reloadMessage();
     } catch (error) {
