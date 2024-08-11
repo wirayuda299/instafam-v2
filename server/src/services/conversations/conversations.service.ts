@@ -28,7 +28,6 @@ export class ConversationsService {
       const conversationsQuery = `
             SELECT
             c.id AS "conversationId",
-            c.created_at AS "conversationCreatedAt",
             u_sender.id AS "senderId",
             u_sender.username AS "senderUsername",
             u_sender.profile_image AS "senderImage",
@@ -91,7 +90,6 @@ export class ConversationsService {
   async sendPersonalMessage(data: SendMessageSchema) {
     try {
       const validatedValue = sendMessageSchema.safeParse(data);
-
       if (!validatedValue.success) {
         throw new BadRequestException('Data is not valid');
       }
@@ -100,24 +98,24 @@ export class ConversationsService {
         conversationId,
         message,
         recipient_id,
-        sendedBy,
         parent_id,
-        attachmentId,
-        attachmentUrl,
+        image_url,
+        userId,
+        image_asset_id
       } = validatedValue.data;
 
       await this.db.pool.query(`BEGIN`);
-      const currentConversations = await this.getUserConversations(sendedBy);
 
+      const currentConversations = await this.getUserConversations(userId);
       if (currentConversations.length > 0) {
         await this.send({
-          sendedBy,
           conversationId,
-          attachmentId,
-          attachmentUrl,
+          image_asset_id,
+          image_url,
           message,
           parent_id,
           recipient_id,
+          userId
         });
       } else {
         const {
@@ -126,13 +124,13 @@ export class ConversationsService {
           `INSERT INTO conversations (sender_id, recipient_id)
            VALUES ($1, $2)
            RETURNING id`,
-          [sendedBy],
+          [userId, recipient_id],
         );
         await this.send({
-          sendedBy,
-          conversationId: conversation.rows[0].id,
-          attachmentId,
-          attachmentUrl,
+          userId,
+          conversationId: conversation.id,
+          image_asset_id,
+          image_url,
           message,
           parent_id,
           recipient_id,
@@ -149,7 +147,6 @@ export class ConversationsService {
   async send(data: SendMessageSchema) {
     try {
       const validatedValue = sendMessageSchema.safeParse(data);
-
       if (!validatedValue.success) {
         throw new BadRequestException('Data is not valid');
       }
@@ -157,21 +154,21 @@ export class ConversationsService {
       const {
         conversationId,
         message,
-        sendedBy,
         parent_id,
-        attachmentId,
-        attachmentUrl,
+        image_url,
+        userId,
+        image_asset_id,
       } = validatedValue.data;
 
       await this.db.pool.query(
-        `INSERT INTO messages("content", user_id, image_url, image_asset_id, conversation_id, parent_id)
+        `INSERT INTO messages("content", author, attachment_url, attachment_id, conversation_id, parent_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id`,
         [
           message,
-          sendedBy,
-          attachmentUrl,
-          attachmentId,
+          userId,
+          image_url,
+          image_asset_id,
           conversationId,
           parent_id,
         ],
@@ -181,83 +178,67 @@ export class ConversationsService {
     }
   }
 
-  async fetchReplies(
-    messageId: string,
-    messages: any[],
-    conversationId: string,
-  ) {
-    const replies = await this.db.pool.query(
-      `SELECT
-          mr.parent_message_id as parent_message_id,
-          mr.id as reply_id,
-          mr.author as author_id,
-          m."content" as message,
-          m.id as message_id,
-          m.is_read as is_read,
-          m.user_id as author,
-          m.image_url as media_image,
-          m.image_asset_id as media_image_asset_id,
-          m.created_at as created_at,
-          m.updated_at as update_at,
-          u.username as username,
-          u.profile_image as profile_image
-          FROM messages_replies as mr
-          JOIN messages as m ON m.id = mr.message_id
-          JOIN users as u on u.id = m.user_id
-          WHERE mr.parent_message_id = $1
-          ORDER BY m.created_at ASC`,
-      [messageId],
-    );
-
-    for await (const reply of replies.rows) {
-      reply.conversation_id = conversationId;
-      messages.push(reply);
-      await this.fetchReplies(reply.message_id, messages, conversationId);
-    }
-  }
-
-  async getPersonalMessage(userId: string | null) {
+ async getPersonalMessage(userId: string | null) {
     try {
-      const messages = [];
-      const conversations = await this.getUserConversations(userId);
+        const conversations = await this.getUserConversations(userId);
 
-      const baseMessages = await this.db.pool.query(
-        `SELECT
-          m.conversation_id,
-          m.content AS message,
-          m.is_read AS is_read,
-          m.user_id AS author,
-          m.id as message_id,
-          m.image_url AS media_image,
-          m.image_asset_id AS media_image_asset_id,
-          m.created_at AS created_at,
-          m.updated_at AS update_at,
-          u.username AS username,
-          u.profile_image as profile_image
-          from messages as m
-          JOIN users AS u ON u.id = m.user_id
-          WHERE m.conversation_id = $1
-          OR m.user_id = COALESCE($2, m.user_id)`,
-        [conversations[0].conversationId, userId],
-      );
+        if (conversations.length === 0) {
+            return [];  
+        }
 
-      for await (const message of baseMessages.rows) {
-        messages.push(message);
-        await this.fetchReplies(
-          message.message_id,
-          messages,
-          message.conversation_id,
-        );
-      }
+        const allMessages = [];
 
-      messages.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-      );
+        for (const conversation of conversations) {
+            const baseMessages = await this.db.pool.query(
+                `WITH RECURSIVE message_tree AS (
+                    SELECT 
+                        m.id, 
+                        m.content as message, 
+                        m.attachment_url, 
+                        m.attachment_id, 
+                        m.parent_id, 
+                        u.username,
+                        u.profile_image,
+                        m.createdAt as created_at,
+                        m.updatedAt as updated_at,
+                        m.author, 
+                        0 AS level  
+                    FROM messages as m
+                    JOIN users as u on u.id = m.author
+                    WHERE (m.conversation_id = $1) AND m.parent_id IS NULL  
+                    UNION ALL
+                    SELECT 
+                        m.id, 
+                        m.content as message, 
+                        m.attachment_url, 
+                        m.attachment_id, 
+                        m.parent_id, 
+                        u.username,
+                        u.profile_image,
+                        m.createdAt as created_at,
+                        m.updatedAt as updated_at,
+                        m.author, 
+                        mt.level + 1 AS level  
+                    FROM 
+                        messages as m
+                    JOIN users as u on u.id = m.author
+                    INNER JOIN 
+                        message_tree mt ON m.parent_id = mt.id
+                    WHERE 
+                        m.conversation_id = $1)
+                SELECT * FROM message_tree
+                ORDER BY level`,
+                [conversation.conversationId]
+            );
 
-      return messages;
+            allMessages.push(...baseMessages.rows); 
+        }
+
+        return allMessages;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  }
 }
+
+
+  }
