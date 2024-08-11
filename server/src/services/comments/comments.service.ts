@@ -2,21 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
 import { addCommentSchema, AddCommentSchema } from 'src/common/validation';
+import { Comment } from 'src/types';
 
-type Comment = {
-  comment_id: string;
-  author: string;
-  comment: string;
-  createdAt: string;
-  updatedAt: string;
-  username: string;
-  profile_image: string;
-  post_id: string;
-};
 
 @Injectable()
 export class CommentsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async addComment(values: AddCommentSchema) {
     try {
@@ -25,6 +16,7 @@ export class CommentsService {
         throw new BadRequestException('Please add valid data');
       }
       const { author, comment, post_id } = validatedValue.data;
+      await this.db.pool.query(`begin`)
       await this.db.pool.query(
         `
         insert into comments(author,message, post_id)
@@ -32,7 +24,9 @@ export class CommentsService {
         `,
         [author, comment, post_id],
       );
+      await this.db.pool.query(`commit`)
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
@@ -60,8 +54,7 @@ export class CommentsService {
         join users as u on u.id = c.author
         where c.post_id = $1
       ORDER BY c.createdAt DESC
-      LIMIT 10
-        `;
+      LIMIT 10`;
 
       const queryWithCursor = ` select
         c.id as comment_id,
@@ -76,8 +69,7 @@ export class CommentsService {
         join users as u on u.id = c.author
         WHERE (c.createdAt, c.post_id) < ($1, $2) and c.post_id = $3
       ORDER BY c.createdAt DESC
-      LIMIT 10
-        `;
+      LIMIT 10`;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
       const params = lastCursor ? [createdAt, lastCursor, postId] : [postId];
@@ -100,14 +92,13 @@ export class CommentsService {
 
       return comments.rows as Comment[];
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }
 
   async likeOrDislikeComment(commentId: string, liked_by: string) {
     try {
+      await this.db.pool.query(`begin`)
       const isLiked = await this.db.pool.query(
         `select * from comment_likes as cl
         where cl.comment_id = $1 and cl.liked_by = $2
@@ -126,7 +117,9 @@ export class CommentsService {
           [commentId, liked_by],
         );
       }
+      await this.db.pool.query(`commit`)
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
