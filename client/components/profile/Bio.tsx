@@ -3,8 +3,6 @@
 import { FormEvent, useState } from "react"
 import { toast } from "sonner"
 
-import { updateUserBio } from "@/helper/users"
-
 export default function Bio({ bio, userId }: { bio: string, userId: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -18,6 +16,8 @@ export default function Bio({ bio, userId }: { bio: string, userId: string }) {
         toast.error("Bio too long")
         return 
       } 
+
+      const {updateUserBio}= await import('@/helper/users')
 
       await updateUserBio(bio, userId, window.location.pathname)
 

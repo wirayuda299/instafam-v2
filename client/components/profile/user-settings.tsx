@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog"
 import { Form, FormControl, FormField, FormItem } from "../ui/form"
 import { Label } from "../ui/label"
 import { Switch } from "@/components/ui/switch"
-import { updateUserSetting } from "@/helper/users"
 import { updateSettingSchema, UpdateSettingSchema } from "@/validation"
 
 
@@ -30,6 +29,7 @@ export default function UserSetting({ userId, settings, userSessionId }: Props) 
 
   const handleUpdateProfile = async (data: UpdateSettingSchema) => {
     try {
+      const { updateUserSetting } = await import('@/helper/users')
       await updateUserSetting(userId, userSessionId, data.show_mention, data.show_saved_post, data.show_draft_posts, window.location.pathname)
     } catch (e) {
       toast.error((e as Error).message || "Failed to update setting")
@@ -40,7 +40,7 @@ export default function UserSetting({ userId, settings, userSessionId }: Props) 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="bg-black-1/50 hover:bg-black-1/60">
+        <button className="bg-black-1/50 hover:bg-black-1/60" title="Setting" name="setting">
           <Cog />
         </button>
       </DialogTrigger>

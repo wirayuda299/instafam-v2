@@ -11,7 +11,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { createComment } from "@/actions/comments";
 import { AddCommentSchema, addCommentSchema } from "@/validation";
 import { handleError } from "@/utils/error";
 
@@ -25,6 +24,7 @@ export default function CommentForm({ postId }: { postId: string }) {
 
   const handleCreateComment = async (value: AddCommentSchema) => {
     try {
+      const { createComment } = await import('@/actions/comments')
       const res = await createComment(
         postId,
         value.comment,

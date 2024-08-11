@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { deletePost } from "@/actions/post";
 import { handleError } from "@/utils/error";
 
 const fallbackErrorMessage = "Failed to delete post";
@@ -16,6 +15,7 @@ export default function DeletePost({ fileId, postId, postAuthor }: Props) {
   const handleDeletePost = async () => {
     try {
       setIsLoading(true);
+      const { deletePost } = await import('@/actions/post')
       const deletedFile = await deletePost(
         fileId,
         postId,
