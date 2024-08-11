@@ -92,7 +92,7 @@ export default async function PostDetail({ params }: Params) {
               <LoadMoreComments
                 prevComments={comments}
                 postId={params.id}
-                createdAt={comments[comments.length - 1]?.created_at}
+                createdAt={comments[comments.length - 1]?.createdat}
                 cursor={comments[comments.length - 1]?.comment_id}
               />
             </div>
