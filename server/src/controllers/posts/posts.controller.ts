@@ -14,15 +14,16 @@ import { PostsService } from 'src/services/posts/posts.service';
 
 @Controller('api/v1/posts')
 export class PostsController {
-  constructor(private postService: PostsService) {}
+  constructor(private postService: PostsService) { }
 
   @Get()
   getUserPosts(
     @Query('cursor') cursor: string,
     @Query('createdAt') createdAt: string,
     @Query('userId') userId: string,
+    @Query('published') published: boolean,
   ) {
-    return this.postService.getUserPosts(userId, cursor, createdAt);
+    return this.postService.getUserPosts(userId, published, cursor, createdAt);
   }
   @Get('/find-all')
   getPosts(

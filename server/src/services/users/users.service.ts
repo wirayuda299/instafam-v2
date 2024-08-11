@@ -18,7 +18,7 @@ type User = {
 
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async createUser(values: CreateUserType) {
     try {
@@ -75,6 +75,20 @@ export class UsersService {
       return users.rows;
     } catch (e) {
       throw e;
+    }
+  }
+
+  async updateBio(bio: string, userId: string) {
+    try {
+
+      await this.db.pool.query(`update users set bio= $1 where id = $2`, [bio, userId]).then(() => {
+        return {
+          messages: "bio updated"
+        }
+      })
+
+    } catch (error) {
+      throw error
     }
   }
 

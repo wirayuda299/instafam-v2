@@ -12,6 +12,7 @@ export const createPostSchema = z.object({
   media_url: z.string().url().startsWith('https'),
   media_asset_id: z.string(),
   author: z.string(),
+  isDraft: z.boolean().default(false)
 });
 
 export const addCommentSchema = z.object({

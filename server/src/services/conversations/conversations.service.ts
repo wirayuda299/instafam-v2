@@ -21,25 +21,25 @@ type UserConversation = {
 
 @Injectable()
 export class ConversationsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async getUserConversations(userId: string): Promise<UserConversation[]> {
     try {
       const conversationsQuery = `
             SELECT
-                c.id AS "conversationId",
-                c.created_at AS "conversationCreatedAt",
-                u_sender.id AS "senderId",
-                u_sender.username AS "senderUsername",
-                u_sender.profile_image AS "senderImage",
-                u_recipient.id AS "recipientId",
-                u_recipient.username AS "recipientUsername",
-                u_recipient.profile_image AS "recipientImage"
-                FROM conversations AS c
-                JOIN users AS u_sender ON u_sender.id = c.sender_id
-                JOIN users AS u_recipient ON u_recipient.id = c.recipient_id
-                WHERE c.sender_id = $1
-                OR c.recipient_id = $1`;
+            c.id AS "conversationId",
+            c.created_at AS "conversationCreatedAt",
+            u_sender.id AS "senderId",
+            u_sender.username AS "senderUsername",
+            u_sender.profile_image AS "senderImage",
+            u_recipient.id AS "recipientId",
+            u_recipient.username AS "recipientUsername",
+            u_recipient.profile_image AS "recipientImage"
+            FROM conversations AS c
+            JOIN users AS u_sender ON u_sender.id = c.sender_id
+            JOIN users AS u_recipient ON u_recipient.id = c.recipient_id
+            WHERE c.sender_id = $1
+            OR c.recipient_id = $1`;
 
       const { rows } = await this.db.pool.query(conversationsQuery, [userId]);
       return rows;
@@ -71,9 +71,9 @@ export class ConversationsService {
       }
       await this.db.pool.query(
         `update messages
-                set content = $1,
-                updated_at = NOW()
-                where id = $2`,
+          set content = $1,
+          updated_at = NOW()
+          where id = $2`,
         [content, messageId],
       );
       return {
@@ -220,21 +220,21 @@ export class ConversationsService {
 
       const baseMessages = await this.db.pool.query(
         `SELECT
-                m.conversation_id,
-                m.content AS message,
-                m.is_read AS is_read,
-                m.user_id AS author,
-                m.id as message_id,
-                m.image_url AS media_image,
-                m.image_asset_id AS media_image_asset_id,
-                m.created_at AS created_at,
-                m.updated_at AS update_at,
-                u.username AS username,
-                u.profile_image as profile_image
-                from messages as m
-                JOIN users AS u ON u.id = m.user_id
-                WHERE m.conversation_id = $1
-                OR m.user_id = COALESCE($2, m.user_id)`,
+          m.conversation_id,
+          m.content AS message,
+          m.is_read AS is_read,
+          m.user_id AS author,
+          m.id as message_id,
+          m.image_url AS media_image,
+          m.image_asset_id AS media_image_asset_id,
+          m.created_at AS created_at,
+          m.updated_at AS update_at,
+          u.username AS username,
+          u.profile_image as profile_image
+          from messages as m
+          JOIN users AS u ON u.id = m.user_id
+          WHERE m.conversation_id = $1
+          OR m.user_id = COALESCE($2, m.user_id)`,
         [conversations[0].conversationId, userId],
       );
 

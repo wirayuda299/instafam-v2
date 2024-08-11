@@ -11,7 +11,7 @@ import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async createPost(data: CreatePostType) {
     try {
@@ -21,14 +21,14 @@ export class PostsService {
         throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
       }
 
-      const { captions, author, media_asset_id, media_url } =
+      const { captions, author, media_asset_id, media_url, isDraft } =
         validatedValues.data;
 
       await this.db.pool
         .query(
-          `INSERT INTO posts (author, captions, media_url, media_asset_id)
-         VALUES ($1, $2, $3, $4)`,
-          [author, captions, media_url, media_asset_id],
+          `INSERT INTO posts (author, captions, media_url, media_asset_id, published)
+         VALUES ($1, $2, $3, $4, $5)`,
+          [author, captions, media_url, media_asset_id, isDraft],
         )
         .then(() => {
           return {
@@ -66,8 +66,8 @@ export class PostsService {
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
         LEFT JOIN post_likes pl ON p.id = pl.post_id
-        WHERE (p.createdAt, p.id) < ($1, $2)
-        GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.media_url, p.createdAt, p.media_asset_id
+        WHERE (p.createdAt, p.id) < ($1, $2) and p.published = true
+        GROUP BY p.id, p.author, u.username, u.profile_image, p.captions,p.published, p.media_url, p.createdAt, p.media_asset_id
         ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
         LIMIT 10
     `;
@@ -86,7 +86,8 @@ export class PostsService {
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
         LEFT JOIN post_likes pl ON p.id = pl.post_id
-        GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.media_url, p.createdAt, p.media_asset_id
+        where p.published = true
+        GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.createdAt, p.media_asset_id
         ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
         LIMIT 10
     `;
@@ -127,7 +128,7 @@ export class PostsService {
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
-        where p.id = $1`,
+        where p.id = $1 and p.published =true`,
         [postId],
       );
 
@@ -208,7 +209,7 @@ export class PostsService {
     }
   }
 
-  async getUserPosts(userId: string, lastCursor?: string, createdAt?: string) {
+  async getUserPosts(userId: string, published: boolean = true, lastCursor?: string, createdAt?: string) {
     try {
       const totalPosts = await this.db.pool.query(
         `select count(*) from posts where author= $1`,
@@ -226,7 +227,7 @@ export class PostsService {
         p.media_asset_id AS media_asset_id
       FROM posts AS p
       JOIN users AS u ON u.id = p.author
-      WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3
+      WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3 and p.published= $4
       ORDER BY p.createdAt DESC, p.id DESC
       LIMIT 10
     `;
@@ -243,13 +244,13 @@ export class PostsService {
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
-        where p.author = $1
+        where p.author = $1 and p.published=$2
         ORDER BY p.createdAt DESC
         LIMIT 10
     `;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
-      const params = lastCursor ? [createdAt, lastCursor, userId] : [userId];
+      const params = lastCursor ? [createdAt, lastCursor, userId, published] : [userId, published];
 
       const posts = await this.db.pool.query(query, params);
 
@@ -315,7 +316,7 @@ export class PostsService {
          from bookmarks as b
          join posts as p on p.id = b.post_id
          join users as u on u.id = $1
-         where b.author = $1`,
+         where b.author = $1 and p.published = true`,
         [author],
       );
 

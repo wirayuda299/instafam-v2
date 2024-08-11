@@ -51,6 +51,8 @@ export default function CreatePostForm({
   label,
 }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isDraft, setIsDraft] = useState(false)
+
   const [activeField, setActiveField] =
     useState<(typeof fields)[number]>("media");
 
@@ -75,6 +77,7 @@ export default function CreatePostForm({
 
   const isSubmitting = form.formState.isSubmitting;
   const isChanged = form.formState.isDirty;
+  const isValid = form.formState.isValid
 
   async function handlePost(data: SchemaType) {
     if (!files) {
@@ -85,6 +88,7 @@ export default function CreatePostForm({
     let uploadedFiles: UploadedFileRes | null = null;
 
     try {
+      setIsDraft(false)
       const formData = new FormData();
       formData.append("files", files.media);
 
@@ -103,7 +107,7 @@ export default function CreatePostForm({
           captions: data.captions,
           media: uploadedFiles.data.url,
           media_asset_id: uploadedFiles.data.key,
-        });
+        }, isDraft);
         if (res && "errors" in res) {
           handleError(res, "Something went wrong");
           const deletedFile = await deleteFile(uploadedFiles.data.key);
@@ -124,6 +128,7 @@ export default function CreatePostForm({
   return (
     <Dialog
       open={isOpen}
+      modal={false}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
           reset();
@@ -137,7 +142,6 @@ export default function CreatePostForm({
         <li className="group rounded-md p-2 hover:bg-black-1/30 md:w-full">
           <button type="button" className="flex items-center gap-3">
             {Icon}
-
             <span
               data-testid="cpf-label"
               className={cn(
@@ -259,14 +263,27 @@ export default function CreatePostForm({
                 )}
               />
             )}
-            {activeField === "captions" && (
-              <Button
-                disabled={!isChanged || isSubmitting}
-                type="submit"
-                className="absolute bottom-0 w-full bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSubmitting ? "Publishing..." : "Publish"}
-              </Button>
+            {activeField === "captions" && isValid && (
+              <div className='flex items-center absolute bottom-0 w-full'>
+                <Button
+                  disabled={!isChanged || isSubmitting || !isValid}
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed rounded-none disabled:opacity-50"
+                >
+                  {isSubmitting ? "Publishing..." : "Publish"}
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setIsDraft(true)
+                    await handlePost(form.getValues())
+                  }}
+                  disabled={!isChanged || isSubmitting || !isValid}
+                  type="button"
+                  className="w-full  bg-green-600 hover:bg-green-700 disabled:cursor-not-allowed rounded-none disabled:opacity-50"
+                >
+                  Save as draft
+                </Button>
+              </div>
             )}
           </form>
         </Form>

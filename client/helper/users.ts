@@ -1,7 +1,8 @@
+import { toast } from "sonner";
+
 import { User } from "@/types";
 import { ApiRequest } from "@/utils/api";
 import { revalidate } from "@/utils/cache";
-import { toast } from "sonner";
 
 const api = new ApiRequest();
 
@@ -59,7 +60,7 @@ export async function searchUser(
 
 
 
-export async function updateUserSetting(userId: string, userSessionId: string, show_mention: boolean, show_saved_post: boolean, show_draft_posts: boolean, pathname:string) {
+export async function updateUserSetting(userId: string, userSessionId: string, show_mention: boolean, show_saved_post: boolean, show_draft_posts: boolean, pathname: string) {
   try {
     await api.update('/users/update/setting', {
       userId,
@@ -78,3 +79,12 @@ export async function updateUserSetting(userId: string, userSessionId: string, s
   }
 }
 
+export async function updateUserBio(bio: string, userId: string, pathname: string) {
+  try {
+    await api.update('/users/update/bio', { bio, userId }, "PUT")
+    revalidate(pathname)
+  } catch (error) {
+    throw error
+  }
+
+}
