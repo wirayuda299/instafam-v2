@@ -24,6 +24,8 @@ export class PostsService {
       const { captions, author, media_asset_id, media_url, isDraft } =
         validatedValues.data;
 
+
+      await this.db.pool.query(`begin`)
       await this.db.pool
         .query(
           `INSERT INTO posts (author, captions, media_url, media_asset_id, published)
@@ -36,7 +38,11 @@ export class PostsService {
             error: false,
           };
         });
+
+      await this.db.pool.query(`commit`)
     } catch (error) {
+
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
@@ -153,7 +159,7 @@ export class PostsService {
       if (!post.rows[0].exists) {
         throw new NotFoundException('Post not found');
       }
-
+      await this.db.pool.query(`begin`)
       await this.db.pool
         .query(`delete from posts where id = $1`, [postId])
         .then(() => {
@@ -162,7 +168,9 @@ export class PostsService {
             error: false,
           };
         });
+      await this.db.pool.query(`commit`)
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
@@ -186,6 +194,8 @@ export class PostsService {
 
   async likeOrDislikePost(postId: string, liked_by: string) {
     try {
+
+      await this.db.pool.query(`begin`)
       const isLiked = await this.db.pool.query(
         `select * from post_likes as pl
         where pl.post_id = $1 and pl.liked_by = $2
@@ -204,7 +214,9 @@ export class PostsService {
           [postId, liked_by],
         );
       }
+      await this.db.pool.query(`commit`)
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }
@@ -225,11 +237,11 @@ export class PostsService {
         p.media_url AS media_url,
         p.createdAt,
         p.media_asset_id AS media_asset_id
-      FROM posts AS p
-      JOIN users AS u ON u.id = p.author
-      WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3 and p.published= $4
-      ORDER BY p.createdAt DESC, p.id DESC
-      LIMIT 10
+        FROM posts AS p
+        JOIN users AS u ON u.id = p.author
+        WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3 and p.published= $4
+        ORDER BY p.createdAt DESC, p.id DESC
+        LIMIT 10
     `;
 
       const queryWithoutCursor = `
@@ -272,6 +284,7 @@ export class PostsService {
 
   async savePost(author: string, post_id: string) {
     try {
+      await this.db.pool.query(`begin`)
       const isSaved = await this.db.pool.query(
         `select * from bookmarks where author = $1 and post_id = $2`,
         [author, post_id],
@@ -291,11 +304,13 @@ export class PostsService {
           values($1,$2)`,
           [author, post_id],
         );
+      await this.db.pool.query(`commit`)
         return {
           message: 'Post saved',
         };
       }
     } catch (error) {
+      await this.db.pool.query(`rollback`)
       throw error;
     }
   }

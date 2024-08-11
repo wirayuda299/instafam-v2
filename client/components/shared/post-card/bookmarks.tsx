@@ -4,7 +4,7 @@ import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import useSwr from "swr";
 import { useAuth } from "@clerk/nextjs";
-import { useMemo, useOptimistic, useState } from "react";
+import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { saveOrDeleteBookmarkedPost } from "@/actions/post";

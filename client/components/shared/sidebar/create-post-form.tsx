@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/form";
 import useUploadFile from "@/hooks/useUploadFile";
 import { Button } from "@/components/ui/button";
-import { deleteFile, uploadFiles } from "@/actions/files";
 import { createPost } from "@/actions/post";
 import { handleError } from "@/utils/error";
 
@@ -41,7 +40,6 @@ const schema = z.object({
 });
 
 type SchemaType = z.infer<typeof schema>;
-type UploadedFileRes = Awaited<ReturnType<typeof uploadFiles>>;
 
 const fields = ["media", "captions"] as const;
 
@@ -85,13 +83,15 @@ export default function CreatePostForm({
       return;
     }
 
-    let uploadedFiles: UploadedFileRes | null = null;
+    let uploadedFiles: any;
+
 
     try {
       setIsDraft(false)
       const formData = new FormData();
       formData.append("files", files.media);
 
+      const { uploadFiles } = await import('@/actions/files')
       uploadedFiles = await uploadFiles(formData);
 
       if ("errors" in uploadedFiles) {
@@ -108,8 +108,10 @@ export default function CreatePostForm({
           media: uploadedFiles.data.url,
           media_asset_id: uploadedFiles.data.key,
         }, isDraft);
+
         if (res && "errors" in res) {
           handleError(res, "Something went wrong");
+          const { deleteFile } = await import('@/actions/files')
           const deletedFile = await deleteFile(uploadedFiles.data.key);
 
           if (deletedFile && "errors" in deletedFile) {

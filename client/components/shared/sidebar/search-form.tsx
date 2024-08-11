@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 
-import { searchUser } from "@/helper/users";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { handleError } from "@/utils/error";
 import { debounce } from "@/utils/debounce";
@@ -33,6 +32,7 @@ export default function SearchForm({
     (async () => {
       setLoading(true);
       try {
+        const {searchUser}=await import('@/helper/users')
         const users = await searchUser(searchQuery.toLowerCase());
         if (users && "errors" in users) {
           handleError(users, "Failed to search user");
