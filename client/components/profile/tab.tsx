@@ -58,9 +58,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
         break;
       default:
         activeRef = ref1.current
-
     }
-
     setActiveTab(activeRef);
   }, [tab]);
 
@@ -77,55 +75,55 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
   }, [activeTab, updateStyles]);
 
   return (
-   <div className="relative mx-auto flex min-w-fit max-w-screen-md items-center justify-center gap-10 p-3">
-  <div
-    ref={lineRef}
-    className="ease absolute top-0 h-px w-[71px] rounded-full bg-white transition-all duration-300"
-  ></div>
-  <button
-    ref={ref1}
-    title="posts"
-    name="posts"
-    onClick={() => handleChangeActiveTab(ref1.current!)}
-    className="flex items-center gap-2"
-  >
-    <Grid /> <span className="font-medium">Posts</span>
-  </button>
-  {(userId === userSession || settings.show_saved_post) && (
-    <button
-      ref={ref2}
-      title="saved"
-      name="saved"
-      onClick={() => handleChangeActiveTab(ref2.current!)}
-      className="flex items-center gap-2"
-    >
-      <Bookmark /> <span className="font-medium">Saved</span>
-    </button>
-  )}
-  {(userId === userSession || settings.show_draft_posts) && (
-    <button
-      ref={ref3}
-      title="draft"
-      name="draft"
-      onClick={() => handleChangeActiveTab(ref3.current!)}
-      className="flex items-center gap-2"
-    >
-      <LockKeyhole />
-      <span className="font-medium">Draft</span>
-    </button>
-  )}
-  {(userSession === userId || settings.show_mention) && (
-    <button
-      ref={ref4}
-      title="mention"
-      name="mention"
-      onClick={() => handleChangeActiveTab(ref4.current!)}
-      className="flex items-center gap-2"
-    >
-      <AtSign />
-      <span className="font-medium">Mention</span>
-    </button>
-  )}
-</div>
+    <div className="relative mx-auto flex min-w-fit max-w-screen-md items-center justify-center gap-10 p-3">
+      <div
+        ref={lineRef}
+        className="ease absolute top-0 h-px w-[71px] rounded-full bg-white transition-all duration-300"
+      ></div>
+      <button
+        ref={ref1}
+        title="posts"
+        name="posts"
+        onClick={() => handleChangeActiveTab(ref1.current!)}
+        className="flex items-center gap-2"
+      >
+        <Grid /> <span className="font-medium">Posts</span>
+      </button>
+      {(userId === userSession || settings.show_saved_post) && (
+        <button
+          ref={ref2}
+          title="saved"
+          name="saved"
+          onClick={() => handleChangeActiveTab(ref2.current!)}
+          className="flex items-center gap-2"
+        >
+          <Bookmark /> <span className="font-medium">Saved</span>
+        </button>
+      )}
+      {(userId === userSession || settings.show_draft_posts) && (
+        <button
+          ref={ref3}
+          title="draft"
+          name="draft"
+          onClick={() => handleChangeActiveTab(ref3.current!)}
+          className="flex items-center gap-2"
+        >
+          <LockKeyhole />
+          <span className="font-medium">Draft</span>
+        </button>
+      )}
+      {(userSession === userId || settings.show_mention) && (
+        <button
+          ref={ref4}
+          title="mention"
+          name="mention"
+          onClick={() => handleChangeActiveTab(ref4.current!)}
+          className="flex items-center gap-2"
+        >
+          <AtSign />
+          <span className="font-medium">Mention</span>
+        </button>
+      )}
+    </div>
   );
 }

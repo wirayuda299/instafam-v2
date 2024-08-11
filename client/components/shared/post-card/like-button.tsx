@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
-import { likeOrDislikePost } from "@/actions/post";
 import { Like } from "@/types";
 import { handleError } from "@/utils/error";
 
@@ -38,6 +37,7 @@ export default function LikeButton({
           }
         });
       });
+      const {likeOrDislikePost}=await import('@/actions/post')
       const res = await likeOrDislikePost(postId, pathname);
       if (res && "errors" in res) {
         handleError(res, "Something wrong when like or dislike post");

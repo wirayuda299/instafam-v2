@@ -9,7 +9,6 @@ export default function UserPosts({ posts, totalPosts }: { posts: Post[], totalP
       {posts?.map((post) => (
         <PostCardImage key={post.post_id} post={post} />
       ))}
-
       <LoadMore
         totalPosts={totalPosts}
         type="profile"

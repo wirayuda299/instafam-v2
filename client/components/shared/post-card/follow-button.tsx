@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { useMemo, useState } from "react";
 
-import { followUnfollow } from "@/actions/users";
 import { getUserFollowers, getUserFollowing } from "@/helper/users";
 import { handleError } from "@/utils/error";
 import { cn } from "@/lib/utils";
@@ -59,6 +58,7 @@ export default function FollowButton({ userToFollow, userId, styles }: Props) {
         }
       }, false);
 
+      const {followUnfollow}= await import( "@/actions/users")
       const res = await followUnfollow(userId, userToFollow);
       if (res && "errors" in res) {
         handleError(res, "Failed to follow or unfollow user");
