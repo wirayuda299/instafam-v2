@@ -30,7 +30,7 @@ export default function LoadMoreComments({
 
   const getComments = useCallback(async () => {
     try {
-      const { getAllComments } = await import('@/helper/comments')
+      const { getAllComments } = await import("@/helper/comments");
       const res = await getAllComments(postId, lastCursor, lastCreatedAt);
 
       setComments((prev) => prev.concat(res));

@@ -1,4 +1,3 @@
-
 export type Post = {
   post_id: string;
   author_id: string;
@@ -31,19 +30,18 @@ export interface Comment {
   }[];
 }
 
-
 export type User = {
   id: string;
   username: string;
   email: string;
   profile_image: string;
-  bio: string
+  bio: string;
   settings: {
-    userid: string,
-    show_saved_post: boolean
-    show_mention: boolean,
-    show_draft_posts: boolean
-  }
+    userid: string;
+    show_saved_post: boolean;
+    show_mention: boolean;
+    show_draft_posts: boolean;
+  };
 };
 export type ConversationMessage = {
   id: string;
@@ -55,6 +53,6 @@ export type ConversationMessage = {
   profile_image: string;
   author: string;
   level: number;
-  created_at:string,
-  updated_at:string
-}
+  created_at: string;
+  updated_at: string;
+};

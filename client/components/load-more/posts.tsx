@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { Post } from "@/types";
 import { shimmer, toBase64 } from "@/utils/image-loader";
 
-const PostCard = dynamic(() => import('../shared/post-card'), { ssr: false })
+const PostCard = dynamic(() => import("../shared/post-card"), { ssr: false });
 
 const RenderComponentBasedOnType = (type: string, post: Post) => {
   switch (type) {
@@ -96,7 +96,7 @@ export default function LoadMore({
     if (!lastCursor || !lastCreatedAt) return;
 
     try {
-      const { getAllPosts } = await import('@/helper/posts')
+      const { getAllPosts } = await import("@/helper/posts");
       const res = await getAllPosts(lastCursor, lastCreatedAt);
 
       setPosts((prev) => [...prev, ...res.posts]);

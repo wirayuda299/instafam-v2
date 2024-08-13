@@ -1,13 +1,22 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState, useEffect, useCallback, startTransition } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  startTransition,
+} from "react";
 import { Grid, Bookmark, LockKeyhole, AtSign } from "lucide-react";
 
 import { User } from "@/types";
 
-
-type Props = { userId: string, settings: Pick<User, 'settings'>['settings'], userSession: string }
+type Props = {
+  userId: string;
+  settings: Pick<User, "settings">["settings"];
+  userSession: string;
+};
 
 export default function ProfileTab({ settings, userSession, userId }: Props) {
   const ref1 = useRef<HTMLButtonElement>(null);
@@ -21,13 +30,15 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
 
-  const [activeTab, setActiveTab] = useState<HTMLButtonElement | null>(ref1?.current);
+  const [activeTab, setActiveTab] = useState<HTMLButtonElement | null>(
+    ref1?.current,
+  );
 
   const handleChangeActiveTab = (tab: HTMLButtonElement) => {
     setActiveTab(tab);
     startTransition(() => {
       router.push(`?tab=${tab.title}`);
-    })
+    });
   };
 
   const updateStyles = useCallback(() => {
@@ -36,28 +47,28 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
       const containerRect = activeTab.parentElement!.getBoundingClientRect();
       const leftPosition = tabRect.left - containerRect.left;
       lineRef.current.style.left = `${leftPosition}px`;
-      lineRef.current.style.width = activeTab.clientWidth + 'px'
+      lineRef.current.style.width = activeTab.clientWidth + "px";
     }
   }, [activeTab]);
 
   useEffect(() => {
-    let activeRef
+    let activeRef;
 
     switch (tab) {
-      case 'posts':
-        activeRef = ref1.current
+      case "posts":
+        activeRef = ref1.current;
         break;
-      case 'saved':
-        activeRef = ref2.current
+      case "saved":
+        activeRef = ref2.current;
         break;
-      case 'draft':
-        activeRef = ref3.current
+      case "draft":
+        activeRef = ref3.current;
         break;
-      case 'mention':
-        activeRef = ref4.current
+      case "mention":
+        activeRef = ref4.current;
         break;
       default:
-        activeRef = ref1.current
+        activeRef = ref1.current;
     }
     setActiveTab(activeRef);
   }, [tab]);

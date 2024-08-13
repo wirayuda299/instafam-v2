@@ -1,13 +1,12 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 
 import { shimmer, toBase64 } from "@/utils/image-loader";
 import { showUsers } from "@/helper/users";
 import UserListItem from "./user-list-item";
 
-
-const AllUsers = dynamic(() => import('./all-users'), { ssr: false })
+const AllUsers = dynamic(() => import("./all-users"), { ssr: false });
 
 export default async function Recommendations() {
   const userSession = await currentUser();

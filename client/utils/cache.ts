@@ -1,8 +1,7 @@
-'use server'
+"use server";
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath } from "next/cache";
 
-export async function revalidate(key:string){
-  revalidatePath(key)
-
+export async function revalidate(key: string) {
+  revalidatePath(key);
 }
