@@ -18,7 +18,6 @@ type Props = {
 export default async function MessageDetail({ params, searchParams }: Props) {
   const user = await getUser(params.id);
 
-
   return (
     <div className="no-scrollbar fixed left-0 z-50 h-full max-h-screen w-full overflow-y-auto bg-black md:static">
       <header className="sticky top-0 flex h-20 w-full items-center justify-between border-b border-black-1 bg-black p-5">

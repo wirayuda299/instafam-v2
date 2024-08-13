@@ -6,7 +6,6 @@ import { revalidate } from "@/utils/cache";
 
 const api = new ApiRequest();
 
-
 export async function getUser(id: string) {
   try {
     return await api.getData<User>(`/users/${id}`);
@@ -58,33 +57,45 @@ export async function searchUser(
   }
 }
 
-
-
-export async function updateUserSetting(userId: string, userSessionId: string, show_mention: boolean, show_saved_post: boolean, show_draft_posts: boolean, pathname: string) {
+export async function updateUserSetting(
+  userId: string,
+  userSessionId: string,
+  show_mention: boolean,
+  show_saved_post: boolean,
+  show_draft_posts: boolean,
+  pathname: string,
+) {
   try {
-    await api.update('/users/update/setting', {
-      userId,
-      userSessionId,
-      show_mention,
-      show_saved_post,
-      show_draft_posts
-    }, "PUT")
+    await api
+      .update(
+        "/users/update/setting",
+        {
+          userId,
+          userSessionId,
+          show_mention,
+          show_saved_post,
+          show_draft_posts,
+        },
+        "PUT",
+      )
       .then(() => {
-        revalidate(pathname)
-        toast.success("User setting has been updated")
-      })
-
+        revalidate(pathname);
+        toast.success("User setting has been updated");
+      });
   } catch (e) {
-    toast.error((e as Error).message || "Failed to update")
+    toast.error((e as Error).message || "Failed to update");
   }
 }
 
-export async function updateUserBio(bio: string, userId: string, pathname: string) {
+export async function updateUserBio(
+  bio: string,
+  userId: string,
+  pathname: string,
+) {
   try {
-    await api.update('/users/update/bio', { bio, userId }, "PUT")
-    revalidate(pathname)
+    await api.update("/users/update/bio", { bio, userId }, "PUT");
+    revalidate(pathname);
   } catch (error) {
-    throw error
+    throw error;
   }
-
 }

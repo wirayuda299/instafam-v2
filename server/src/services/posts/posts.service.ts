@@ -11,7 +11,7 @@ import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async createPost(data: CreatePostType) {
     try {
@@ -24,8 +24,7 @@ export class PostsService {
       const { captions, author, media_asset_id, media_url, isDraft } =
         validatedValues.data;
 
-
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       await this.db.pool
         .query(
           `INSERT INTO posts (author, captions, media_url, media_asset_id, published)
@@ -39,10 +38,9 @@ export class PostsService {
           };
         });
 
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
     } catch (error) {
-
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }
@@ -159,7 +157,7 @@ export class PostsService {
       if (!post.rows[0].exists) {
         throw new NotFoundException('Post not found');
       }
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       await this.db.pool
         .query(`delete from posts where id = $1`, [postId])
         .then(() => {
@@ -168,9 +166,9 @@ export class PostsService {
             error: false,
           };
         });
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }
@@ -194,8 +192,7 @@ export class PostsService {
 
   async likeOrDislikePost(postId: string, liked_by: string) {
     try {
-
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       const isLiked = await this.db.pool.query(
         `select * from post_likes as pl
         where pl.post_id = $1 and pl.liked_by = $2
@@ -214,14 +211,19 @@ export class PostsService {
           [postId, liked_by],
         );
       }
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }
 
-  async getUserPosts(userId: string, published: boolean = true, lastCursor?: string, createdAt?: string) {
+  async getUserPosts(
+    userId: string,
+    published: boolean = true,
+    lastCursor?: string,
+    createdAt?: string,
+  ) {
     try {
       const totalPosts = await this.db.pool.query(
         `select count(*) from posts where author= $1`,
@@ -262,7 +264,9 @@ export class PostsService {
     `;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
-      const params = lastCursor ? [createdAt, lastCursor, userId, published] : [userId, published];
+      const params = lastCursor
+        ? [createdAt, lastCursor, userId, published]
+        : [userId, published];
 
       const posts = await this.db.pool.query(query, params);
 
@@ -284,7 +288,7 @@ export class PostsService {
 
   async savePost(author: string, post_id: string) {
     try {
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       const isSaved = await this.db.pool.query(
         `select * from bookmarks where author = $1 and post_id = $2`,
         [author, post_id],
@@ -304,13 +308,13 @@ export class PostsService {
           values($1,$2)`,
           [author, post_id],
         );
-      await this.db.pool.query(`commit`)
+        await this.db.pool.query(`commit`);
         return {
           message: 'Post saved',
         };
       }
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }

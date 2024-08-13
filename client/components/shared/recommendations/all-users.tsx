@@ -21,7 +21,7 @@ export default function AllUsers() {
     (async () => {
       try {
         setIsLoading(true);
-        const { showUsers } = await import('@/helper/users')
+        const { showUsers } = await import("@/helper/users");
         const users = await showUsers(userId, 0);
         if (users) {
           setAllUsers(users);

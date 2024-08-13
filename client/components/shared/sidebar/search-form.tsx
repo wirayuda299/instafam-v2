@@ -32,7 +32,7 @@ export default function SearchForm({
     (async () => {
       setLoading(true);
       try {
-        const {searchUser}=await import('@/helper/users')
+        const { searchUser } = await import("@/helper/users");
         const users = await searchUser(searchQuery.toLowerCase());
         if (users && "errors" in users) {
           handleError(users, "Failed to search user");

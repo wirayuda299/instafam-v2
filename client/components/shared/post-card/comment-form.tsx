@@ -24,7 +24,7 @@ export default function CommentForm({ postId }: { postId: string }) {
 
   const handleCreateComment = async (value: AddCommentSchema) => {
     try {
-      const { createComment } = await import('@/actions/comments')
+      const { createComment } = await import("@/actions/comments");
       const res = await createComment(
         postId,
         value.comment,

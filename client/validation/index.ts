@@ -11,7 +11,6 @@ export const createPostSchema = z.object({
   captions: z.string().min(1, "Caption is required"),
   media: z.string().url().min(1, "Please add image").startsWith("https"),
   media_asset_id: z.string(),
-
 });
 
 export const addCommentSchema = z.object({
@@ -38,7 +37,7 @@ export const updateSettingSchema = z.object({
   show_saved_post: z.boolean(),
   show_mention: z.boolean(),
   show_draft_posts: z.boolean(),
-})
+});
 
 export type UpdateSettingSchema = z.infer<typeof updateSettingSchema>;
 export type SendMessageSchema = z.infer<typeof sendMessageSchema>;

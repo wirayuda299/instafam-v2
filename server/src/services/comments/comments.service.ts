@@ -4,10 +4,9 @@ import { DatabaseService } from '../database/database.service';
 import { addCommentSchema, AddCommentSchema } from 'src/common/validation';
 import { Comment } from 'src/types';
 
-
 @Injectable()
 export class CommentsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async addComment(values: AddCommentSchema) {
     try {
@@ -16,7 +15,7 @@ export class CommentsService {
         throw new BadRequestException('Please add valid data');
       }
       const { author, comment, post_id } = validatedValue.data;
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       await this.db.pool.query(
         `
         insert into comments(author,message, post_id)
@@ -24,9 +23,9 @@ export class CommentsService {
         `,
         [author, comment, post_id],
       );
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }
@@ -98,7 +97,7 @@ export class CommentsService {
 
   async likeOrDislikeComment(commentId: string, liked_by: string) {
     try {
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       const isLiked = await this.db.pool.query(
         `select * from comment_likes as cl
         where cl.comment_id = $1 and cl.liked_by = $2
@@ -117,9 +116,9 @@ export class CommentsService {
           [commentId, liked_by],
         );
       }
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }

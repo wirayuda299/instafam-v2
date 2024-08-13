@@ -34,10 +34,6 @@ export async function createUser(values: CreateUserType) {
   }
 }
 
-
-
-
-
 export async function followUnfollow(userId: string, userToFollow: string) {
   try {
     const api = new ApiRequest();

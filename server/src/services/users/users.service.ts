@@ -10,10 +10,9 @@ import { DatabaseService } from '../database/database.service';
 import { createUserSchema, CreateUserType } from 'src/common/validation';
 import { User } from 'src/types';
 
-
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async createUser(values: CreateUserType) {
     try {
@@ -75,19 +74,19 @@ export class UsersService {
 
   async updateBio(bio: string, userId: string) {
     try {
-
-      await this.db.pool.query(`begin`)
-      await this.db.pool.query(`update users set bio= $1 where id = $2`, [bio, userId]).then(() => {
-        return {
-          messages: "bio updated"
-        }
-      })
-      await this.db.pool.query(`commit`)
-
+      await this.db.pool.query(`begin`);
+      await this.db.pool
+        .query(`update users set bio= $1 where id = $2`, [bio, userId])
+        .then(() => {
+          return {
+            messages: 'bio updated',
+          };
+        });
+      await this.db.pool.query(`commit`);
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
 
-      throw error
+      throw error;
     }
   }
 
@@ -102,8 +101,7 @@ export class UsersService {
       if (userId !== userSessionId) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
-      await this.db.pool.query(`begin`)
-
+      await this.db.pool.query(`begin`);
 
       await this.db.pool.query(
         `update user_settings
@@ -113,13 +111,13 @@ export class UsersService {
       where userid=$4`,
         [show_mention, show_draft_posts, show_saved_post, userId],
       );
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
 
       return {
         message: 'User setting has been updated',
       };
     } catch (e) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw e;
     }
   }

@@ -2,38 +2,34 @@
 
 import { useSocketContext } from "@/context/socket";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
-import { shimmer, toBase64 } from "@/utils/image-loader";
 import ChatForm from "./chat-form";
 
-import { formatMessageTimestamp } from "@/utils/date";
 import { ConversationMessage } from "@/types";
-
+import ChatItem from "./chat-item";
 
 export default function ChatList() {
-  const searchParams = useSearchParams();
   const { userId } = useAuth();
-   const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const params = useParams();
- const { socket } = useSocketContext();
+  const [selectedMessage, setSelectedMessage] =
+    useState<ConversationMessage | null>(null);
+  const { socket } = useSocketContext();
+  const searchParams = useSearchParams();
 
   const conversationId = searchParams.get("conversationId") as string;
 
-  const reloadPersonalMessage = () => {
+  const reloadPersonalMessage = useCallback(() => {
     if (!socket) return;
 
     socket?.emit("get_messages", {
       userId: params.id,
     });
-  }
-
-
-
+  }, [params.id, socket]);
 
   useEffect(() => {
     if (!socket) return;
@@ -43,66 +39,47 @@ export default function ChatList() {
 
     const handleMessages = (messages: ConversationMessage[]) => {
       setMessages(messages);
-      setLoading(false)
+      setLoading(false);
     };
 
     socket?.on("set_messages", handleMessages);
 
     return () => {
-      socket?.off("get_messages");
       socket?.off("set_messages", handleMessages);
     };
-  }, [params.id, socket]);
+  }, [params.id, socket, reloadPersonalMessage]);
 
+  const handleSelectMessage = useCallback(
+    (message: ConversationMessage | null) => setSelectedMessage(message),
+    [],
+  );
 
   return (
     <>
       <ol className="flex min-h-svh flex-col gap-5 p-5">
         {loading
           ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-7 w-full max-w-xs animate-pulse rounded-md bg-black-1/50",
-                i % 2 === 0 ? "self-end" : "self-start",
-              )}
-            ></div>
-          ))
+              <div
+                key={i}
+                className={cn(
+                  "h-7 w-full max-w-xs animate-pulse rounded-md bg-black-1/50",
+                  i % 2 === 0 ? "self-end" : "self-start",
+                )}
+              ></div>
+            ))
           : messages.map((c) => (
-            <li
-              key={c.id}
-              className={cn(
-                "group flex gap-3",
-                c.author === userId ? "self-end" : "self-start",
-              )}
-            >
-              {c.author !== userId && c.profile_image && (
-                <Image
-                  src={c.profile_image}
-                  width={40}
-                  height={40}
-                  alt="user"
-                  loading="lazy"
-                  placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(45, 45))}`}
-                  className="h-8 w-8 rounded-full object-cover" />
-              )}
-              <div>
-                <p
-                  className={cn(
-                    "w-full max-w-xs break-words rounded-xl bg-blue-600 px-3 py-2 text-white",
-                    c.author === userId ? "bg-blue-600" : "bg-black-50",
-                  )}
-                >
-                  {c.message}
-                </p>
-                <p className="text-xs opacity-0 group-hover:opacity-100">
-                  {formatMessageTimestamp(c.created_at)}
-                </p>
-              </div>
-            </li>
-          ))}
+              <ChatItem
+                messages={messages}
+                selectMessage={handleSelectMessage}
+                c={c}
+                key={c.id}
+                userId={userId!}
+              />
+            ))}
       </ol>
       <ChatForm
+        handleSelectedMessage={handleSelectMessage}
+        selectedMessage={selectedMessage}
         memberId={params.id as string}
         conversationId={conversationId || ""}
         reloadMessage={reloadPersonalMessage}
