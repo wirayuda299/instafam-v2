@@ -7,7 +7,7 @@ const limit = 80;
 export default function Captions({ captions }: { captions: string }) {
   const [isExpand, setIsExpand] = useState(false);
 
-  const expandCaption = () => setIsExpand((prev) => !prev)
+  const expandCaption = () => setIsExpand((prev) => !prev);
 
   const expandableCaptions =
     captions.length >= limit && !isExpand

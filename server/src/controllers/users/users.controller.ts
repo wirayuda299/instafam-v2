@@ -14,7 +14,7 @@ import { UsersService } from 'src/services/users/users.service';
 
 @Controller('api/v1/users')
 export class UsersController {
-  constructor(private userService: UsersService) { }
+  constructor(private userService: UsersService) {}
 
   @Get()
   showUsers(@Query('userId') id: string, @Query('limit') limit: number) {
@@ -57,7 +57,7 @@ export class UsersController {
 
   @Put('/update/bio')
   updateUserBio(@Body('bio') bio: string, @Body('userId') id: string) {
-    return this.userService.updateBio(bio, id)
+    return this.userService.updateBio(bio, id);
   }
 
   @Put('/update/setting')
@@ -76,5 +76,4 @@ export class UsersController {
       showDraftPosts,
     );
   }
-
 }

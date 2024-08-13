@@ -91,3 +91,16 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+.highlight {
+  animation: highlight 2s ease-in-out;
+  scroll-margin-top:90px;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: yellow;
+  }
+  100% {
+    background-color: transparent;
+  }
+}

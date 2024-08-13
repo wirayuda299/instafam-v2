@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 import ProfileTab from "@/components/profile/tab";
 import FollowButton from "@/components/shared/post-card/follow-button";
 import UserSetting from "@/components/profile/user-settings";
-const SavedPosts = dynamic(() => import("@/components/profile/SavedPosts"))
+const SavedPosts = dynamic(() => import("@/components/profile/SavedPosts"));
 import UserPosts from "@/components/profile/UserPosts";
 
 import { shimmer, toBase64 } from "@/utils/image-loader";
@@ -17,26 +17,22 @@ import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
 import { getUserPosts } from "@/helper/posts";
 import Bio from "@/components/profile/Bio";
 
-
 type Props = {
   params: { id: string };
   searchParams: { tab: "mention" | "saved" | "posts" | "draft" };
 };
 
-
 export default async function UserProfile({ searchParams, params }: Props) {
   const userSession = await currentUser();
 
-  const user = await getUser(params.id)
+  const user = await getUser(params.id);
   if (!user) notFound();
 
-  const [followers, following, { posts, totalPosts }] =
-    await Promise.all([
-      getUserFollowers(params.id),
-      getUserFollowing(params.id),
-      getUserPosts(params.id, searchParams.tab === 'draft' ? false : true)
-    ]);
-
+  const [followers, following, { posts, totalPosts }] = await Promise.all([
+    getUserFollowers(params.id),
+    getUserFollowing(params.id),
+    getUserPosts(params.id, searchParams.tab === "draft" ? false : true),
+  ]);
 
   return (
     <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
@@ -59,7 +55,8 @@ export default async function UserProfile({ searchParams, params }: Props) {
                   <UserSetting
                     settings={user.settings}
                     userId={params.id}
-                    userSessionId={userSession?.id} />
+                    userSessionId={userSession?.id}
+                  />
                 </>
               ) : (
                 <>
@@ -95,7 +92,11 @@ export default async function UserProfile({ searchParams, params }: Props) {
         </header>
       </div>
       <div className="overflow-x-auto">
-        <ProfileTab userSession={userSession?.id!} userId={params.id} settings={user.settings} />
+        <ProfileTab
+          userSession={userSession?.id!}
+          userId={params.id}
+          settings={user.settings}
+        />
       </div>
       <Suspense
         fallback={<p className="text-white">Loading...</p>}
@@ -103,25 +104,28 @@ export default async function UserProfile({ searchParams, params }: Props) {
       >
         <div className="flex flex-wrap gap-3">
           {searchParams.tab === "posts" && (
-            <Suspense fallback={'Loading posts...'} key={searchParams.tab}>
+            <Suspense fallback={"Loading posts..."} key={searchParams.tab}>
               <UserPosts totalPosts={totalPosts} posts={posts} />
             </Suspense>
           )}
 
-
-          {searchParams.tab === 'saved' && (
-            <Suspense fallback={'Loading saved posts...'} key={searchParams.tab}>
+          {searchParams.tab === "saved" && (
+            <Suspense
+              fallback={"Loading saved posts..."}
+              key={searchParams.tab}
+            >
               <SavedPosts userId={params.id} />
             </Suspense>
           )}
-          {searchParams.tab === 'draft' && (
-            <Suspense fallback={'Loading draft posts...'} key={searchParams.tab}>
+          {searchParams.tab === "draft" && (
+            <Suspense
+              fallback={"Loading draft posts..."}
+              key={searchParams.tab}
+            >
               <UserPosts totalPosts={totalPosts} posts={posts} />
             </Suspense>
           )}
-          {searchParams.tab === 'mention' && (
-            <p>mention</p>
-          )}
+          {searchParams.tab === "mention" && <p>mention</p>}
         </div>
       </Suspense>
     </main>

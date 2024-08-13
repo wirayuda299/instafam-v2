@@ -31,7 +31,7 @@ export async function createPost(value: CreatePostType, isDraft: boolean) {
           media_url: media,
           media_asset_id,
           author: userId,
-          isDraft
+          isDraft,
         },
         "POST",
       )

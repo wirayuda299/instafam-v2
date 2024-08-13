@@ -51,6 +51,10 @@ export class SocketGateway implements OnModuleInit {
   async sendMessage(@MessageBody() payload: SendMessageSchema) {
     try {
       await this.messageService.sendPersonalMessage(payload);
+      const messages = await this.messageService.getPersonalMessage(
+        payload.userId,
+      );
+      this.server.emit('set_messages', messages);
     } catch (e) {
       console.log(e);
     }

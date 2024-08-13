@@ -49,7 +49,7 @@ export default function CreatePostForm({
   label,
 }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isDraft, setIsDraft] = useState(false)
+  const [isDraft, setIsDraft] = useState(false);
 
   const [activeField, setActiveField] =
     useState<(typeof fields)[number]>("media");
@@ -75,7 +75,7 @@ export default function CreatePostForm({
 
   const isSubmitting = form.formState.isSubmitting;
   const isChanged = form.formState.isDirty;
-  const isValid = form.formState.isValid
+  const isValid = form.formState.isValid;
 
   async function handlePost(data: SchemaType) {
     if (!files) {
@@ -85,13 +85,12 @@ export default function CreatePostForm({
 
     let uploadedFiles: any;
 
-
     try {
-      setIsDraft(false)
+      setIsDraft(false);
       const formData = new FormData();
       formData.append("files", files.media);
 
-      const { uploadFiles } = await import('@/actions/files')
+      const { uploadFiles } = await import("@/actions/files");
       uploadedFiles = await uploadFiles(formData);
 
       if ("errors" in uploadedFiles) {
@@ -103,15 +102,18 @@ export default function CreatePostForm({
         "data" in uploadedFiles &&
         uploadedFiles.data !== null
       ) {
-        const res = await createPost({
-          captions: data.captions,
-          media: uploadedFiles.data.url,
-          media_asset_id: uploadedFiles.data.key,
-        }, isDraft);
+        const res = await createPost(
+          {
+            captions: data.captions,
+            media: uploadedFiles.data.url,
+            media_asset_id: uploadedFiles.data.key,
+          },
+          isDraft,
+        );
 
         if (res && "errors" in res) {
           handleError(res, "Something went wrong");
-          const { deleteFile } = await import('@/actions/files')
+          const { deleteFile } = await import("@/actions/files");
           const deletedFile = await deleteFile(uploadedFiles.data.key);
 
           if (deletedFile && "errors" in deletedFile) {
@@ -266,22 +268,22 @@ export default function CreatePostForm({
               />
             )}
             {activeField === "captions" && isValid && (
-              <div className='flex items-center absolute bottom-0 w-full'>
+              <div className="absolute bottom-0 flex w-full items-center">
                 <Button
                   disabled={!isChanged || isSubmitting || !isValid}
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed rounded-none disabled:opacity-50"
+                  className="w-full rounded-none bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? "Publishing..." : "Publish"}
                 </Button>
                 <Button
                   onClick={async () => {
-                    setIsDraft(true)
-                    await handlePost(form.getValues())
+                    setIsDraft(true);
+                    await handlePost(form.getValues());
                   }}
                   disabled={!isChanged || isSubmitting || !isValid}
                   type="button"
-                  className="w-full  bg-green-600 hover:bg-green-700 disabled:cursor-not-allowed rounded-none disabled:opacity-50"
+                  className="w-full rounded-none bg-green-600 hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Save as draft
                 </Button>
