@@ -14,7 +14,7 @@ import { PostsService } from 'src/services/posts/posts.service';
 
 @Controller('api/v1/posts')
 export class PostsController {
-  constructor(private postService: PostsService) { }
+  constructor(private postService: PostsService) {}
 
   @Get()
   getUserPosts(

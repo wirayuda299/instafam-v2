@@ -21,7 +21,7 @@ type UserConversation = {
 
 @Injectable()
 export class ConversationsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async getUserConversations(userId: string): Promise<UserConversation[]> {
     try {
@@ -60,7 +60,7 @@ export class ConversationsService {
           HttpStatus.UNAUTHORIZED,
         );
       }
-      await this.db.pool.query(`begin`)
+      await this.db.pool.query(`begin`);
       const message = await this.db.pool.query(
         `select * from messages where id = $1`,
         [messageId],
@@ -76,13 +76,13 @@ export class ConversationsService {
           where id = $2`,
         [content, messageId],
       );
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query(`commit`);
       return {
         message: 'Message updated',
         error: false,
       };
     } catch (error) {
-      await this.db.pool.query(`rollback`)
+      await this.db.pool.query(`rollback`);
       throw error;
     }
   }
@@ -101,7 +101,7 @@ export class ConversationsService {
         parent_id,
         image_url,
         userId,
-        image_asset_id
+        image_asset_id,
       } = validatedValue.data;
 
       await this.db.pool.query(`BEGIN`);
@@ -115,7 +115,7 @@ export class ConversationsService {
           message,
           parent_id,
           recipient_id,
-          userId
+          userId,
         });
       } else {
         const {
@@ -164,33 +164,26 @@ export class ConversationsService {
         `INSERT INTO messages("content", author, attachment_url, attachment_id, conversation_id, parent_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id`,
-        [
-          message,
-          userId,
-          image_url,
-          image_asset_id,
-          conversationId,
-          parent_id,
-        ],
+        [message, userId, image_url, image_asset_id, conversationId, parent_id],
       );
     } catch (e) {
       throw e;
     }
   }
 
- async getPersonalMessage(userId: string | null) {
+  async getPersonalMessage(userId: string | null) {
     try {
-        const conversations = await this.getUserConversations(userId);
+      const conversations = await this.getUserConversations(userId);
 
-        if (conversations.length === 0) {
-            return [];  
-        }
+      if (conversations.length === 0) {
+        return [];
+      }
 
-        const allMessages = [];
+      const allMessages = [];
 
-        for (const conversation of conversations) {
-            const baseMessages = await this.db.pool.query(
-                `WITH RECURSIVE message_tree AS (
+      for (const conversation of conversations) {
+        const baseMessages = await this.db.pool.query(
+          `WITH RECURSIVE message_tree AS (
                     SELECT 
                         m.id, 
                         m.content as message, 
@@ -227,18 +220,16 @@ export class ConversationsService {
                     WHERE 
                         m.conversation_id = $1)
                 SELECT * FROM message_tree
-                ORDER BY level`,
-                [conversation.conversationId]
-            );
+                ORDER BY message_tree.created_at asc`,
+          [conversation.conversationId],
+        );
 
-            allMessages.push(...baseMessages.rows); 
-        }
-
-        return allMessages;
+        allMessages.push(...baseMessages.rows);
+      }
+      // @ts-ignore
+      return allMessages;
     } catch (error) {
-        throw error;
+      throw error;
     }
-}
-
-
   }
+}

@@ -32,4 +32,3 @@ export type Comment = {
   profile_image: string;
   post_id: string;
 };
-

@@ -8,7 +8,6 @@ const LoadMorePost = dynamic(() => import("@/components/load-more/posts"), {
   ssr: false,
 });
 
-
 export default async function Home() {
   const { posts, totalPosts } = await getAllPosts();
 

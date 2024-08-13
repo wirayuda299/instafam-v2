@@ -1,13 +1,10 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-
-import { Post } from "@/types"
-import { shimmer, toBase64 } from "@/utils/image-loader"
-
+import { Post } from "@/types";
+import { shimmer, toBase64 } from "@/utils/image-loader";
 
 export default function PostCardImage({ post }: { post: Post }) {
-
   return (
     <Link href={`/post/${post.post_id}`}>
       <Image
@@ -22,7 +19,5 @@ export default function PostCardImage({ post }: { post: Post }) {
         alt="attachment"
       />
     </Link>
-
-  )
-
+  );
 }
