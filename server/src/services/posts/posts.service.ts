@@ -21,7 +21,7 @@ export class PostsService {
         throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
       }
 
-      const { captions, author, media_asset_id, media_url, isDraft } =
+      const { captions, author, media_asset_id, media_url, published } =
         validatedValues.data;
 
       await this.db.pool.query(`begin`);
@@ -29,7 +29,7 @@ export class PostsService {
         .query(
           `INSERT INTO posts (author, captions, media_url, media_asset_id, published)
          VALUES ($1, $2, $3, $4, $5)`,
-          [author, captions, media_url, media_asset_id, isDraft],
+          [author, captions, media_url, media_asset_id, published],
         )
         .then(() => {
           return {
@@ -226,7 +226,7 @@ export class PostsService {
   ) {
     try {
       const totalPosts = await this.db.pool.query(
-        `select count(*) from posts where author= $1`,
+        `select count(*) from posts where author= $1 and published = true`,
         [userId],
       );
       const queryWithCursor = `
