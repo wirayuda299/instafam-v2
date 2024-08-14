@@ -9,7 +9,7 @@ import { deleteFile } from "./files";
 
 const api = new ApiRequest();
 
-export async function createPost(value: CreatePostType, isDraft: boolean) {
+export async function createPost(value: CreatePostType, published: boolean, pathname:string) {
   try {
     const validatedValues = createPostSchema.safeParse(value);
     if (!validatedValues.success) {
@@ -31,12 +31,12 @@ export async function createPost(value: CreatePostType, isDraft: boolean) {
           media_url: media,
           media_asset_id,
           author: userId,
-          isDraft,
+          published,
         },
         "POST",
       )
       .then(() => {
-        revalidatePath("/");
+        revalidatePath(pathname);
       });
   } catch (error) {
     return {
