@@ -57,12 +57,12 @@ export class UsersService {
 
       const users = await this.db.pool.query(
         `
-            select
-            id,
-            username,
-            email,
-            profile_image
-            from users where username @@ to_tsquery($1)`,
+				select
+				id,
+				username,
+				email,
+				profile_image
+				from users where username @@ to_tsquery($1)`,
         [query],
       );
 
