@@ -10,7 +10,7 @@ import ProfileTab from "@/components/profile/tab";
 import FollowButton from "@/components/shared/post-card/follow-button";
 import UserSetting from "@/components/profile/user-settings";
 const SavedPosts = dynamic(() => import("@/components/profile/SavedPosts"));
-import UserPosts from "@/components/profile/UserPosts";
+const UserPosts= dynamic(()=> import( "@/components/profile/UserPosts"))
 
 import { shimmer, toBase64 } from "@/utils/image-loader";
 import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
@@ -98,10 +98,6 @@ export default async function UserProfile({ searchParams, params }: Props) {
           settings={user.settings}
         />
       </div>
-      <Suspense
-        fallback={<p className="text-white">Loading...</p>}
-        key={searchParams.tab}
-      >
         <div className="flex flex-wrap gap-3">
           {searchParams.tab === "posts" && (
             <Suspense fallback={"Loading posts..."} key={searchParams.tab}>
@@ -127,7 +123,6 @@ export default async function UserProfile({ searchParams, params }: Props) {
           )}
           {searchParams.tab === "mention" && <p>mention</p>}
         </div>
-      </Suspense>
     </main>
   );
 }
