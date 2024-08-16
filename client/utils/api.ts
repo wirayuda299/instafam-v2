@@ -1,13 +1,13 @@
 import { prepareHeaders } from "./cookies";
 
 export class ApiRequest {
-  private readonly serverEndpoint: string = process.env.NEXT_PUBLIC_SERVER_URL!
+  private readonly serverEndpoint: string = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1`;
 
   private async getConfig(method: string) {
     return {
       method,
       headers: await prepareHeaders(),
-      credentials: "include" as RequestCredentials,
+      credentials: 'include' as RequestCredentials,
     };
   }
 
@@ -19,15 +19,14 @@ export class ApiRequest {
     try {
       const config = await this.getConfig(method);
       const res = await fetch(this.serverEndpoint + url, {
-        body: JSON.stringify(body),
         ...config,
+        body: JSON.stringify(body),
       });
 
-      if (!res.headers.get("content-type")?.includes("application/json"))
+      if (!res.headers.get('content-type')?.includes('application/json'))
         return;
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.messages);
 
       return data;
@@ -37,13 +36,14 @@ export class ApiRequest {
   }
   async getData<T>(query: string): Promise<T> {
     try {
-      const config = await this.getConfig("GET");
-
+      const config = await this.getConfig('GET');
       const res = await fetch(this.serverEndpoint + query, config);
+
       const result = await res.json();
+			console.log(result)
       if (!res.ok) throw new Error(result.messages);
 
-      return result;
+      return result.data;
     } catch (error) {
       throw error;
     }

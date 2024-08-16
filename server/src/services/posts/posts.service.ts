@@ -128,6 +128,7 @@ export class PostsService {
         totalPosts: +totalPosts.rows[0].count,
       };
     } catch (error) {
+			console.log("error fetch posts", error)
       throw error;
     }
   }

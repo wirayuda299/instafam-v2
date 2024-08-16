@@ -29,7 +29,7 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const server = io("http://localhost:3001");
+    const server = io(process.env.NEXT_PUBLIC_SERVER_URL!);
     setSocket(server);
 
     return () => {
