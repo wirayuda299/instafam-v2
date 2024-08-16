@@ -78,7 +78,7 @@ export default function CreatePostForm({
 	const isValid = form.formState.isValid;
 
 
-	const saveToDb = async (uploadedFiles: any, data: SchemaType, published:boolean) => {
+	const saveToDb = async (uploadedFiles: any, data: SchemaType, published: boolean) => {
 		if (!files) return
 
 		const formData = new FormData();
@@ -98,18 +98,18 @@ export default function CreatePostForm({
 			"data" in uploadedFiles &&
 			uploadedFiles.data !== null
 		) {
-			const res = await createPost(
-				{
-					captions: data.captions,
-					media: uploadedFiles.data.url,
-					media_asset_id: uploadedFiles.data.key,
-				},
-				published,
-				window.location.pathname,
-			);
+
+			const values = {
+				captions: data.captions,
+				media: uploadedFiles.data.url,
+				media_asset_id: uploadedFiles.data.key,
+			}
+
+			const res = await createPost(values, published, window.location.pathname);
 
 			if (res && "errors" in res) {
 				handleError(res, "Something went wrong");
+
 				const { deleteFile } = await import("@/actions/files");
 				const deletedFile = await deleteFile(uploadedFiles.data.key);
 
@@ -144,7 +144,7 @@ export default function CreatePostForm({
 		let uploadedFiles: any;
 		try {
 			await saveToDb(uploadedFiles, form.getValues(), false);
-				toast.success("Your post saved as draft")
+			toast.success("Your post saved as draft")
 		} catch (e) {
 			toast.error((e as Error).message || "An error occurred while creating the post");
 		} finally {
@@ -161,7 +161,6 @@ export default function CreatePostForm({
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
 					reset();
-					setIsOpen(false);
 				} else {
 					setIsOpen(true);
 				}
@@ -192,6 +191,7 @@ export default function CreatePostForm({
 								: () => setActiveField("media")
 						}
 						className="disabled:cursor-not-allowed disabled:opacity-50"
+						aria-disabled={activeField === "media"}
 						disabled={activeField === "media"}
 						type="button"
 						name="back"
@@ -201,6 +201,7 @@ export default function CreatePostForm({
 					</button>
 					<p className="font-semibold">Create new post</p>
 					<button
+						aria-disabled={activeField === "captions" || !preview}
 						disabled={activeField === "captions" || !preview}
 						onClick={
 							activeField === "captions"
@@ -231,6 +232,8 @@ export default function CreatePostForm({
 										alt="preview"
 									/>
 									<button
+										title="close"
+										name="close"
 										onClick={reset}
 										type="button"
 										className="absolute right-2 top-2 opacity-0 group-hover:opacity-100"
@@ -295,6 +298,7 @@ export default function CreatePostForm({
 						{activeField === "captions" && isValid && (
 							<div className="absolute bottom-0 flex w-full items-center">
 								<Button
+									aria-disabled={loading || !isChanged || isSubmitting || !isValid}
 									disabled={loading || !isChanged || isSubmitting || !isValid}
 									type="submit"
 									className="w-full rounded-none bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -302,6 +306,7 @@ export default function CreatePostForm({
 									{isSubmitting ? "Publishing..." : "Publish"}
 								</Button>
 								<Button
+									aria-disabled={loading}
 									onClick={handleSaveDraft}
 									disabled={loading}
 									type="button"

@@ -34,6 +34,7 @@ export default function SearchForm({
       try {
         const { searchUser } = await import("@/helper/users");
         const users = await searchUser(searchQuery.toLowerCase());
+
         if (users && "errors" in users) {
           handleError(users, "Failed to search user");
           return;

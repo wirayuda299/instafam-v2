@@ -53,11 +53,19 @@ export class PostsController {
   ) {
     return this.postService.likeOrDislikePost(postId, likedBy);
   }
+
   @Post('/save_or_delete')
   savePost(@Body('postId') postId: string, @Body('author') savedBy: string) {
     return this.postService.savePost(savedBy, postId);
   }
 
+  @Post('/report')
+  reportPost(
+    @Body('postId') postId: string,
+    @Body('reasons') reasons: string[],
+  ) {
+    return this.postService.reportPost(postId, reasons);
+  }
   @Delete('/delete')
   deletePost(@Req() req: Request) {
     const { postId, userSession, postAuthor } = req.body;

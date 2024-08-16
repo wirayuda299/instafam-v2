@@ -7,7 +7,6 @@ import { useAuth } from "@clerk/nextjs";
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 
-import { saveOrDeleteBookmarkedPost } from "@/actions/post";
 import { handleError } from "@/utils/error";
 import { getSavedPosts } from "@/helper/posts";
 import { cn } from "@/lib/utils";
@@ -41,6 +40,7 @@ export default function Bookmarks({ postId }: { postId: string | null }) {
           return prevData?.concat(postId);
         }
       });
+			const {saveOrDeleteBookmarkedPost}= await import('@/actions/post')
 
       const res = await saveOrDeleteBookmarkedPost(postId, pathname);
       if (res && "errors" in res) {

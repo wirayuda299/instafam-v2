@@ -45,6 +45,21 @@ export class PostsService {
     }
   }
 
+  async reportPost(postId: string, reasons: string[]) {
+    try {
+      await this.db.pool.query(
+        `insert into report (post_id, reason)
+					values($1, $2)`,
+        [postId, reasons],
+      );
+      return {
+        message: 'Post has been reported',
+      };
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async getAllPosts(
     lastCursor?: string,
     createdAt?: string,

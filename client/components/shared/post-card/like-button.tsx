@@ -26,6 +26,7 @@ export default function LikeButton({
     () => likesData.map((like) => like.liked_by).includes(userId!),
     [likesData, userId],
   );
+
   const handleLikes = async () => {
     try {
       startTransition(() => {
@@ -38,6 +39,7 @@ export default function LikeButton({
         });
       });
       const { likeOrDislikePost } = await import("@/actions/post");
+
       const res = await likeOrDislikePost(postId, pathname);
       if (res && "errors" in res) {
         handleError(res, "Something wrong when like or dislike post");

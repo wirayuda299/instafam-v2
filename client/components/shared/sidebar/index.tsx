@@ -99,6 +99,7 @@ export default function Sidebar() {
         )}
         <li className="group rounded-md p-2 hover:bg-black-1/30 md:w-full">
           <Link
+						aria-label="profile"
             href={`/profile/${user?.id}?tab=posts`}
             className="flex items-center gap-3"
           >
@@ -122,7 +123,7 @@ export default function Sidebar() {
           </Link>
         </li>
       </ul>
-      <button className="group mt-3 hidden w-full items-center gap-3 px-3 md:flex">
+      <button title='more' name="more" className="group mt-3 hidden w-full items-center gap-3 px-3 md:flex">
         <Menu />
         {!isCurrentPathMessages && (
           <span className="prose prose-sm capitalize text-white 2xl:prose-lg group-hover:brightness-110">

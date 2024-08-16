@@ -9,7 +9,7 @@ export default function Bio({ bio, userId }: { bio: string; userId: string }) {
   const handleSubmitForm = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      // @ts-ignore
+			// @ts-ignore
       const bio = e.target.bio.value;
       if (bio.length > 100) {
         toast.error("Bio too long");

@@ -9,6 +9,16 @@ import { deleteFile } from "./files";
 
 const api = new ApiRequest();
 
+export async function reportPost(postId:string, reasons:string[]){
+	try{
+		return await api.update("/posts/report", {postId, reasons}, "POST")
+	}catch(e){
+		return {
+			errors: (e as Error).message || "Failed to report post"
+		}
+	}
+}
+
 export async function createPost(value: CreatePostType, published: boolean, pathname:string) {
   try {
     const validatedValues = createPostSchema.safeParse(value);

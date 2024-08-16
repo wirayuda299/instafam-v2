@@ -39,3 +39,18 @@ export const sidebarItems = [
     icon: <SquarePlus className="text-2xl" size={25} />,
   },
 ] as const;
+
+
+export const REPORT_POST_REASONS: string[] = [
+	"It's spam",
+	"Nudity or sexual content",
+	"Hate speech or symbols",
+	"Violence or dangerous organizations",
+	"Harassment or bullying",
+	"False information",
+	"Scam or fraud",
+	"Intellectual property violation",
+	"Self-harm or suicide",
+	"Sale of illegal or regulated goods"
+] as const
+

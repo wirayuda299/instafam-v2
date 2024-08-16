@@ -105,10 +105,10 @@ export class UsersService {
 
       await this.db.pool.query(
         `update user_settings
-      set show_mention = $1,
+					set show_mention = $1,
           show_draft_posts = $2,
           show_saved_post=$3
-      where userid=$4`,
+					where userid=$4`,
         [show_mention, show_draft_posts, show_saved_post, userId],
       );
       await this.db.pool.query(`commit`);

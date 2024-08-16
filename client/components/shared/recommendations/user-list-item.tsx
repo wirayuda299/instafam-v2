@@ -1,10 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { User } from "@/types";
 import { shimmer, toBase64 } from "@/utils/image-loader";
 import FollowButton from "../post-card/follow-button";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+
 
 type Props = { user: User; userSessionId: string; styles?: string };
 
@@ -26,6 +27,7 @@ export default function UserListItem({ user, userSessionId, styles }: Props) {
         />
         <div>
           <Link
+						aria-label="profile"
             href={`/profile/${user?.id}?tab=posts`}
             className="prose-base font-semibold capitalize text-white lg:prose-lg"
           >
