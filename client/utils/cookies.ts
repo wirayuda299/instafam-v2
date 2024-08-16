@@ -8,10 +8,10 @@ export async function getCookies() {
 }
 
 export async function prepareHeaders() {
-  //const token = await getToken();
+  const token = await getToken();
   return {
     "Content-type": "application/json",
-    //Authorization: `Bearer - ${token}`,
-    //Cookies: await getCookies(),
+    Authorization: `Bearer - ${token}`,
+    Cookies: await getCookies(),
   };
 }
