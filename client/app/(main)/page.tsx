@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-import PostCard from "@/components/shared/post-card";
+import PostCard from "@/components/shared/post-card/index";
 import Recommendations from "@/components/shared/recommendations/recommendations";
 import { getAllPosts } from "@/helper/posts";
 
@@ -14,12 +14,12 @@ export default async function Home() {
   return (
     <main className="no-scrollbar flex h-full" id="test">
       <div className="flex h-auto max-h-screen w-full flex-col gap-5 divide-y divide-gray-600/50 overflow-y-auto p-2 max-md:max-h-dvh">
-        {posts?.map((post) => (
+        {posts?.map((post?) => (
           <PostCard
-            fileId={post.media_asset_id}
-            createdAt={post.createdat}
-            authorId={post.author_id}
-            likes={post.likes}
+            fileId={post?.media_asset_id}
+            createdAt={post?.createdat}
+            authorId={post?.author_id}
+            likes={post?.likes}
             priority={true}
             loading="eager"
             postId={post?.post_id}
