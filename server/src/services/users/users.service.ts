@@ -15,6 +15,7 @@ export class UsersService {
   constructor(private db: DatabaseService) {}
 
   async createUser(values: CreateUserType) {
+		console.log("Create user values", values)
     try {
       const validatedValue = createUserSchema.safeParse(values);
       if (!validatedValue.success) {
@@ -43,6 +44,7 @@ export class UsersService {
         error: false,
       };
     } catch (error) {
+			console.log("BACKEND: CREATE USER ERROR => ", error)
       await this.db.pool.query(`rollback`);
 
       throw error;
