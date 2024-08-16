@@ -1,7 +1,7 @@
 import { prepareHeaders } from "./cookies";
 
 export class ApiRequest {
-  private readonly serverEndpoint: string = "http://localhost:3001/api/v1";
+  private readonly serverEndpoint: string = process.env.NEXT_PUBLIC_SERVER_URL!
 
   private async getConfig(method: string) {
     return {

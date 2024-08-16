@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-import { Socket, io } from "socket.io-client";
+import { type Socket, io } from "socket.io-client";
 
 export type SocketContext = {
   socket: Socket | null;
