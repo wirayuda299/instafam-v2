@@ -11,7 +11,7 @@ export async function createUser(values: CreateUserType) {
 
     const { username, id, email, image } = validatedValue;
 
-    await fetch("http://localhost:3001/api/v1/users/create", {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/create`, {
       body: JSON.stringify({
         username,
         id,
@@ -30,6 +30,7 @@ export async function createUser(values: CreateUserType) {
       };
     });
   } catch (error) {
+		console.log("ERROR CREATE USER -> ", error)
     throw error;
   }
 }

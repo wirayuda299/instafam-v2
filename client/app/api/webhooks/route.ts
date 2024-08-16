@@ -8,6 +8,7 @@ import { createUser } from "@/actions/users";
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
+	console.log("WEBHOOK CALLED")
   if (!WEBHOOK_SECRET) {
     throw new Error("WEBHOOK SECRET is required");
   }
