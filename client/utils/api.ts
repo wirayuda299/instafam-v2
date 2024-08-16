@@ -40,10 +40,9 @@ export class ApiRequest {
       const res = await fetch(this.serverEndpoint + query, config);
 
       const result = await res.json();
-			console.log(result)
       if (!res.ok) throw new Error(result.messages);
 
-      return result.data;
+      return result
     } catch (error) {
       throw error;
     }

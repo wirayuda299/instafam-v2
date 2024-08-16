@@ -102,8 +102,8 @@ export default function LoadMore({
       setPosts((prev) => [...prev, ...res.posts]);
 
       if (res.posts.length > 0) {
-        setLastCursorSafe(res.posts[res.posts.length - 1].post_id);
-        setLastCreatedAtSafe(res.posts[res.posts.length - 1].createdat);
+        setLastCursorSafe(res?.posts[res.posts.length - 1].post_id);
+        setLastCreatedAtSafe(res?.posts[res.posts.length - 1].createdat);
       } else {
         setHasMorePosts(false);
       }
