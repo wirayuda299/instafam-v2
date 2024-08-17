@@ -21,14 +21,6 @@ export const addCommentSchema = z.object({
   post_id: z.string().min(1, 'Post id is required'),
 });
 
-//conversationId: '',
-//message: 'ss',
-//userId: 'user_2kM92cZs2T24VqobCz3h2MdBZWp',
-//image_url: '',
-//image_asset_id: '',
-//recipient_id: 'user_2kVnmwE9TqhhUJqHAyWSQ0ahBrs',
-//parent_id: ''
-//
 
 export const sendMessageSchema = z.object({
   conversationId: z.string().optional(),

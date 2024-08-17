@@ -14,6 +14,7 @@ export class PostsService {
   constructor(private db: DatabaseService) {}
 
   async createPost(data: CreatePostType) {
+
     try {
       const validatedValues = createPostSchema.safeParse(data);
 
