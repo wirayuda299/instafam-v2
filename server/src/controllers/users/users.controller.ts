@@ -17,9 +17,8 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
-  showUsers(@Query('userId') id: string, @Query('limit') limit: number) {
-    const isNan = Number.isNaN(+limit);
-    return this.userService.getUsers(id, isNan ? 8 : +limit);
+  showUsers(@Query('userId') id: string, @Query('lastCursor') lastCursor?:string) {
+    return this.userService.getUsers(id, lastCursor);
   }
 
   @Get('/search')

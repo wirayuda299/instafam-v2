@@ -63,7 +63,7 @@ export class PostsService {
 
   async getAllPosts(
     lastCursor?: string,
-    createdAt?: string,
+    created_at?: string,
   ): Promise<{
     posts: Post[];
     totalPosts: number;
@@ -80,15 +80,15 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.createdAt,
+        p.created_at,
         p.media_asset_id AS media_asset_id,
         COUNT(pl.post_id) AS likes_count
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
         LEFT JOIN post_likes pl ON p.id = pl.post_id
-        WHERE (p.createdAt, p.id) < ($1, $2) and p.published = true
-        GROUP BY p.id, p.author, u.username, u.profile_image, p.captions,p.published, p.media_url, p.createdAt, p.media_asset_id
-        ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
+        WHERE (p.created_at, p.id) < ($1, $2) and p.published = true
+        GROUP BY p.id, p.author, u.username, u.profile_image, p.captions,p.published, p.media_url, p.created_at, p.media_asset_id
+        ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
         LIMIT 10
     `;
 
@@ -100,20 +100,20 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.createdAt,
+        p.created_at,
         COUNT(pl.post_id) AS likes_count,
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
         LEFT JOIN post_likes pl ON p.id = pl.post_id
         where p.published = true
-        GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.createdAt, p.media_asset_id
-        ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
+        GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
+        ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
         LIMIT 10
     `;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
-      const params = lastCursor ? [createdAt, lastCursor] : [];
+      const params = lastCursor ? [created_at, lastCursor] : [];
 
       const posts = await this.db.pool.query(query, params);
 
@@ -145,7 +145,7 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.createdAt,
+        p.created_at,
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
@@ -239,7 +239,7 @@ export class PostsService {
     userId: string,
     published: boolean = true,
     lastCursor?: string,
-    createdAt?: string,
+    created_at?: string,
   ) {
     try {
       const totalPosts = await this.db.pool.query(
@@ -254,12 +254,12 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.createdAt,
+        p.created_at,
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
-        WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3 and p.published= $4
-        ORDER BY p.createdAt DESC, p.id DESC
+        WHERE (p.created_at, p.id) < ($1, $2) and p.author = $3 and p.published= $4
+        ORDER BY p.created_at DESC, p.id DESC
         LIMIT 10
     `;
 
@@ -271,18 +271,18 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.createdAt,
+        p.created_at,
         p.media_asset_id AS media_asset_id
         FROM posts AS p
         JOIN users AS u ON u.id = p.author
         where p.author = $1 and p.published=$2
-        ORDER BY p.createdAt DESC
+        ORDER BY p.created_at DESC
         LIMIT 10
     `;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
       const params = lastCursor
-        ? [createdAt, lastCursor, userId, published]
+        ? [created_at, lastCursor, userId, published]
         : [userId, published];
 
       const posts = await this.db.pool.query(query, params);
@@ -345,7 +345,7 @@ export class PostsService {
           u.profile_image AS profile_image,
           p.captions AS captions,
           p.media_url AS media_url,
-          p.createdAt,
+          p.created_at,
           p.media_asset_id AS media_asset_id,
           post_id,
           u.id as author
