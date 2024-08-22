@@ -28,7 +28,7 @@ export class UsersService {
             await this.db.pool.query(`begin`);
             await this.db.pool.query(
                 `insert into users(id, email, username, profile_image)
-        values($1,$2,$3,$4)`,
+                values($1,$2,$3,$4)`,
                 [id, email, username, image],
             );
 
@@ -43,9 +43,7 @@ export class UsersService {
                 error: false,
             };
         } catch (error) {
-            console.log("BACKEND: CREATE USER ERROR => ", error)
             await this.db.pool.query(`rollback`);
-
             throw error;
         }
     }
@@ -107,8 +105,8 @@ export class UsersService {
             await this.db.pool.query(
                 `update user_settings
 					set show_mention = $1,
-          show_draft_posts = $2,
-          show_saved_post=$3
+                    show_draft_posts = $2,
+                    show_saved_post=$3
 					where userid=$4`,
                 [show_mention, show_draft_posts, show_saved_post, userId],
             );
@@ -229,7 +227,6 @@ async getUsers(userId: string, lastCursor?: string) {
             totalUser: parseInt(totalUsersResult.rows[0].count, 10)
         };
     } catch (error) {
-        console.error('Error fetching users:', error);
         throw error;
     }
 }

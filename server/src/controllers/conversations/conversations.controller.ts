@@ -1,4 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
+
 import { ConversationsService } from 'src/services/conversations/conversations.service';
 
 @Controller('api/v1/conversations')

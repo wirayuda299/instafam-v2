@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 export default async function Explore() {
   const { posts, totalPosts } = await getAllPosts();
+
   return (
     <div className="grid max-h-screen min-h-screen w-full grid-cols-2 gap-0 overflow-y-auto md:grid-cols-3">
       {posts?.map((post, i) => (
