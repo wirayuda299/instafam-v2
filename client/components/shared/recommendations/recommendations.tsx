@@ -11,7 +11,7 @@ const AllUsers = dynamic(() => import("./all-users"), { ssr: false });
 export default async function Recommendations() {
   const userSession = await currentUser();
 
-  const users = await showUsers(userSession?.id!);
+  const {users} = await showUsers(userSession?.id!);
 
   return (
     <aside className="sticky top-0 hidden w-full max-w-[350px] p-4 lg:block">
