@@ -17,9 +17,7 @@ export default async function MessagesLayout({
   const user = await currentUser();
 
   if (!user) return null;
-  const userId = user.id;
-
-  const conversations = await getConversation(userId);
+  const conversations = await getConversation(user?.id);
 
   return (
     <SocketContextProvider>
@@ -41,12 +39,12 @@ export default async function MessagesLayout({
             {conversations?.map((c) => (
               <Link
                 role="listitem"
-                href={`/messages/${userId === c.senderId ? c.recipientId : c.senderId}?conversationId=${c.conversationId}`}
+                href={`/messages/${user?.id === c.senderId ? c.recipientId : c.senderId}?conversationId=${c.conversationId}`}
                 key={c.conversationId}
                 className="flex items-center gap-3 rounded-md p-1 hover:bg-black-1/30"
               >
                 <Image
-                  src={c.senderId === userId ? c.recipientImage : c.senderImage}
+                  src={c.senderId === user?.id ? c.recipientImage : c.senderImage}
                   width={45}
                   height={45}
                   alt="user"
@@ -55,7 +53,7 @@ export default async function MessagesLayout({
                   className="size-12 min-w-12 rounded-full object-cover"
                 />
                 <p className="text-sm font-semibold">
-                  {c.senderId === userId
+                  {c.senderId === user?.id
                     ? c.recipientUsername
                     : c.senderUsername}
                 </p>
