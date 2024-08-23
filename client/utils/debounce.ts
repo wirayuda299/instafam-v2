@@ -1,4 +1,6 @@
-export function debounce(func: () => void, timeout = 1000) {
+import type { ChangeEvent } from "react";
+
+export function debounce(func: (e:ChangeEvent<HTMLInputElement>) => void, timeout = 1000) {
   let timer: any;
 
   return (...args: any[]) => {

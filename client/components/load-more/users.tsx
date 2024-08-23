@@ -3,6 +3,7 @@
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 import { User } from "@/types";
 import UserListItem from "../shared/recommendations/user-list-item";
@@ -48,7 +49,14 @@ export default function LoadMoreUsers({ prevUsers, totalUsers, userId }: Props) 
             {users.map(user => <UserListItem user={user} key={user.id} userSessionId={userId} />)}
 
             {hasMoreUser && (
-                <div ref={ref} className="min-w-full min-h-[50px] rounded-md bg-black-1/50 animate-pulse"></div>
+                <div ref={ref} className="w-full flex justify-center p-2">
+                        <Loader2 className="animate-spin"/>
+
+
+
+
+
+                        </div>
             )}
         </>
     );

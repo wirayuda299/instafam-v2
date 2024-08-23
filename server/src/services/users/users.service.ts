@@ -50,9 +50,7 @@ export class UsersService {
 
     async searchUser(query: string): Promise<User[]> {
         try {
-            if (!query) {
-                throw new BadRequestException('username is required');
-            }
+            if (!query) throw new BadRequestException('username is required');
 
             const users = await this.db.pool.query(
                 `
@@ -104,10 +102,10 @@ export class UsersService {
 
             await this.db.pool.query(
                 `update user_settings
-					set show_mention = $1,
-                    show_draft_posts = $2,
-                    show_saved_post=$3
-					where userid=$4`,
+			     set show_mention = $1,
+                 show_draft_posts = $2,
+                 show_saved_post=$3
+				 where userid=$4`,
                 [show_mention, show_draft_posts, show_saved_post, userId],
             );
             await this.db.pool.query(`commit`);
@@ -123,19 +121,11 @@ export class UsersService {
 
     async getUserById(id: string) {
         try {
-            const user = await this.db.pool.query(
-                `select * from users where id = $1`,
-                [id],
-            );
+            const user = await this.db.pool.query(`select * from users where id = $1`, [id]);
 
-            if (user.rows.length < 0) {
-                return new NotFoundException('User not found');
-            }
+            if (user.rows.length < 0) return new NotFoundException('User not found')
 
-            const userSettings = await this.db.pool.query(
-                `select * from user_settings where userId= $1`,
-                [user.rows[0].id],
-            );
+            const userSettings = await this.db.pool.query(`select * from user_settings where userId= $1`, [user.rows[0].id]);
 
             user.rows[0].settings = userSettings.rows[0];
 
@@ -204,31 +194,24 @@ export class UsersService {
         }
     }
 
-async getUsers(userId: string, lastCursor?: string) {
-    try {
-        const cursorCondition = lastCursor ? `AND created_at < $2` : '';
-        const query = `
-            SELECT * FROM users
-            WHERE id != $1
-            ${cursorCondition}
-            ORDER BY created_at DESC
-            LIMIT 6
-        `;
+    async getUsers(userId: string, lastCursor?: string) {
+        try {
+            const cursorCondition = lastCursor ? `AND created_at < $2` : '';
+            const query = `SELECT * FROM users WHERE id != $1 ${cursorCondition} ORDER BY created_at DESC LIMIT 6`;
 
-        const params = lastCursor ? [userId, lastCursor] : [userId];
+            const params = lastCursor ? [userId, lastCursor] : [userId];
 
-        const totalUsersQuery = 'SELECT COUNT(*) FROM users';
-        const totalUsersResult = await this.db.pool.query(totalUsersQuery);
+            const totalUsersQuery = 'SELECT COUNT(*) FROM users';
+            const totalUsersResult = await this.db.pool.query(totalUsersQuery);
 
-        const usersResult = await this.db.pool.query(query, params);
+            const usersResult = await this.db.pool.query(query, params);
 
-        return {
-            users: usersResult.rows,
-            totalUser: parseInt(totalUsersResult.rows[0].count, 10)
-        };
-    } catch (error) {
-        throw error;
+            return {
+                users: usersResult.rows,
+                totalUser: parseInt(totalUsersResult.rows[0].count, 10)
+            };
+        } catch (error) {
+            throw error;
+        }
     }
-}
-
 }

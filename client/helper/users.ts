@@ -6,6 +6,11 @@ import { revalidate } from "@/utils/cache";
 
 const api = new ApiRequest();
 
+type ShowUsers = {
+    users: User[],
+    totalUser: number
+}
+
 export async function getUser(id: string) {
     try {
         return await api.getData<User>(`/users/${id}`);
@@ -14,11 +19,7 @@ export async function getUser(id: string) {
     }
 }
 
-export async function showUsers(userId: string, lastCursor?: string): Promise<{
-    users: User[],
-    totalUser: number
-}> {
-    console.log({userId, lastCursor})
+export async function showUsers(userId: string, lastCursor?: string): Promise<ShowUsers> {
     try {
         if (!userId) {
             return {
@@ -28,12 +29,8 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<{
         }
         const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`
 
-        return await api.getData<{
-            users: User[],
-            totalUser: number
-        }>(query);
+        return await api.getData<ShowUsers>(query);
     } catch (error) {
-        console.log(error)
         throw error;
     }
 
@@ -49,18 +46,14 @@ export async function getUserFollowers(userId: string) {
 
 export async function getUserFollowing(userId: string) {
     try {
-        const following = await api.getData<{ following_id: string }[]>(
-            `/users/following?userId=${userId}`,
-        );
+        const following = await api.getData<{ following_id: string }[]>(`/users/following?userId=${userId}`);
         return following;
     } catch (e) {
         throw e;
     }
 }
 
-export async function searchUser(
-    query: string,
-): Promise<User[] | { errors: string }> {
+export async function searchUser(query: string): Promise<User[] | { errors: string }> {
     try {
         return await api.getData<User[]>(`/users/search?username=${query}`);
     } catch (e) {
@@ -79,6 +72,7 @@ export async function updateUserSetting(
     pathname: string,
 ) {
     try {
+
         await api
             .update(
                 "/users/update/setting",
