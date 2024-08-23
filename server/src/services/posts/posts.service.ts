@@ -1,8 +1,8 @@
 import {
+    NotFoundException,
     HttpException,
     HttpStatus,
     Injectable,
-    NotFoundException,
 } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
@@ -58,17 +58,12 @@ export class PostsService {
         }
     }
 
-    async getAllPosts(
-        lastCursor?: string,
-        created_at?: string,
-    ): Promise<{
+    async getAllPosts(lastCursor?: string, created_at?: string): Promise<{
         posts: Post[];
         totalPosts: number;
     }> {
         try {
-            const totalPosts = await this.db.pool.query(
-                `select count(*) from posts `,
-            );
+            const totalPosts = await this.db.pool.query(`select count(*) from posts`);
             const queryWithCursor = `
               SELECT
                 p.id AS post_id,
@@ -105,7 +100,7 @@ export class PostsService {
                   where p.published = true
                   GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
                   ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
-                  LIMIT 10 `;
+                  LIMIT 10`;
 
             const query = lastCursor ? queryWithCursor : queryWithoutCursor;
             const params = lastCursor ? [created_at, lastCursor] : [];
@@ -124,6 +119,7 @@ export class PostsService {
                 totalPosts: +totalPosts.rows[0].count,
             };
         } catch (error) {
+            console.log(error)
             throw error;
         }
     }
@@ -131,8 +127,7 @@ export class PostsService {
     async getPostById(postId: string): Promise<Post> {
         try {
             const post = await this.db.pool.query(
-                `
-                   SELECT
+                ` SELECT
                     p.id AS post_id,
                     p.author AS author_id,
                     u.username AS author_name,
@@ -164,9 +159,8 @@ export class PostsService {
                 `select exists(select * from posts where id =$1)`,
                 [postId],
             );
-            if (!post.rows[0].exists) {
-                throw new NotFoundException('Post not found');
-            }
+            if (!post.rows[0].exists)  throw new NotFoundException('Post not found')
+
             await this.db.pool.query(`begin`);
             await this.db.pool
                 .query(`delete from posts where id = $1`, [postId])
@@ -202,23 +196,12 @@ export class PostsService {
     async likeOrDislikePost(postId: string, liked_by: string) {
         try {
             await this.db.pool.query(`begin`);
-            const isLiked = await this.db.pool.query(
-                `select * from post_likes as pl
-                 where pl.post_id = $1 and pl.liked_by = $2
-        `,
-                [postId, liked_by],
-            );
+            const isLiked = await this.db.pool.query(`select * from post_likes as pl where pl.post_id = $1 and pl.liked_by = $2`,[postId, liked_by]);
 
             if (isLiked.rows.length > 0) {
-                await this.db.pool.query(
-                    `delete from post_likes where post_id = $1 and liked_by = $2`,
-                    [postId, liked_by],
-                );
+                await this.db.pool.query(`delete from post_likes where post_id = $1 and liked_by = $2`,[postId, liked_by]);
             } else {
-                await this.db.pool.query(
-                    `insert into post_likes (post_id, liked_by) values($1,$2)`,
-                    [postId, liked_by],
-                );
+                await this.db.pool.query(`insert into post_likes (post_id, liked_by) values($1,$2)`,[postId, liked_by]);
             }
             await this.db.pool.query(`commit`);
         } catch (error) {
@@ -234,25 +217,22 @@ export class PostsService {
         created_at?: string,
     ) {
         try {
-            const totalPosts = await this.db.pool.query(
-                `select count(*) from posts where author= $1 and published = true`,
-                [userId],
-            );
+            const totalPosts = await this.db.pool.query(`select count(*) from posts where author= $1 and published = true`,[userId]);
             const queryWithCursor = `
                   SELECT
-                p.id AS post_id,
-                p.author AS author_id,
-                u.username AS author_name,
-                u.profile_image AS profile_image,
-                p.captions AS captions,
-                p.media_url AS media_url,
-                p.created_at,
-                p.media_asset_id AS media_asset_id
-                FROM posts AS p
-                JOIN users AS u ON u.id = p.author
-                WHERE (p.created_at, p.id) < ($1, $2) and p.author = $3 and p.published= $4
-                ORDER BY p.created_at DESC, p.id DESC
-                LIMIT 10 `;
+                    p.id AS post_id,
+                    p.author AS author_id,
+                    u.username AS author_name,
+                    u.profile_image AS profile_image,
+                    p.captions AS captions,
+                    p.media_url AS media_url,
+                    p.created_at,
+                    p.media_asset_id AS media_asset_id
+                    FROM posts AS p
+                    JOIN users AS u ON u.id = p.author
+                    WHERE (p.created_at, p.id) < ($1, $2) and p.author = $3 and p.published= $4
+                    ORDER BY p.created_at DESC, p.id DESC
+                    LIMIT 10 `;
 
             const queryWithoutCursor = `
               SELECT
