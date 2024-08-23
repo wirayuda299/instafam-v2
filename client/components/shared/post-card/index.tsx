@@ -23,7 +23,7 @@ type Props = {
   postId: string;
   priority: boolean;
   authorId: string;
-  createdAt: string;
+  created_at: string;
   imageStyles?: string;
   headerStyles?: string;
   rootStyles?: string;
@@ -49,7 +49,7 @@ export default function PostCard({
   priority = false,
   loading = "eager",
   authorId,
-  createdAt,
+  created_at,
   fileId,
 }: Props) {
   return (
@@ -81,7 +81,7 @@ export default function PostCard({
               {authorUsername}
             </Link>
             <small className="block text-xs opacity-50">
-              {formatMessageTimestamp(createdAt)}
+              {formatMessageTimestamp(created_at)}
             </small>
           </div>
         </div>

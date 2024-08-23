@@ -6,7 +6,7 @@ export type Post = {
   captions: string;
   media_url: string;
   media_asset_id: string;
-  createdat: string;
+  created_at: string;
   likes: Like[];
 };
 

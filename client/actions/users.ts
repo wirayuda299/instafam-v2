@@ -1,8 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
+
 import { ApiRequest } from "@/utils/api";
 import { createUserSchema, CreateUserType } from "@/validation";
-import { revalidatePath } from "next/cache";
 
 export async function createUser(values: CreateUserType) {
   try {
@@ -30,7 +32,6 @@ export async function createUser(values: CreateUserType) {
       };
     });
   } catch (error) {
-		console.log("ERROR CREATE USER -> ", error)
     throw error;
   }
 }
@@ -38,9 +39,7 @@ export async function createUser(values: CreateUserType) {
 export async function followUnfollow(userId: string, userToFollow: string) {
   try {
     const api = new ApiRequest();
-    await api.update(
-      "/users/follow_unfollow",
-      {
+    await api.update("/users/follow_unfollow", {
         userId,
         userToFollow,
       },

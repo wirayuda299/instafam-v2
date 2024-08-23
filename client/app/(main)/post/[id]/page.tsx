@@ -36,7 +36,7 @@ export default async function PostDetail({ params }: Params) {
                 <div className="w-full max-lg:max-h-full max-lg:max-w-full md:overflow-y-auto">
                     <PostCard
                         fileId={post.media_asset_id}
-                        createdAt={post.createdat}
+                        created_at={post.created_at}
                         authorId={post.author_id}
                         likes={post.likes || []}
                         priority={true}

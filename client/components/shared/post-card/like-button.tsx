@@ -9,6 +9,7 @@ import { useAuth } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Like } from "@/types";
 import { handleError } from "@/utils/error";
+import { likeOrDislikePost } from "@/actions/post";
 
 export default function LikeButton({
   postId,
@@ -38,7 +39,6 @@ export default function LikeButton({
           }
         });
       });
-      const { likeOrDislikePost } = await import("@/actions/post");
 
       const res = await likeOrDislikePost(postId, pathname);
       if (res && "errors" in res) {
