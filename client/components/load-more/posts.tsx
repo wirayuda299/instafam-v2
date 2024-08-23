@@ -42,7 +42,7 @@ const RenderComponentBasedOnType = (type: string, post: Post) => {
       return (
         <PostCard
           fileId={post.media_asset_id}
-          createdAt={post.createdat}
+          created_at={post.created_at}
           authorId={post.author_id}
           likes={post.likes}
           priority={false}
@@ -74,7 +74,7 @@ export default function LoadMore({
     prevPosts[prevPosts.length - 1]?.post_id,
   );
   const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>(
-    prevPosts[prevPosts.length - 1]?.createdat,
+    prevPosts[prevPosts.length - 1]?.created_at,
   );
   const [hasMorePosts, setHasMorePosts] = useState(
     prevPosts.length < totalPosts,
@@ -103,7 +103,7 @@ export default function LoadMore({
 
       if (res.posts.length > 0) {
         setLastCursorSafe(res?.posts[res.posts.length - 1].post_id);
-        setLastCreatedAtSafe(res?.posts[res.posts.length - 1].createdat);
+        setLastCreatedAtSafe(res?.posts[res.posts.length - 1].created_at);
       } else {
         setHasMorePosts(false);
       }
