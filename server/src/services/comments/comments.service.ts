@@ -6,7 +6,7 @@ import { Comment } from 'src/types';
 
 @Injectable()
 export class CommentsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async addComment(values: AddCommentSchema) {
     try {
@@ -44,30 +44,30 @@ export class CommentsService {
         c.id as comment_id,
         c.author as author,
         c.message as comment,
-        c.createdAt,
-        c.updatedAt,
+        c.created_at,
+        c.updated_at,
         u.username,
         u.profile_image,
         c.post_id
         from comments as c
         join users as u on u.id = c.author
         where c.post_id = $1
-      ORDER BY c.createdAt DESC
+      ORDER BY c.created_at DESC
       LIMIT 10`;
 
       const queryWithCursor = ` select
         c.id as comment_id,
         c.author as author,
         c.comment as message,
-        c.createdAt,
-        c.updatedAt,
+        c.created_at,
+        c.updated_at,
         u.username,
         u.profile_image,
         c.post_id
         from comments as c
         join users as u on u.id = c.author
-        WHERE (c.createdAt, c.post_id) < ($1, $2) and c.post_id = $3
-      ORDER BY c.createdAt DESC
+        WHERE (c.created_at, c.post_id) < ($1, $2) and c.post_id = $3
+      ORDER BY c.created_at DESC
       LIMIT 10`;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;

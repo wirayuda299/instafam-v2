@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SquarePen } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { currentUser } from "@clerk/nextjs/server";
@@ -8,6 +7,7 @@ import { shimmer, toBase64 } from "@/utils/image-loader";
 import { SocketContextProvider } from "@/context/socket";
 
 import { getConversation } from "@/helper/conversations";
+import NewChat from "@/components/messages/new-chat";
 
 export default async function MessagesLayout({
   children,
@@ -23,16 +23,10 @@ export default async function MessagesLayout({
     <SocketContextProvider>
       <div className="flex h-full max-h-screen w-full overflow-hidden">
         <aside className="min-h-dvh w-full max-w-[250px] border-r border-black-1 p-2 max-md:max-w-full lg:min-h-screen">
-          <header className="h-20 w-full space-y-3 p-1">
+          <header className="border-b border-black-1 w-full space-y-3 px-1 py-2">
             <div className="flex w-full items-center justify-between">
-              <h2>{user?.username}</h2>
-              <button>
-                <SquarePen />
-              </button>
-            </div>
-            <div className="flex h-12 w-full items-center justify-between text-base">
-              <p className="text-gray-500">Messages</p>
-              <button className="font-semibold">Request</button>
+              <h2 className="font-semibold capitalize">{user?.username}</h2>
+              <NewChat />
             </div>
           </header>
           <ul className="mt-4 flex h-full flex-col gap-5 overflow-y-auto pb-36">

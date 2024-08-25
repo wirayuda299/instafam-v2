@@ -7,9 +7,7 @@ import ChatList from "@/components/messages/chat-list";
 import { getUser } from "@/helper/users";
 
 type Props = {
-    params: {
-        id: string;
-    };
+    params: { id: string };
 };
 
 export default async function MessageDetail({ params }: Props) {
