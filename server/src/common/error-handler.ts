@@ -1,3 +1,4 @@
+import { ZodError } from 'zod'
 import {
   ArgumentsHost,
   BadRequestException,
@@ -6,7 +7,6 @@ import {
   HttpException,
   NotFoundException,
 } from '@nestjs/common';
-import { ZodError } from 'zod';
 
 @Catch(ZodError, HttpException, NotFoundException, BadRequestException)
 export class ValidationFilter implements ExceptionFilter {
