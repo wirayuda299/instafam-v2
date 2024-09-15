@@ -26,17 +26,13 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
   children,
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Initialize the socket connection
     const server = io(process.env.NEXT_PUBLIC_SERVER_URL!, {
-      reconnectionAttempts: 5,  // Limit the number of reconnection attempts
-      timeout: 10000,  // Connection timeout after 10 seconds
+      reconnectionAttempts: 5,
+      timeout: 10000,
     });
     setSocket(server);
-
-    // Clean up the socket on unmount
     return () => {
       server.disconnect();
       setSocket(null);
@@ -46,44 +42,37 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
   useEffect(() => {
     if (!socket) return;
 
-    // Connection established
     socket.on("connect", () => {
       console.log("Connected to WebSocket server");
-      setError(null);  // Clear any previous errors
     });
 
     // Disconnection event
     socket.on("disconnect", (reason) => {
       console.log("Disconnected from WebSocket server:", reason);
       if (reason === "io server disconnect") {
-        setError("Server disconnected the connection.");
+        console.log(reason)
       } else if (reason === "ping timeout") {
-        setError("Connection timed out. Trying to reconnect...");
+        console.log(reason)
       }
     });
 
-    // Error handling
     socket.on("connect_error", (err) => {
       console.error("Connection error:", err.message);
-      setError(`Connection error: ${err.message}`);
     });
 
     // Reconnect attempt
     socket.on("reconnect_attempt", (attempt) => {
       console.log(`Reconnecting attempt: ${attempt}`);
-      setError(`Reconnecting... Attempt #${attempt}`);
     });
 
     // Reconnect failed
     socket.on("reconnect_failed", () => {
       console.error("Reconnection failed. Giving up.");
-      setError("Failed to reconnect to the server.");
     });
 
     // Reconnection success
     socket.on("reconnect", (attempt) => {
       console.log(`Reconnected successfully on attempt: ${attempt}`);
-      setError(null);  // Clear any errors after successful reconnection
     });
 
     return () => {
@@ -98,7 +87,6 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
 
   return (
     <SocketContext.Provider value={{ socket }}>
-      {error && <div className="error">{error}</div>}
       {children}
     </SocketContext.Provider>
   );
