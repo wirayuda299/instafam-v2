@@ -5,12 +5,11 @@ import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 
 import { Post } from "@/types";
 import { shimmer, toBase64 } from "@/utils/image-loader";
+import PostCard from "../shared/post-card";
 
-const PostCard = dynamic(() => import("../shared/post-card"), { ssr: false });
 
 const RenderComponentBasedOnType = (type: string, post: Post) => {
   switch (type) {
@@ -116,7 +115,7 @@ export default function LoadMore({
     if (inView && hasMorePosts && prevPosts.length >= 10) {
       getPosts();
     }
-  }, [hasMorePosts, inView, prevPosts.length]);
+  }, [getPosts, hasMorePosts, inView, prevPosts.length]);
 
   return (
     <>

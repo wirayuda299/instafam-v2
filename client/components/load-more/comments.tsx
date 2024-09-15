@@ -50,7 +50,7 @@ export default function LoadMoreComments({
     if (inView && prevComments.length >= 10 && hasMoreComments) {
       getComments();
     }
-  }, [hasMoreComments, inView, prevComments.length]);
+  }, [getComments, hasMoreComments, inView, prevComments.length]);
 
   return (
     <>

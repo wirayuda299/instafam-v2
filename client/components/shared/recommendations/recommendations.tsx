@@ -11,7 +11,9 @@ const AllUsers = dynamic(() => import("./all-users"), { ssr: false });
 export default async function Recommendations() {
   const userSession = await currentUser();
 
-  const {users} = await showUsers(userSession?.id!);
+  if (!userSession) return null
+
+  const { users } = await showUsers(userSession?.id!);
 
   return (
     <aside className="sticky top-0 hidden w-full max-w-[350px] p-4 lg:block">
@@ -40,7 +42,7 @@ export default async function Recommendations() {
           <AllUsers />
         </div>
         <div className="flex flex-col gap-5 divide-y divide-gray-500/50 pt-5">
-          {users?.map((user) => (
+          {(users || [])?.map((user) => (
             <UserListItem
               user={user}
               userSessionId={userSession?.id!}

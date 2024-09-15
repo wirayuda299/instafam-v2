@@ -11,7 +11,7 @@ export default async function Home() {
   return (
     <main className="no-scrollbar flex h-full" id="test">
       <div className="flex h-auto max-h-screen w-full flex-col gap-5 divide-y divide-gray-600/50 overflow-y-auto p-2 max-md:max-h-dvh">
-        {posts?.map((post) => (
+        {(posts || [])?.map((post) => (
           <PostCard
             fileId={post?.media_asset_id}
             created_at={post?.created_at}
