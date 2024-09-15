@@ -3,7 +3,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 
@@ -14,7 +13,6 @@ import { User } from 'src/types';
 @Injectable()
 export class UsersService {
   constructor(private db: DatabaseService) { }
-  logger = new Logger()
   async createUser(values: CreateUserType) {
     try {
       const validatedValue = createUserSchema.safeParse(values);
@@ -40,7 +38,6 @@ export class UsersService {
         error: false,
       };
     } catch (error) {
-      this.logger.error(error)
       await this.db.pool.query(`rollback`);
       throw error;
     }
@@ -63,7 +60,6 @@ export class UsersService {
       return users.rows;
     } catch (e) {
 
-      this.logger.error(e)
       throw e;
     }
   }
@@ -77,7 +73,6 @@ export class UsersService {
         });
       await this.db.pool.query(`commit`);
     } catch (error) {
-      this.logger.error(error)
       await this.db.pool.query(`rollback`);
       throw error;
     }
@@ -109,7 +104,6 @@ export class UsersService {
       };
     } catch (e) {
 
-      this.logger.error(e)
       await this.db.pool.query(`rollback`);
       throw e;
     }
@@ -127,8 +121,6 @@ export class UsersService {
 
       return user.rows[0];
     } catch (error) {
-
-      this.logger.error(error)
       throw error;
     }
   }
@@ -167,7 +159,6 @@ export class UsersService {
       }
       await this.db.pool.query(`commit`);
     } catch (e) {
-      this.logger.error(e)
       await this.db.pool.query(`rollback`);
       throw e;
     }
@@ -189,7 +180,6 @@ export class UsersService {
         totalUser: parseInt(totalUsersResult.rows[0].count, 10)
       };
     } catch (error) {
-      this.logger.error(error)
       throw error;
     }
   }

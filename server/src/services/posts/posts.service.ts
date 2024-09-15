@@ -3,7 +3,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Logger,
 } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
@@ -13,7 +12,6 @@ import { Post, PostLike } from 'src/types';
 @Injectable()
 export class PostsService {
   constructor(private db: DatabaseService) { }
-  logger = new Logger()
 
   async createPost(data: CreatePostType) {
     try {
@@ -121,7 +119,6 @@ export class PostsService {
         totalPosts: +totalPosts.rows[0].count,
       };
     } catch (error) {
-      this.logger.error(error)
       throw error;
     }
   }
@@ -148,8 +145,6 @@ export class PostsService {
       post.rows[0].likes = likes || [];
       return post.rows[0];
     } catch (error) {
-
-      this.logger.error(error)
       throw error;
     }
   }
