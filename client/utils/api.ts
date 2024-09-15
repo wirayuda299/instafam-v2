@@ -39,17 +39,16 @@ export class ApiRequest {
       const config = await this.getConfig('GET');
       const res = await fetch(this.serverEndpoint + query, config);
 
-      const result = await res.json();
+      console.log({ res })
       if (!res.headers.get('content-type')?.includes('application/json'))
         return [] as T
 
+      const result = await res.json();
 
-      console.log({ result })
       if (!res.ok) throw new Error(result.messages);
 
       return result
     } catch (error) {
-      console.log("Error -> ", error)
       throw error;
     }
   }
