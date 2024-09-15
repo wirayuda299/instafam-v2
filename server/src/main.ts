@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: 'http://localhost:3000',
-      allowedHeaders: ['Content-type', 'Authorization', 'Cookies'],
+      allowedHeaders: ['content-type', 'Authorization', 'Cookies'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       maxAge: 5000,
