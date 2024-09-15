@@ -3,9 +3,10 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 
 import { getAllPosts } from "@/helper/posts";
-import { shimmer, toBase64 } from "@/utils/image-loader";
 import LoadMore from "@/components/load-more/posts";
 import { cn } from "@/lib/utils";
+
+export const dynamic = 'force-dynamic'
 
 export default async function Explore() {
   const { posts, totalPosts } = await getAllPosts();
@@ -26,9 +27,7 @@ export default async function Explore() {
             sizes="400px"
             src={post.media_url}
             priority={true}
-            loading={"eager"}
             fetchPriority="high"
-            blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(500, 500))}`}
             width={500}
             height={500}
             alt="attachment"
