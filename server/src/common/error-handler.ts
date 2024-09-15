@@ -5,8 +5,10 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  WsExceptionFilter,
   NotFoundException,
 } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 
 @Catch(ZodError, HttpException, NotFoundException, BadRequestException)
 export class ValidationFilter implements ExceptionFilter {
@@ -45,3 +47,17 @@ export class ValidationFilter implements ExceptionFilter {
     }
   }
 }
+
+
+@Catch(WsException)
+export class WebSocketExceptionFilter implements WsExceptionFilter {
+  catch(exception: WsException, host: ArgumentsHost) {
+    const client = host.switchToWs().getClient();
+    const errorResponse = {
+      event: 'error',
+      message: exception.getError(),
+    };
+    client.emit('error', errorResponse);
+  }
+}
+
