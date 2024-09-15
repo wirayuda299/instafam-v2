@@ -4,6 +4,7 @@ import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ValidationFilter } from './common/error-handler';
+import { logger } from './middleware/logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(compression());
   app.useGlobalFilters(new ValidationFilter());
+  app.use(logger())
   await app.listen(3001);
 }
 bootstrap();
