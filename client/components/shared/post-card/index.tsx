@@ -102,6 +102,7 @@ export default function PostCard({
           priority={priority}
           loading={loading}
           width={500}
+
           height={500}
           alt="attachment"
         />

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    dangerouslyAllowSVG:true,
     remotePatterns: [
       {
         protocol: "https",
@@ -10,6 +11,7 @@ const nextConfig = {
       },
     ],
   },
+  
   env: {
     NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
