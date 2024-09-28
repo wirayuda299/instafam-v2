@@ -38,11 +38,6 @@ export class ApiRequest {
     try {
       const config = await this.getConfig('GET');
       const res = await fetch(this.serverEndpoint + query, config);
-
-      console.log({ res })
-      if (!res.headers.get('content-type')?.includes('application/json'))
-        return [] as T
-
       const result = await res.json();
 
       if (!res.ok) throw new Error(result.messages);
