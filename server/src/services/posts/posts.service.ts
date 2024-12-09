@@ -11,13 +11,14 @@ import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async createPost(data: CreatePostType) {
     try {
       const validatedValues = createPostSchema.safeParse(data);
 
-      if (!validatedValues.success) throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
+      if (!validatedValues.success)
+        throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
 
       const { captions, author, media_asset_id, media_url, published } =
         validatedValues.data;
@@ -58,72 +59,84 @@ export class PostsService {
     }
   }
 
-  async getAllPosts(lastCursor?: string, created_at?: string): Promise<{
-    posts: Post[];
-    totalPosts: number;
-  }> {
+  async getAllPosts(
+    lastCursor?: string,
+    created_at?: string,
+  ): Promise<{ posts: Post[]; totalPosts: number }> {
     try {
-      console.log({lastCursor, created_at})
-      const totalPosts = await this.db.pool.query(`select count(*) from posts`);
+      console.log({ lastCursor, created_at });
+
+      // Count total posts
+      const totalPosts = await this.db.pool.query(`SELECT COUNT(*) FROM posts`);
+
+      // Prepare SQL queries
       const queryWithCursor = `
-              SELECT
-                p.id AS post_id,
-                p.author AS author_id,
-                u.username AS author_name,
-                u.profile_image AS profile_image,
-                p.captions AS captions,
-                p.media_url AS media_url,
-                p.created_at,
-                p.media_asset_id AS media_asset_id,
-                COUNT(pl.post_id) AS likes_count
-                FROM posts AS p
-                JOIN users AS u ON u.id = p.author
-                LEFT JOIN post_likes pl ON p.id = pl.post_id
-                WHERE (p.created_at, p.id) < ($1, $2) and p.published = true
-                GROUP BY p.id, p.author, u.username, u.profile_image, p.captions,p.published, p.media_url, p.created_at, p.media_asset_id
-                ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
-                LIMIT 10 `;
+      SELECT
+        p.id AS post_id,
+        p.author AS author_id,
+        u.username AS author_name,
+        u.profile_image AS profile_image,
+        p.captions AS captions,
+        p.media_url AS media_url,
+        p.created_at,
+        p.media_asset_id AS media_asset_id,
+        COUNT(pl.post_id) AS likes_count
+      FROM posts AS p
+      JOIN users AS u ON u.id = p.author
+      LEFT JOIN post_likes pl ON p.id = pl.post_id
+      WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true
+      GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.published, p.media_url, p.created_at, p.media_asset_id
+      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      LIMIT 10`;
 
       const queryWithoutCursor = `
-                  SELECT
-                  p.id AS post_id,
-                  p.author AS author_id,
-                  u.username AS author_name,
-                  u.profile_image AS profile_image,
-                  p.captions AS captions,
-                  p.media_url AS media_url,
-                  p.created_at,
-                  COUNT(pl.post_id) AS likes_count,
-                  p.media_asset_id AS media_asset_id
-                  FROM posts AS p
-                  JOIN users AS u ON u.id = p.author
-                  LEFT JOIN post_likes pl ON p.id = pl.post_id
-                  where p.published = true
-                  GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
-                  ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
-                  LIMIT 10`;
+      SELECT
+        p.id AS post_id,
+        p.author AS author_id,
+        u.username AS author_name,
+        u.profile_image AS profile_image,
+        p.captions AS captions,
+        p.media_url AS media_url,
+        p.created_at,
+        COUNT(pl.post_id) AS likes_count,
+        p.media_asset_id AS media_asset_id
+      FROM posts AS p
+      JOIN users AS u ON u.id = p.author
+      LEFT JOIN post_likes pl ON p.id = pl.post_id
+      WHERE p.published = true
+      GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
+      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      LIMIT 10`;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
       const params = lastCursor ? [created_at, lastCursor] : [];
 
+      // Execute the query
       const posts = await this.db.pool.query(query, params);
 
       if (posts.rows.length > 0) {
-        for await (const post of posts.rows) {
-          const likes = await this.getPostLikes(post.post_id);
-          post.likes = likes || [];
-        }
+        // Fetch likes concurrently for all posts
+        const postIds = posts.rows.map((post) => post.post_id);
+        const likesPromises = postIds.map((postId) =>
+          this.getPostLikes(postId),
+        );
+        const likesResults = await Promise.all(likesPromises);
+
+        // Attach likes data to each post
+        posts.rows.forEach((post, index) => {
+          post.likes = likesResults[index] || [];
+        });
       }
 
       return {
         posts: posts.rows,
-        totalPosts: +totalPosts.rows[0].count,
+        totalPosts: parseInt(totalPosts.rows[0].count, 10),
       };
     } catch (error) {
-      throw error;
+      console.error('Error fetching posts:', error);
+      throw new Error('Failed to retrieve posts.');
     }
   }
-
   async getPostById(postId: string): Promise<Post> {
     try {
       const post = await this.db.pool.query(
@@ -152,14 +165,14 @@ export class PostsService {
 
   async deletePost(postId: string, postAuthor: string, userSession: string) {
     try {
-      if (postAuthor !== userSession) throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-
+      if (postAuthor !== userSession)
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
       const post = await this.db.pool.query(
         `select exists(select * from posts where id =$1)`,
         [postId],
       );
-      if (!post.rows[0].exists) throw new NotFoundException('Post not found')
+      if (!post.rows[0].exists) throw new NotFoundException('Post not found');
 
       await this.db.pool.query(`begin`);
       await this.db.pool
@@ -196,12 +209,21 @@ export class PostsService {
   async likeOrDislikePost(postId: string, liked_by: string) {
     try {
       await this.db.pool.query(`begin`);
-      const isLiked = await this.db.pool.query(`select * from post_likes as pl where pl.post_id = $1 and pl.liked_by = $2`, [postId, liked_by]);
+      const isLiked = await this.db.pool.query(
+        `select * from post_likes as pl where pl.post_id = $1 and pl.liked_by = $2`,
+        [postId, liked_by],
+      );
 
       if (isLiked.rows.length > 0) {
-        await this.db.pool.query(`delete from post_likes where post_id = $1 and liked_by = $2`, [postId, liked_by]);
+        await this.db.pool.query(
+          `delete from post_likes where post_id = $1 and liked_by = $2`,
+          [postId, liked_by],
+        );
       } else {
-        await this.db.pool.query(`insert into post_likes (post_id, liked_by) values($1,$2)`, [postId, liked_by]);
+        await this.db.pool.query(
+          `insert into post_likes (post_id, liked_by) values($1,$2)`,
+          [postId, liked_by],
+        );
       }
       await this.db.pool.query(`commit`);
     } catch (error) {
@@ -217,7 +239,10 @@ export class PostsService {
     created_at?: string,
   ) {
     try {
-      const totalPosts = await this.db.pool.query(`select count(*) from posts where author= $1 and published = true`, [userId]);
+      const totalPosts = await this.db.pool.query(
+        `select count(*) from posts where author= $1 and published = true`,
+        [userId],
+      );
       const queryWithCursor = `
                   SELECT
                     p.id AS post_id,
