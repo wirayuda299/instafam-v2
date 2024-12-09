@@ -63,6 +63,7 @@ export class PostsService {
     totalPosts: number;
   }> {
     try {
+      console.log({lastCursor, created_at})
       const totalPosts = await this.db.pool.query(`select count(*) from posts`);
       const queryWithCursor = `
               SELECT
