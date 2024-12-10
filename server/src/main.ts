@@ -9,7 +9,7 @@ import { logger } from './middleware/logger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: 'https://instafam-v2.onrender.com',
+      origin: process.env.CLIENT_URL ?? 'http://localhost:3001',
       allowedHeaders: ['content-type', 'Authorization', 'Cookies'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -19,7 +19,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(compression());
   app.useGlobalFilters(new ValidationFilter());
-  app.use(logger)
+  app.use(logger);
   await app.listen(3001);
 }
 bootstrap();
