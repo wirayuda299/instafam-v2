@@ -9,11 +9,10 @@ const nextConfig = {
         pathname: '/**/*',
         port:''
       },
-{
+      {
         protocol: "https",
         hostname: "img.clerk.com",
-        pathname: '/**/*',
-        port:''
+        pathname: '/*',
       }
     ],
   },

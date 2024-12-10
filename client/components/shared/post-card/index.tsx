@@ -68,7 +68,7 @@ export default function PostCard({
             placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(50, 50))}`}
             sizes="45px"
             className="aspect-auto size-10 min-w-10 rounded-full object-cover md:size-12 md:min-w-12 2xl:size-14 2xl:min-w-14"
-            src={authorImage}
+            src={authorImage ?? "/next.svg"}
             width={45}
             height={45}
             alt="profile"
