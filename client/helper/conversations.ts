@@ -1,6 +1,3 @@
-import { ApiRequest } from "@/utils/api";
-
-const api = new ApiRequest();
 
 type UserConversation = {
     conversationId: string;
@@ -13,11 +10,20 @@ type UserConversation = {
     recipientImage: string;
 };
 
-export async function getConversation(userSession: string) {
+export async function getConversation(userSession: string):Promise<UserConversation[]> {
     try {
-        return await api.getData<UserConversation[]>(
-            `/conversations?userId=${userSession}`,
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/conversations?userId=${userSession}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json'
+            }
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch conversation');
+
+        const conversation = await res.json();
+        return conversation;
     } catch (error) {
         throw error;
     }
@@ -25,8 +31,20 @@ export async function getConversation(userSession: string) {
 
 export async function getPersonalMessage(userId: string) {
     try {
-        return await api.getData(`/conversations/messages?userId=${userId}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/messages?userId=${userId}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json'
+            }
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch personal messages');
+
+        const messages = await res.json();
+        return messages;
     } catch (e) {
         throw e;
     }
 }
+

@@ -4,18 +4,25 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 import { createPostSchema, CreatePostType } from "@/validation";
-import { ApiRequest } from "@/utils/api";
 import { deleteFile } from "./files";
-
-const api = new ApiRequest();
 
 export async function reportPost(postId: string, reasons: string[]) {
     try {
-        return await api.update("/posts/report", { postId, reasons }, "POST")
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/report`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({ postId, reasons })
+        });
+
+        if (!res.ok) throw new Error('Failed to report post');
+        return await res.json();
     } catch (e) {
         return {
             errors: (e as Error).message || "Failed to report post"
-        }
+        };
     }
 }
 
@@ -33,18 +40,23 @@ export async function createPost(value: CreatePostType, published: boolean, path
 
         const { captions, media, media_asset_id } = validatedValues.data;
 
-        await api.update("/posts/create", {
-            captions,
-            media_url: media,
-            media_asset_id,
-            author: userId,
-            published,
-        },
-            "POST",
-        )
-            .then(() => {
-                revalidatePath(pathname);
-            });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/create`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                captions,
+                media_url: media,
+                media_asset_id,
+                author: userId,
+                published,
+            })
+        });
+
+        if (!res.ok) throw new Error('Failed to create post');
+        revalidatePath(pathname);
     } catch (error) {
         return {
             errors: (error as Error).message,
@@ -60,10 +72,19 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
             errors: "Unauthorized",
         };
 
-        await api.update("/posts/like_or_dislike", {
-            postId,
-            liked_by: userId,
-        }, "POST");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/like_or_dislike`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                postId,
+                liked_by: userId,
+            })
+        });
+
+        if (!res.ok) throw new Error('Failed to like or dislike post');
         revalidatePath(pathname);
     } catch (error) {
         return { errors: (error as Error).message };
@@ -91,10 +112,17 @@ export async function deletePost(
             };
         }
 
-        await api.update("/posts/delete", { postId, userSession: userId, postAuthor }, "DELETE")
-            .then(() => {
-                revalidatePath(pathname);
-            });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/delete`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({ postId, userSession: userId, postAuthor })
+        });
+
+        if (!res.ok) throw new Error('Failed to delete post');
+        revalidatePath(pathname);
     } catch (error) {
         return {
             errors: (error as Error).message || "Failed to delete post",
@@ -102,25 +130,33 @@ export async function deletePost(
     }
 }
 
-export async function saveOrDeleteBookmarkedPost(postId: string, pathname: string) {
+export async function saveOrDeleteBookmarkedPost(postId: string, pathname: string):Promise<{
+  errors:string
+}|{
+  message:string
+}> {
     try {
         const { userId } = auth();
         if (!userId) throw new Error("Unauthorized");
 
-        await api
-            .update("/posts/save_or_delete", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/save_or_delete`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
                 author: userId,
                 postId,
-            }, "POST")
-            .then(() => {
-                revalidatePath(`/profile/${userId}`);
-                revalidatePath(pathname);
-                return { message: "Success" };
             })
-            .catch((e) => {
-                return { errors: e.message };
-            });
+        });
+
+        if (!res.ok) throw new Error('Failed to save or delete bookmarked post');
+        revalidatePath(`/profile/${userId}`);
+        revalidatePath(pathname);
+        return { message: "Success" };
     } catch (error) {
         return { errors: (error as Error).message };
     }
 }
+

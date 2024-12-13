@@ -1,10 +1,8 @@
 import { toast } from "sonner";
 
 import { User } from "@/types";
-import { ApiRequest } from "@/utils/api";
 import { revalidate } from "@/utils/cache";
 
-const api = new ApiRequest();
 
 type ShowUsers = {
   users: User[],
@@ -13,7 +11,18 @@ type ShowUsers = {
 
 export async function getUser(id: string) {
   try {
-    return await api.getData<User>(`/users/${id}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) return;
+
+    const user = await res.json();
+    return user;
   } catch (error) {
     throw error;
   }
@@ -25,28 +34,65 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
       return {
         users: [] as User[],
         totalUser: 0
-      }
+      };
     }
-    const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`
 
-    return await api.getData<ShowUsers>(query);
+    const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`;
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${query}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      return {
+        users: [],
+        totalUser: 0
+      };
+    }
+
+    const users = await res.json();
+    return users;
   } catch (error) {
     throw error;
   }
-
 }
 
-export async function getUserFollowers(userId: string) {
+export async function getUserFollowers(userId: string):Promise<{follower_id:string}[]> {
   try {
-    return await api.getData<{ follower_id: string }[]>(`/users/followers?userId=${userId}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/followers?userId=${userId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch followers');
+
+    const followers = await res.json();
+    return followers;
   } catch (e) {
     throw e;
   }
 }
 
-export async function getUserFollowing(userId: string) {
+export async function getUserFollowing(userId: string):Promise<{following_id:string}[]> {
   try {
-    const following = await api.getData<{ following_id: string }[]>(`/users/following?userId=${userId}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/following?userId=${userId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch following');
+
+    const following = await res.json();
     return following;
   } catch (e) {
     throw e;
@@ -55,10 +101,21 @@ export async function getUserFollowing(userId: string) {
 
 export async function searchUser(query: string): Promise<User[] | { errors: string }> {
   try {
-    return await api.getData<User[]>(`/users/search?username=${query}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/search?username=${query}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to search user');
+
+    const users = await res.json();
+    return users;
   } catch (e) {
     return {
-      errors: (e as Error).message,
+      errors: (e as Error).message
     };
   }
 }
@@ -72,23 +129,25 @@ export async function updateUserSetting(
   pathname: string,
 ) {
   try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/update/setting`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId,
+        userSessionId,
+        show_mention,
+        show_saved_post,
+        show_draft_posts
+      })
+    });
 
-    await api
-      .update(
-        "/users/update/setting",
-        {
-          userId,
-          userSessionId,
-          show_mention,
-          show_saved_post,
-          show_draft_posts,
-        },
-        "PUT",
-      )
-      .then(() => {
-        revalidate(pathname);
-        toast.success("User setting has been updated");
-      });
+    if (!res.ok) throw new Error('Failed to update settings');
+
+    revalidate(pathname);
+    toast.success("User setting has been updated");
   } catch (e) {
     toast.error((e as Error).message || "Failed to update");
   }
@@ -100,9 +159,20 @@ export async function updateUserBio(
   pathname: string,
 ) {
   try {
-    await api.update("/users/update/bio", { bio, userId }, "PUT");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/update/bio`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ bio, userId })
+    });
+
+    if (!res.ok) throw new Error('Failed to update bio');
+
     revalidate(pathname);
   } catch (error) {
     throw error;
   }
 }
+

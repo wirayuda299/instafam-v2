@@ -2,8 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 
-
-import { ApiRequest } from "@/utils/api";
 import { createUserSchema, CreateUserType } from "@/validation";
 
 export async function createUser(values: CreateUserType) {
@@ -13,7 +11,7 @@ export async function createUser(values: CreateUserType) {
 
     const { username, id, email, image } = validatedValue;
 
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/create`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/create`, {
       body: JSON.stringify({
         username,
         id,
@@ -25,12 +23,14 @@ export async function createUser(values: CreateUserType) {
         "content-type": "application/json",
       },
       credentials: "include",
-    }).then(async (res) => {
-      return {
-        message: await res.json(),
-        error: false,
-      };
     });
+
+    if (!res.ok) throw new Error("Failed to create user");
+
+    return {
+      message: await res.json(),
+      error: false,
+    };
   } catch (error) {
     throw error;
   }
@@ -38,17 +38,25 @@ export async function createUser(values: CreateUserType) {
 
 export async function followUnfollow(userId: string, userToFollow: string) {
   try {
-    const api = new ApiRequest();
-    await api.update("/users/follow_unfollow", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/follow_unfollow`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
         userId,
         userToFollow,
-      },
-      "POST",
-    );
-    revalidatePath("/profile/" + userId);
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to follow or unfollow user");
+
+    revalidatePath(`/profile/${userId}`);
   } catch (e) {
     return {
       errors: (e as Error).message || "Failed to follow or unfollow user",
     };
   }
 }
+

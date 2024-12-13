@@ -1,7 +1,4 @@
 import { Comment } from "@/types";
-import { ApiRequest } from "@/utils/api";
-
-const api = new ApiRequest();
 
 export async function getAllComments(
   postId: string,
@@ -13,7 +10,19 @@ export async function getAllComments(
       cursor && createdAt
         ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
         : `/comments/find-all?postId=${postId}`;
-    return await api.getData(query);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${query}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch comments');
+
+    const comments = await res.json();
+    return comments;
   } catch (error) {
     throw error;
   }

@@ -12,6 +12,7 @@ import ListItem from "./list-item";
 import { cn } from "@/lib/utils";
 import Notifications from "./notifications";
 import CreatePostForm from "./create-post-form";
+import { JSX } from "react";
 
 const RenderItemBasedOnLabel = (
   label: string,
@@ -99,7 +100,7 @@ export default function Sidebar() {
         )}
         <li className="group rounded-md p-2 hover:bg-black-1/30 md:w-full">
           <Link
-						aria-label="profile"
+            aria-label="profile"
             href={`/profile/${user?.id}?tab=posts`}
             className="flex items-center gap-3"
           >

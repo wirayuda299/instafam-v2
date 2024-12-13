@@ -8,12 +8,11 @@ import { createUser } from "@/actions/users";
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
-	console.log("WEBHOOK CALLED")
   if (!WEBHOOK_SECRET) {
     throw new Error("WEBHOOK SECRET is required");
   }
 
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svixId = headerPayload.get("svix-id");
   const svixTimestamp = headerPayload.get("svix-timestamp");
   const svixSignature = headerPayload.get("svix-signature");

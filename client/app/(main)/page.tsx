@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic'
 export default async function Home() {
   const { posts, totalPosts } = await getAllPosts();
 
-  console.log("posts -> ", posts)
   return (
     <main className="no-scrollbar flex h-full" id="test">
       <div className="flex h-auto max-h-screen w-full flex-col gap-5 divide-y divide-gray-600/50 overflow-y-auto p-2 max-md:max-h-dvh">

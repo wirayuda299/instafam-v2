@@ -7,11 +7,12 @@ import ChatList from "@/components/messages/chat-list";
 import { getUser } from "@/helper/users";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function MessageDetail({ params }: Props) {
-  const user = await getUser(params?.id);
+  const id = (await params).id
+  const user = await getUser(id);
 
   return (
     <div className="no-scrollbar fixed left-0 z-50 h-full max-h-screen w-full overflow-y-auto bg-black md:static">

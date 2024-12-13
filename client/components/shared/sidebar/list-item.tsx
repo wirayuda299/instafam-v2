@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { JSX } from "react";
 
 type Props = {
   Icon: JSX.Element;
