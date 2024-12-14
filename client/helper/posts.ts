@@ -19,9 +19,10 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
         'content-type': 'application/json'
       }
     });
+    console.log("res variable  -> ", res)
 
     const data = await res.json();
-    console.log(data)
+    console.log("data variable -> ", data)
     return data;
   } catch (error) {
     throw error;

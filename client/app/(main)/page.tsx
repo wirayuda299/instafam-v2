@@ -4,7 +4,6 @@ import Recommendations from "@/components/shared/recommendations/recommendations
 import { getAllPosts } from "@/helper/posts";
 import LoadMorePost from "@/components/load-more/posts";
 
-export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   const { posts, totalPosts } = await getAllPosts();
