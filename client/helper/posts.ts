@@ -1,5 +1,7 @@
 import { Post  } from "@/types";
 
+const serverUrl=process.env.SERVER_URL
+
 export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
   posts:Post[],
   totalPosts:number
@@ -7,10 +9,10 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
   try {
     const query =
       cursor && createdAt
-        ? `/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
-        : "/posts/find-all";
+        ? `/api/v1/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
+        : "/api/v1/posts/find-all";
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${query}`, {
+    const res = await fetch(`${serverUrl}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -18,9 +20,8 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
       }
     });
 
-    if (!res.ok) throw new Error('Failed to fetch posts');
-
     const data = await res.json();
+    console.log(data)
     return data;
   } catch (error) {
     throw error;

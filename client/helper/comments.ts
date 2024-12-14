@@ -1,4 +1,6 @@
 import { Comment } from "@/types";
+const serverUrl=process.env.SERVER_URL
+
 
 export async function getAllComments(
   postId: string,
@@ -11,7 +13,7 @@ export async function getAllComments(
         ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
         : `/comments/find-all?postId=${postId}`;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${query}`, {
+    const res = await fetch(`${serverUrl}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {

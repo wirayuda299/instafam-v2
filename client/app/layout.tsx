@@ -27,9 +27,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-    >
+    <ClerkProvider>
       <html lang="en">
         <body
           className={`mx-auto max-w-screen-2xl overflow-hidden bg-black text-white`}

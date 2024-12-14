@@ -6,9 +6,12 @@ import { revalidatePath } from "next/cache";
 import { createPostSchema, CreatePostType } from "@/validation";
 import { deleteFile } from "./files";
 
+const serverUrl=process.env.SERVER_URL+'/api/v1'
+
+
 export async function reportPost(postId: string, reasons: string[]) {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/report`, {
+        const res = await fetch(`${serverUrl}/posts/report`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -40,7 +43,7 @@ export async function createPost(value: CreatePostType, published: boolean, path
 
         const { captions, media, media_asset_id } = validatedValues.data;
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/create`, {
+        const res = await fetch(`${serverUrl}/posts/create`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -71,8 +74,8 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
         if (!userId) return {
             errors: "Unauthorized",
         };
-
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/like_or_dislike`, {
+console.log(serverUrl)
+        const res = await fetch(`${serverUrl}/posts/like_or_dislike`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -84,6 +87,7 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
             })
         });
 
+    
         if (!res.ok) throw new Error('Failed to like or dislike post');
         revalidatePath(pathname);
     } catch (error) {
@@ -112,7 +116,7 @@ export async function deletePost(
             };
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/delete`, {
+        const res = await fetch(`${serverUrl}/posts/delete`, {
             method: 'DELETE',
             credentials: 'include',
             headers: {
@@ -139,7 +143,7 @@ export async function saveOrDeleteBookmarkedPost(postId: string, pathname: strin
         const { userId } = auth();
         if (!userId) throw new Error("Unauthorized");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/save_or_delete`, {
+        const res = await fetch(`${serverUrl}/posts/save_or_delete`, {
             method: 'POST',
             credentials: 'include',
             headers: {

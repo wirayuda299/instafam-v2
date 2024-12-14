@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@clerk/nextjs/server";
 
+const serverUrl=process.env.SERVER_URL
 export async function createComment(
   postId: string,
   comment: string,
@@ -13,7 +14,7 @@ export async function createComment(
     const { userId } = auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/comments/add`, {
+    const res = await fetch(`${serverUrl}/comments/add`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -48,7 +49,7 @@ export async function likeOrDislikeComment(
         errors: "Unauthorized",
       };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/comments/like_or_dislike`, {
+    const res = await fetch(`${serverUrl}/comments/like_or_dislike`, {
       method: 'POST',
       credentials: 'include',
       headers: {

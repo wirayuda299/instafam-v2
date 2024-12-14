@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { createUserSchema, CreateUserType } from "@/validation";
+const serverUrl=process.env.SERVER_URL
+
 
 export async function createUser(values: CreateUserType) {
   try {
@@ -11,7 +13,7 @@ export async function createUser(values: CreateUserType) {
 
     const { username, id, email, image } = validatedValue;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/create`, {
+    const res = await fetch(`${serverUrl}/api/v1/users/create`, {
       body: JSON.stringify({
         username,
         id,
@@ -38,7 +40,7 @@ export async function createUser(values: CreateUserType) {
 
 export async function followUnfollow(userId: string, userToFollow: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/follow_unfollow`, {
+    const res = await fetch(`${serverUrl}/users/follow_unfollow`, {
       method: "POST",
       credentials: "include",
       headers: {

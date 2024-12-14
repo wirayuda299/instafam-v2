@@ -58,7 +58,7 @@ const RenderComponentBasedOnType = (type: string, post: Post) => {
 };
 
 export default function LoadMore({
-  prevPosts,
+  prevPosts = [],
   type,
   totalPosts,
 }: {
@@ -70,10 +70,10 @@ export default function LoadMore({
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [lastCursor, setLastCursor] = useState<string | undefined>(
-    prevPosts[prevPosts.length - 1]?.post_id,
+    prevPosts[prevPosts?.length - 1]?.post_id,
   );
   const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>(
-    prevPosts[prevPosts.length - 1]?.created_at,
+    prevPosts[prevPosts?.length - 1]?.created_at,
   );
   const [hasMorePosts, setHasMorePosts] = useState(
     prevPosts.length < totalPosts,

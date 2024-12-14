@@ -1,18 +1,20 @@
-import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
+
+import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 import { createUser } from "@/actions/users";
 
 export async function POST(req: Request) {
+  const headerPayload = await headers();
+
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
     throw new Error("WEBHOOK SECRET is required");
   }
 
-  const headerPayload = await headers();
   const svixId = headerPayload.get("svix-id");
   const svixTimestamp = headerPayload.get("svix-timestamp");
   const svixSignature = headerPayload.get("svix-signature");
