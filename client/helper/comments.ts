@@ -10,8 +10,8 @@ export async function getAllComments(
   try {
     const query =
       cursor && createdAt
-        ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
-        : `/comments/find-all?postId=${postId}`;
+        ? `/api/v1/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
+        : `/api/v1/comments/find-all?postId=${postId}`;
 
     const res = await fetch(`${serverUrl}${query}`, {
       method: 'GET',
@@ -21,6 +21,7 @@ export async function getAllComments(
       }
     });
 
+    console.log(res)
     if (!res.ok) throw new Error('Failed to fetch comments');
 
     const comments = await res.json();

@@ -14,7 +14,7 @@ export async function createComment(
     const { userId } = auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const res = await fetch(`${serverUrl}/comments/add`, {
+    const res = await fetch(`${serverUrl}/api/v1/comments/add`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -49,7 +49,7 @@ export async function likeOrDislikeComment(
         errors: "Unauthorized",
       };
 
-    const res = await fetch(`${serverUrl}/comments/like_or_dislike`, {
+    const res = await fetch(`${serverUrl}/api/v1/comments/like_or_dislike`, {
       method: 'POST',
       credentials: 'include',
       headers: {

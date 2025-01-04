@@ -4,7 +4,6 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 import { createPostSchema, CreatePostType } from "@/validation";
-import { deleteFile } from "./files";
 
 const serverUrl=process.env.SERVER_URL+'/api/v1'
 
@@ -23,11 +22,13 @@ export async function reportPost(postId: string, reasons: string[]) {
         if (!res.ok) throw new Error('Failed to report post');
         return await res.json();
     } catch (e) {
+    console.log(e)
         return {
             errors: (e as Error).message || "Failed to report post"
         };
     }
 }
+
 
 export async function createPost(value: CreatePostType, published: boolean, pathname: string) {
     try {
@@ -66,7 +67,6 @@ export async function createPost(value: CreatePostType, published: boolean, path
         };
     }
 }
-
 export async function likeOrDislikePost(postId: string, pathname: string) {
     const { userId } = auth();
 
@@ -74,7 +74,6 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
         if (!userId) return {
             errors: "Unauthorized",
         };
-console.log(serverUrl)
         const res = await fetch(`${serverUrl}/posts/like_or_dislike`, {
             method: 'POST',
             credentials: 'include',
@@ -87,7 +86,6 @@ console.log(serverUrl)
             })
         });
 
-    
         if (!res.ok) throw new Error('Failed to like or dislike post');
         revalidatePath(pathname);
     } catch (error) {
@@ -109,12 +107,12 @@ export async function deletePost(
             };
         }
 
-        const deletedFile = await deleteFile(fileId);
-        if (deletedFile && "errors" in deletedFile) {
-            return {
-                errors: deletedFile.errors,
-            };
-        }
+        //const deletedFile = await deleteFile(fileId);
+        //if (deletedFile && "errors" in deletedFile) {
+        //    return {
+        //        errors: deletedFile.errors,
+        //    };
+        //}
 
         const res = await fetch(`${serverUrl}/posts/delete`, {
             method: 'DELETE',
@@ -155,6 +153,7 @@ export async function saveOrDeleteBookmarkedPost(postId: string, pathname: strin
             })
         });
 
+    console.log(res)
         if (!res.ok) throw new Error('Failed to save or delete bookmarked post');
         revalidatePath(`/profile/${userId}`);
         revalidatePath(pathname);

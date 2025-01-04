@@ -14,6 +14,7 @@ import { formatMessageTimestamp } from "@/utils/date";
 import Bookmarks from "./bookmarks";
 
 type Props = {
+  styles?: string
   authorImage: string;
   fileId: string;
   likes: Like[];
@@ -51,6 +52,7 @@ export default function PostCard({
   authorId,
   created_at,
   fileId,
+  styles
 }: Props) {
   return (
     <article
@@ -136,7 +138,7 @@ export default function PostCard({
         >
           View all comments
         </Link>
-        <CommentForm postId={postId} />
+        <CommentForm styles={styles} postId={postId} />
       </div>
     </article>
   );

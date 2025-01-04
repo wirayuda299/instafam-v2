@@ -16,7 +16,6 @@ export class PostsService {
   async createPost(data: CreatePostType) {
     try {
       const validatedValues = createPostSchema.safeParse(data);
-
       if (!validatedValues.success)
         throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
 
@@ -39,6 +38,7 @@ export class PostsService {
 
       await this.db.pool.query(`commit`);
     } catch (error) {
+      console.log(error);
       await this.db.pool.query(`rollback`);
       throw error;
     }

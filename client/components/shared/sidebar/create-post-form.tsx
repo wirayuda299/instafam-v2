@@ -26,7 +26,7 @@ import {
 import useUploadFile from "@/hooks/useUploadFile";
 import { Button } from "@/components/ui/button";
 import { createPost } from "@/actions/post";
-import { handleError } from "@/utils/error";
+import { CloudinaryResponse, uploadImage } from "@/actions/cloudinary";
 
 type Props = {
   Icon: JSX.Element;
@@ -78,77 +78,73 @@ export default function CreatePostForm({
   const isValid = form.formState.isValid;
 
 
-  const saveToDb = async (uploadedFiles: any, data: SchemaType, published: boolean) => {
-    if (!files) return
+
+  const saveToDb = async (data: SchemaType, published: boolean) => {
+    if (!files || !files.media) {
+      throw new Error("No file selected for upload");
+    }
 
     const formData = new FormData();
     formData.append("files", files.media);
 
-    const { uploadFiles } = await import("@/actions/files");
-    uploadedFiles = await uploadFiles(formData);
+    let res: CloudinaryResponse | null = null
+    try {
+      res = await uploadImage(formData);
 
-    if ("errors" in uploadedFiles) {
-      toast.error(uploadedFiles.errors);
-      return
-    }
-
-
-    if (
-      uploadedFiles &&
-      "data" in uploadedFiles &&
-      uploadedFiles.data !== null
-    ) {
-
-      const values = {
-        captions: data.captions,
-        media: uploadedFiles.data.url,
-        media_asset_id: uploadedFiles.data.key,
+      if (!res?.secure_url || !res?.public_id) {
+        throw new Error("File upload failed");
       }
 
-      const res = await createPost(values, published, window.location.pathname);
-
-      if (res && "errors" in res) {
-        handleError(res, "Something went wrong");
-
-        const { deleteFile } = await import("@/actions/files");
-        const deletedFile = await deleteFile(uploadedFiles.data.key);
-
-        if (deletedFile && "errors" in deletedFile) {
-          handleError(deletedFile, "Failed to delete a file");
-          return
-        }
-      } else {
-        reset();
+      await createPost(
+        {
+          media: res.secure_url,
+          captions: data.captions,
+          media_asset_id: res.public_id,
+        },
+        published,
+        window.location.pathname
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
       }
+
+      //try {
+      //  if (res?.public_id) {
+      //    await deleteFile(res.public_id);
+      //  }
+      //} catch (deleteError) {
+      //  toast.error((deleteError as Error).message)
+      //}
+
+      throw error;
     }
-  }
-
-
+  };
 
 
   async function handlePost(data: SchemaType) {
-
-    let uploadedFiles: any;
-
+    setLoading(true)
     try {
-      await saveToDb(uploadedFiles, data, true)
+      await saveToDb(data, true)
       toast.success("Your post has been published")
     } catch (error: any) {
       toast.error(error.message || "An error occurred while creating the post");
+    } finally {
+      setLoading(false)
     }
   }
 
 
   const handleSaveDraft = async () => {
     setLoading(true)
-    let uploadedFiles: any;
     try {
-      await saveToDb(uploadedFiles, form.getValues(), false);
+      await saveToDb(form.getValues(), false);
       toast.success("Your post saved as draft")
     } catch (e) {
       toast.error((e as Error).message || "An error occurred while creating the post");
     } finally {
       setLoading(false)
+      setIsOpen(false)
     }
 
   }
@@ -224,7 +220,7 @@ export default function CreatePostForm({
               (preview ? (
                 <div className="group relative h-full max-h-[400px] min-w-full">
                   <Image
-                    className="aspect-auto rounded-b-lg object-cover object-center"
+                    className="aspect-auto size-full rounded-b-lg object-cover object-center"
                     fill
                     sizes="500px"
                     placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500, 500))}`}
@@ -265,7 +261,7 @@ export default function CreatePostForm({
                           multiple={false}
                           onChange={(e) => handleChange(e, "media")}
                           type="file"
-                          name="media"
+                          name="file"
                           id="media"
                           className="hidden"
                         />

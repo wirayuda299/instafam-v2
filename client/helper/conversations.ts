@@ -14,7 +14,7 @@ const serverUrl=process.env.SERVER_URL
 
 export async function getConversation(userSession: string):Promise<UserConversation[]> {
     try {
-        const res = await fetch(`${serverUrl}/conversations?userId=${userSession}`, {
+        const res = await fetch(`${serverUrl}/api/v1/conversations?userId=${userSession}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -33,7 +33,7 @@ export async function getConversation(userSession: string):Promise<UserConversat
 
 export async function getPersonalMessage(userId: string) {
     try {
-        const res = await fetch(`${serverUrl}/conversations/messages?userId=${userId}`, {
+        const res = await fetch(`${serverUrl}/api/v1/conversations/messages?userId=${userId}`, {
             method: 'GET',
             credentials: 'include',
             headers: {

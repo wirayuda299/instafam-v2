@@ -34,7 +34,7 @@ export default async function PostDetail({ params }: Params) {
           height={500}
           alt="attachment"
         />
-        <div className="w-full max-lg:max-h-full max-lg:max-w-full md:overflow-y-auto">
+        <div className="w-full relative max-lg:max-h-[500px] max-lg:max-w-full md:overflow-y-auto ">
           <PostCard
             fileId={post.media_asset_id}
             created_at={post.created_at}
@@ -53,7 +53,7 @@ export default async function PostDetail({ params }: Params) {
             captions={post?.captions}
             media={post?.media_url}
           >
-            <div className="flex h-full max-h-[500px] min-h-[280px] flex-col justify-items-start gap-5 justify-self-start overflow-y-auto px-2">
+            <div className="flex max-h-[500px] min-h-[280px] flex-col justify-items-start gap-5 justify-self-start overflow-y-auto px-2">
               {comments?.map((comment) => (
                 <div
                   key={comment.comment_id}

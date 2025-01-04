@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/form";
 import { AddCommentSchema, addCommentSchema } from "@/validation";
 import { handleError } from "@/utils/error";
+import { cn } from "@/lib/utils";
 
-export default function CommentForm({ postId }: { postId: string }) {
+export default function CommentForm({ postId, styles }: { postId: string, styles?: string },) {
   const form = useForm<AddCommentSchema>({
     resolver: zodResolver(addCommentSchema),
     defaultValues: {
@@ -43,7 +44,7 @@ export default function CommentForm({ postId }: { postId: string }) {
 
   return (
     <Form {...form}>
-      <form className="pt-2" onSubmit={form.handleSubmit(handleCreateComment)}>
+      <form className={cn('pt-2', styles)} onSubmit={form.handleSubmit(handleCreateComment)}>
         <FormField
           control={form.control}
           name="comment"

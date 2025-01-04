@@ -9,7 +9,7 @@ import { logger } from './middleware/logger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: process.env.CLIENT_URL ?? 'http://localhost:3001',
+      origin: process.env.CLIENT_URL ?? 'http://localhost:3000',
       allowedHeaders: ['content-type', 'Authorization', 'Cookies'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],

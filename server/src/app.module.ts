@@ -12,6 +12,8 @@ import { CommentsController } from './controllers/comments/comments.controller';
 import { SocketGateway } from './gateway/socket/socket.gateway';
 import { ConversationsService } from './services/conversations/conversations.service';
 import { ConversationsController } from './controllers/conversations/conversations.controller';
+import { CloudinaryModule } from './cloudinary/cloudinary/cloudinary.module';
+import { UploadController } from './controllers/cloudinary/cloudinary.controller';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { ConversationsController } from './controllers/conversations/conversatio
       isGlobal: true,
       envFilePath: '.env',
     }),
+    CloudinaryModule,
   ],
   controllers: [
     AppController,
@@ -26,6 +29,7 @@ import { ConversationsController } from './controllers/conversations/conversatio
     PostsController,
     CommentsController,
     ConversationsController,
+    UploadController,
   ],
   providers: [
     SocketGateway,

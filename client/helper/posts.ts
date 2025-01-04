@@ -19,10 +19,8 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
         'content-type': 'application/json'
       }
     });
-    console.log("res variable  -> ", res)
 
     const data = await res.json();
-    console.log("data variable -> ", data)
     return data;
   } catch (error) {
     throw error;
@@ -31,7 +29,7 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
 
 export async function getSavedPosts(userId: string): Promise<Post[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/bookmarked_post?author=${userId}`, {
+    const res = await fetch(`${serverUrl}/api/v1/posts/bookmarked_post?author=${userId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -60,7 +58,7 @@ export async function getUserPosts(
         ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}&published=${published}`
         : `/posts?userId=${userId}&published=${published}`;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${query}`, {
+    const res = await fetch(`${serverUrl}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -79,7 +77,7 @@ export async function getUserPosts(
 
 export async function getPostById(postId: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/posts/${postId}`, {
+    const res = await fetch(`${serverUrl}/api/v1/posts/${postId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
