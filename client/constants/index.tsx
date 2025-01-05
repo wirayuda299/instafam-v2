@@ -7,6 +7,8 @@ import {
   SquarePlus,
 } from "lucide-react";
 
+export const SERVER_URL=process.env.SERVER_URL+'/api/v1'
+
 export const sidebarItems = [
   {
     label: "home",

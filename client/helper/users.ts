@@ -2,18 +2,16 @@ import { toast } from "sonner";
 
 import { User } from "@/types";
 import { revalidate } from "@/utils/cache";
-
+import { SERVER_URL } from "@/constants";
 
 type ShowUsers = {
   users: User[],
   totalUser: number
 }
-const serverUrl=process.env.SERVER_URL
-
 
 export async function getUser(id: string) {
   try {
-    const res = await fetch(`${serverUrl}/users/${id}`, {
+    const res = await fetch(`${SERVER_URL}/users/${id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -41,7 +39,7 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
 
     const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`;
 
-    const res = await fetch(`${serverUrl}${query}`, {
+    const res = await fetch(`${SERVER_URL}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -56,8 +54,7 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
       };
     }
 
-    const users = await res.json();
-    return users;
+    return  await res.json();
   } catch (error) {
     throw error;
   }
@@ -65,7 +62,7 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
 
 export async function getUserFollowers(userId: string):Promise<{follower_id:string}[]> {
   try {
-    const res = await fetch(`${serverUrl}/users/followers?userId=${userId}`, {
+    const res = await fetch(`${SERVER_URL}/users/followers?userId=${userId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -84,7 +81,7 @@ export async function getUserFollowers(userId: string):Promise<{follower_id:stri
 
 export async function getUserFollowing(userId: string):Promise<{following_id:string}[]> {
   try {
-    const res = await fetch(`${serverUrl}/users/following?userId=${userId}`, {
+    const res = await fetch(`${SERVER_URL}/users/following?userId=${userId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -103,7 +100,7 @@ export async function getUserFollowing(userId: string):Promise<{following_id:str
 
 export async function searchUser(query: string): Promise<User[] | { errors: string }> {
   try {
-    const res = await fetch(`${serverUrl}/users/search?username=${query}`, {
+    const res = await fetch(`${SERVER_URL}/users/search?username=${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -131,7 +128,7 @@ export async function updateUserSetting(
   pathname: string,
 ) {
   try {
-    const res = await fetch(`${serverUrl}/users/update/setting`, {
+    const res = await fetch(`${SERVER_URL}/users/update/setting`, {
       method: 'PUT',
       credentials: 'include',
       headers: {
@@ -161,7 +158,7 @@ export async function updateUserBio(
   pathname: string,
 ) {
   try {
-    const res = await fetch(`${serverUrl}/users/update/bio`, {
+    const res = await fetch(`${SERVER_URL}/users/update/bio`, {
       method: 'PUT',
       credentials: 'include',
       headers: {

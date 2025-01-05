@@ -7,8 +7,6 @@ import { debounce } from "@/utils/debounce";
 import { User } from "@/types";
 
 export default function useSearchUser() {
-
-
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);

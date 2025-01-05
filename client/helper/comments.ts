@@ -1,6 +1,5 @@
+import { SERVER_URL } from "@/constants";
 import { Comment } from "@/types";
-const serverUrl=process.env.SERVER_URL
-
 
 export async function getAllComments(
   postId: string,
@@ -10,10 +9,10 @@ export async function getAllComments(
   try {
     const query =
       cursor && createdAt
-        ? `/api/v1/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
-        : `/api/v1/comments/find-all?postId=${postId}`;
+        ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
+        : `/comments/find-all?postId=${postId}`;
 
-    const res = await fetch(`${serverUrl}${query}`, {
+    const res = await fetch(`${SERVER_URL}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -21,7 +20,6 @@ export async function getAllComments(
       }
     });
 
-    console.log(res)
     if (!res.ok) throw new Error('Failed to fetch comments');
 
     const comments = await res.json();

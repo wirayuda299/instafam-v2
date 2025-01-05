@@ -16,4 +16,26 @@ export class CloudinaryService {
       toStream(file.buffer).pipe(upload);
     });
   }
+
+
+async  getResourceDetails(assetId: string) {
+  try {
+    const resource = await v2.api.resources_by_asset_ids([assetId]);
+    return resource.resources[0]?.public_id; 
+  } catch (error) {
+    throw error;
+  }
+}
+async deleteImage(assetId: string) {
+  try {
+    const publicId = await this.getResourceDetails(assetId);
+    if (!publicId) {
+      throw new Error('Public ID not found for the given asset ID');
+    }
+    return await v2.uploader.destroy(publicId);
+  } catch (error) {
+    throw error;
+  }
+}
+
 }

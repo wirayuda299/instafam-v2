@@ -1,20 +1,9 @@
-
-type UserConversation = {
-    conversationId: string;
-    conversationCreatedAt: string;
-    senderId: string;
-    senderUsername: string;
-    senderImage: string;
-    recipientId: string;
-    recipientUsername: string;
-    recipientImage: string;
-};
-const serverUrl=process.env.SERVER_URL
-
+import { SERVER_URL } from "@/constants";
+import { UserConversation } from "@/types";
 
 export async function getConversation(userSession: string):Promise<UserConversation[]> {
     try {
-        const res = await fetch(`${serverUrl}/api/v1/conversations?userId=${userSession}`, {
+        const res = await fetch(`${SERVER_URL}/conversations?userId=${userSession}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -33,7 +22,7 @@ export async function getConversation(userSession: string):Promise<UserConversat
 
 export async function getPersonalMessage(userId: string) {
     try {
-        const res = await fetch(`${serverUrl}/api/v1/conversations/messages?userId=${userId}`, {
+        const res = await fetch(`${SERVER_URL}/conversations/messages?userId=${userId}`, {
             method: 'GET',
             credentials: 'include',
             headers: {

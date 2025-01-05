@@ -1,6 +1,5 @@
+import { SERVER_URL } from "@/constants";
 import { Post  } from "@/types";
-
-const serverUrl=process.env.SERVER_URL
 
 export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
   posts:Post[],
@@ -9,10 +8,10 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
   try {
     const query =
       cursor && createdAt
-        ? `/api/v1/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
-        : "/api/v1/posts/find-all";
+        ? `/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
+        : "/posts/find-all";
 
-    const res = await fetch(`${serverUrl}${query}`, {
+    const res = await fetch(`${SERVER_URL}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -29,7 +28,7 @@ export async function getAllPosts(cursor?: string, createdAt?: string):Promise<{
 
 export async function getSavedPosts(userId: string): Promise<Post[]> {
   try {
-    const res = await fetch(`${serverUrl}/api/v1/posts/bookmarked_post?author=${userId}`, {
+    const res = await fetch(`${SERVER_URL}/posts/bookmarked_post?author=${userId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -58,7 +57,7 @@ export async function getUserPosts(
         ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}&published=${published}`
         : `/posts?userId=${userId}&published=${published}`;
 
-    const res = await fetch(`${serverUrl}${query}`, {
+    const res = await fetch(`${SERVER_URL}${query}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -77,7 +76,7 @@ export async function getUserPosts(
 
 export async function getPostById(postId: string) {
   try {
-    const res = await fetch(`${serverUrl}/api/v1/posts/${postId}`, {
+    const res = await fetch(`${SERVER_URL}/posts/${postId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {

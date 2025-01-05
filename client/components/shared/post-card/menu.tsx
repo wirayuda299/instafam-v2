@@ -10,6 +10,7 @@ import {
 import CopyLink from "./copy-link";
 import PostAction from "./post-action";
 import ReportPost from "./Report";
+import DeletePost from "./delete-post";
 
 type Props = { postId: string; postAuthor: string; fileId: string };
 

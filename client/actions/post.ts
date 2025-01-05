@@ -4,13 +4,36 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 import { createPostSchema, CreatePostType } from "@/validation";
+import { SERVER_URL } from "@/constants";
 
-const serverUrl=process.env.SERVER_URL+'/api/v1'
 
+async function deleteImage(id:string) {
+    try {
+        const deletedImageRes=await fetch(SERVER_URL+'/image/delete', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({id })
+        })
+
+        if(!deletedImageRes.ok){
+            const res=await deletedImageRes.json()
+            console.log(res)
+            throw new Error(res.message ?? "Failed to delete image")
+        }
+        return 'ok'
+        
+    } catch (error) {
+        throw error
+    }
+
+}
 
 export async function reportPost(postId: string, reasons: string[]) {
     try {
-        const res = await fetch(`${serverUrl}/posts/report`, {
+        const res = await fetch(`${SERVER_URL}/posts/report`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -44,7 +67,7 @@ export async function createPost(value: CreatePostType, published: boolean, path
 
         const { captions, media, media_asset_id } = validatedValues.data;
 
-        const res = await fetch(`${serverUrl}/posts/create`, {
+        const res = await fetch(`${SERVER_URL}/posts/create`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -74,7 +97,7 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
         if (!userId) return {
             errors: "Unauthorized",
         };
-        const res = await fetch(`${serverUrl}/posts/like_or_dislike`, {
+        const res = await fetch(`${SERVER_URL}/posts/like_or_dislike`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -102,33 +125,34 @@ export async function deletePost(
     try {
         const { userId } = auth();
         if (userId !== postAuthor) {
-            return {
-                errors: "Unauthorized",
-            };
+           throw new Error('UnAuthorized')
         }
+        const deleteImageRes=await deleteImage(fileId)
+        console.log(deleteImageRes)
+        if(deleteImageRes !== 'ok'){
+            throw new Error('Failed to delete image')
+           }
+        const  deletedPostRes=await
+          fetch(`${SERVER_URL}/posts/delete`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify({ postId, userSession: userId, postAuthor })
+            })
+        
 
-        //const deletedFile = await deleteFile(fileId);
-        //if (deletedFile && "errors" in deletedFile) {
-        //    return {
-        //        errors: deletedFile.errors,
-        //    };
-        //}
+       
+       if(!deletedPostRes.ok){
+        const res= await deletedPostRes.json()
+        throw new Error(res.message ?? "Failed to delete post")
+       }
 
-        const res = await fetch(`${serverUrl}/posts/delete`, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify({ postId, userSession: userId, postAuthor })
-        });
-
-        if (!res.ok) throw new Error('Failed to delete post');
         revalidatePath(pathname);
     } catch (error) {
-        return {
-            errors: (error as Error).message || "Failed to delete post",
-        };
+        console.log(error)
+       throw error
     }
 }
 
@@ -141,7 +165,7 @@ export async function saveOrDeleteBookmarkedPost(postId: string, pathname: strin
         const { userId } = auth();
         if (!userId) throw new Error("Unauthorized");
 
-        const res = await fetch(`${serverUrl}/posts/save_or_delete`, {
+        const res = await fetch(`${SERVER_URL}/posts/save_or_delete`, {
             method: 'POST',
             credentials: 'include',
             headers: {

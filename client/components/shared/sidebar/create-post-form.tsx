@@ -26,7 +26,8 @@ import {
 import useUploadFile from "@/hooks/useUploadFile";
 import { Button } from "@/components/ui/button";
 import { createPost } from "@/actions/post";
-import { CloudinaryResponse, uploadImage } from "@/actions/cloudinary";
+import { uploadImage } from "@/actions/cloudinary";
+import { CloudinaryResponse } from "@/types";
 
 type Props = {
   Icon: JSX.Element;
@@ -99,16 +100,11 @@ export default function CreatePostForm({
         {
           media: res.secure_url,
           captions: data.captions,
-          media_asset_id: res.public_id,
+          media_asset_id: res.asset_id,
         },
         published,
         window.location.pathname
       );
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
-
       //try {
       //  if (res?.public_id) {
       //    await deleteFile(res.public_id);
@@ -117,6 +113,10 @@ export default function CreatePostForm({
       //  toast.error((deleteError as Error).message)
       //}
 
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      }
       throw error;
     }
   };
@@ -131,6 +131,8 @@ export default function CreatePostForm({
       toast.error(error.message || "An error occurred while creating the post");
     } finally {
       setLoading(false)
+      setIsOpen(false)
+      reset()
     }
   }
 
@@ -145,6 +147,7 @@ export default function CreatePostForm({
     } finally {
       setLoading(false)
       setIsOpen(false)
+      reset()
     }
 
   }

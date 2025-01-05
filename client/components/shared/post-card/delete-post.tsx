@@ -16,16 +16,13 @@ export default function DeletePost({ fileId, postId, postAuthor }: Props) {
 	const handleDeletePost = async () => {
 		try {
 			setIsLoading(true);
-			const deletedFile = await deletePost(
+		await deletePost(
 				fileId,
 				postId,
 				postAuthor,
 				window.location.pathname,
 			);
-			if (deletedFile && "errors" in deletedFile) {
-				handleError(deletedFile, fallbackErrorMessage);
-				return;
-			}
+			
 			toast.success("Post successfully deleted");
 		} catch (error) {
 			toast.error((error as Error).message || fallbackErrorMessage);
