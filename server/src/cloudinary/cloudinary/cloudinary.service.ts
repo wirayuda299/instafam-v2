@@ -8,17 +8,23 @@ export class CloudinaryService {
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
-      const upload = v2.uploader.upload_stream((error, result) => {
-        if (error) return reject(error);
-
-        resolve(result);
-      });
+      const upload = v2.uploader.upload_stream(
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            return reject(error);
+          }
+          console.log('Cloudinary upload success:', result);
+          resolve(result);
+        },
+      );
+  
       toStream(file.buffer).pipe(upload);
-    });
+    })
   }
 
 
-async  getResourceDetails(assetId: string) {
+async getResourceDetails(assetId: string) {
   try {
     const resource = await v2.api.resources_by_asset_ids([assetId]);
     return resource.resources[0]?.public_id; 

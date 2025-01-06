@@ -21,7 +21,6 @@ export default async function PostDetail({ params }: Params) {
   if (!post) return notFound();
 
   const comments = await getAllComments(id);
-
   return (
     <div className="flex max-h-screen min-h-dvh w-full flex-col items-center justify-center gap-3 divide-y divide-gray-600 overflow-y-auto px-3 max-lg:max-h-dvh lg:min-h-screen">
       <div className="flex h-full max-h-[510px] min-h-[510px] w-full max-w-screen-lg max-lg:max-h-full max-lg:flex-col">
@@ -29,7 +28,7 @@ export default async function PostDetail({ params }: Params) {
           className="aspect-auto max-h-[510px] w-full max-w-[450px] rounded-lg border border-gray-600 object-cover object-center max-lg:max-h-[300px] max-lg:max-w-full"
           src={post?.media_url}
           loading="lazy"
-          placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500, 500))}`}
+          placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500,500))}`}
           width={500}
           height={500}
           alt="attachment"

@@ -12,8 +12,7 @@ export async function uploadImage(formData:FormData):Promise<CloudinaryResponse>
       body:formData
     })
   if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.message || "Upload failed");
+        throw new Error(uploadResponse.statusText || "Upload failed");
       }
 
       return await uploadResponse.json();

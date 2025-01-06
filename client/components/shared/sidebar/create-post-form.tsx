@@ -12,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toBase64, shimmer } from "@/utils/image-loader";
@@ -91,11 +92,11 @@ export default function CreatePostForm({
     let res: CloudinaryResponse | null = null
     try {
       res = await uploadImage(formData);
+      console.log(res)
 
       if (!res?.secure_url || !res?.public_id) {
         throw new Error("File upload failed");
       }
-
       await createPost(
         {
           media: res.secure_url,
@@ -107,7 +108,7 @@ export default function CreatePostForm({
       );
       //try {
       //  if (res?.public_id) {
-      //    await deleteFile(res.public_id);
+      //    await deleDialogHeaderteFile(res.public_id);
       //  }
       //} catch (deleteError) {
       //  toast.error((deleteError as Error).message)
@@ -131,7 +132,6 @@ export default function CreatePostForm({
       toast.error(error.message || "An error occurred while creating the post");
     } finally {
       setLoading(false)
-      setIsOpen(false)
       reset()
     }
   }
@@ -146,7 +146,6 @@ export default function CreatePostForm({
       toast.error((e as Error).message || "An error occurred while creating the post");
     } finally {
       setLoading(false)
-      setIsOpen(false)
       reset()
     }
 
@@ -181,8 +180,8 @@ export default function CreatePostForm({
           </button>
         </li>
       </DialogTrigger>
-      <DialogContent className="aspect-square max-h-[400px] w-full max-w-screen-sm gap-0 rounded-lg border-black-1 bg-black p-0 text-white">
-        <DialogHeader className="flex h-11 flex-row items-center justify-between border-b border-black-1 p-2">
+      <DialogContent className="aspect-square w-full max-w-screen-sm gap-0 rounded-lg border-black-1 bg-black p-0 text-white max-h-[400px] overflow-hidden">
+        <DialogTitle  className="flex h-11 flex-row items-center justify-between border-b border-black-1 p-2">
           <button
             onClick={
               activeField === "media"
@@ -213,15 +212,15 @@ export default function CreatePostForm({
           >
             Next
           </button>
-        </DialogHeader>
+        </DialogTitle>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handlePost)}
-            className="relative h-full max-h-[400px] min-h-[400px] min-w-full space-y-0"
+            className="relative h-full  min-h-[400px] min-w-full space-y-0"
           >
             {activeField === "media" &&
               (preview ? (
-                <div className="group relative h-full max-h-[400px] min-w-full">
+                <div className="group relative h-full max-h-[400px] overflow-hidden min-w-full">
                   <Image
                     className="aspect-auto size-full rounded-b-lg object-cover object-center"
                     fill
@@ -294,12 +293,12 @@ export default function CreatePostForm({
                 )}
               />
             )}
-            {activeField === "captions" && isValid && (
-              <div className="absolute bottom-0 flex w-full items-center">
+        {activeField === "captions" && isValid && (
+              <div className="fixed bottom-0 flex w-full items-center">
                 <Button
+                type="submit"
                   aria-disabled={loading || !isChanged || isSubmitting || !isValid}
                   disabled={loading || !isChanged || isSubmitting || !isValid}
-                  type="submit"
                   className="w-full rounded-none bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? "Publishing..." : "Publish"}
@@ -314,9 +313,11 @@ export default function CreatePostForm({
                   {loading ? "Saving as draft" : "Save as draft"}
                 </Button>
               </div>
-            )}
+            )}    
           </form>
         </Form>
+
+        
       </DialogContent>
     </Dialog>
   );

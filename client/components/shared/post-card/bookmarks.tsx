@@ -12,7 +12,13 @@ import { getSavedPosts } from "@/helper/posts";
 import { cn } from "@/lib/utils";
 import { saveOrDeleteBookmarkedPost } from "@/actions/post";
 
-export default function Bookmarks({ postId }: { postId: string | null }) {
+type Props={
+  postId: string | null,
+  authorId:string
+
+}
+
+export default function Bookmarks({ postId, authorId}: Props) {
   const pathname = usePathname();
   const { userId } = useAuth();
 
@@ -52,7 +58,7 @@ export default function Bookmarks({ postId }: { postId: string | null }) {
       toast.error((error as Error).message || "Something wrong");
     }
   };
-  if (!postId) return null;
+  if (!postId || userId === authorId) return null;
 
   return (
     <button

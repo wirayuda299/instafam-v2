@@ -5,12 +5,12 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import CopyLink from "./copy-link";
 import PostAction from "./post-action";
 import ReportPost from "./Report";
-import DeletePost from "./delete-post";
 
 type Props = { postId: string; postAuthor: string; fileId: string };
 
@@ -23,7 +23,8 @@ export default function Menu({ postId, postAuthor, fileId }: Props) {
         <Ellipsis />
       </DialogTrigger>
       <DialogContent className="border-black-1/50 bg-black">
-        <ul className="space-y-3">
+      
+        <DialogTitle className="space-y-3">
           <ReportPost postId={postId} />
           <PostAction postAuthor={postAuthor} postId={postId} fileId={fileId} />
           <Link
@@ -38,7 +39,7 @@ export default function Menu({ postId, postAuthor, fileId }: Props) {
               Cancel
             </li>
           </DialogClose>
-        </ul>
+        </DialogTitle>
       </DialogContent>
     </Dialog>
   );

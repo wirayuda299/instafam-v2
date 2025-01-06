@@ -43,6 +43,7 @@ export class PostsController {
 
   @Post('/create')
   createNewPost(@Req() req: Request) {
+    console.log(req.body)
     return this.postService.createPost(req.body);
   }
 

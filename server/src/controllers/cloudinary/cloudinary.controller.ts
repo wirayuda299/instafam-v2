@@ -21,7 +21,6 @@ export class UploadController {
 
   @Delete('delete')
   deleteImage(@Body('id') id:string){
-    console.log(id)
     return this.cloudinaryService.deleteImage(id)
   }
 }

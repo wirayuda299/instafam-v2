@@ -23,18 +23,20 @@ type Props = {
 };
 
 export default async function UserProfile({ searchParams, params }: Props) {
-  const userSession = await currentUser();
   const id = (await params).id
   const tab = (await searchParams).tab
   const user = await getUser(id);
-  if (!user) notFound();
+  const userSession = await currentUser();
+  if(!userSession || !user){
+    return notFound()
+  }
+
 
   const [followers, following, { posts, totalPosts }] = await Promise.all([
     getUserFollowers(id),
     getUserFollowing(id),
     getUserPosts(id, tab === "draft" ? false : true),
   ]);
-
   return (
     <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
       <div className="max-h-64 min-h-64 w-full border-b border-black-1 p-2 max-sm:max-h-max md:p-5">

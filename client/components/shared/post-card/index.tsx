@@ -124,7 +124,7 @@ export default function PostCard({
               <MessageCircle size={30} className="group-hover:text-gray-500" />
             </Link>
           </div>
-          <Bookmarks postId={postId} />
+          <Bookmarks authorId={authorId} postId={postId} />
         </div>
         <div className="flex flex-wrap items-center gap-2 pt-3">
           <p className="prose prose-sm font-semibold capitalize text-white lg:prose-lg">
