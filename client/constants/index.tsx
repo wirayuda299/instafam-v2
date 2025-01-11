@@ -22,7 +22,7 @@ export class RequestConfig {
 
   setBody(body: string | FormData) {
     if (this.method === 'GET') {
-      delete this._body
+      this._body = undefined
     }
 
     if (body instanceof FormData) {
