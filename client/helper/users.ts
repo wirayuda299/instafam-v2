@@ -2,7 +2,7 @@ import { toast } from "sonner";
 
 import { User } from "@/types";
 import { revalidate } from "@/utils/cache";
-import { SERVER_URL } from "@/constants";
+import { RequestConfig, SERVER_URL } from "@/constants";
 
 type ShowUsers = {
   users: User[],
@@ -11,14 +11,9 @@ type ShowUsers = {
 
 export async function getUser(id: string) {
   try {
-    const res = await fetch(`${SERVER_URL}/users/${id}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const requestConf = new RequestConfig('GET')
 
+    const res = await fetch(`${SERVER_URL}/users/${id}`, requestConf.toRequestInit());
     if (!res.ok) return;
 
     const user = await res.json();
@@ -38,14 +33,9 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
     }
 
     const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`;
+    const requestConf = new RequestConfig('GET')
 
-    const res = await fetch(`${SERVER_URL}${query}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const res = await fetch(`${SERVER_URL}${query}`, requestConf.toRequestInit());
 
     if (!res.ok) {
       return {
@@ -54,21 +44,17 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
       };
     }
 
-    return  await res.json();
+    return await res.json();
   } catch (error) {
     throw error;
   }
 }
 
-export async function getUserFollowers(userId: string):Promise<{follower_id:string}[]> {
+export async function getUserFollowers(userId: string): Promise<{ follower_id: string }[]> {
   try {
-    const res = await fetch(`${SERVER_URL}/users/followers?userId=${userId}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const requestConf = new RequestConfig('GET')
+
+    const res = await fetch(`${SERVER_URL}/users/followers?userId=${userId}`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to fetch followers');
 
@@ -79,15 +65,11 @@ export async function getUserFollowers(userId: string):Promise<{follower_id:stri
   }
 }
 
-export async function getUserFollowing(userId: string):Promise<{following_id:string}[]> {
+export async function getUserFollowing(userId: string): Promise<{ following_id: string }[]> {
   try {
-    const res = await fetch(`${SERVER_URL}/users/following?userId=${userId}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const requestConf = new RequestConfig('GET')
+
+    const res = await fetch(`${SERVER_URL}/users/following?userId=${userId}`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to fetch following');
 
@@ -100,18 +82,13 @@ export async function getUserFollowing(userId: string):Promise<{following_id:str
 
 export async function searchUser(query: string): Promise<User[] | { errors: string }> {
   try {
-    const res = await fetch(`${SERVER_URL}/users/search?username=${query}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const requestConf = new RequestConfig('GET')
+
+    const res = await fetch(`${SERVER_URL}/users/search?username=${query}`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to search user');
 
-    const users = await res.json();
-    return users;
+    return await res.json();
   } catch (e) {
     return {
       errors: (e as Error).message
@@ -128,20 +105,15 @@ export async function updateUserSetting(
   pathname: string,
 ) {
   try {
-    const res = await fetch(`${SERVER_URL}/users/update/setting`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        userId,
-        userSessionId,
-        show_mention,
-        show_saved_post,
-        show_draft_posts
-      })
-    });
+    const requestConf = new RequestConfig('PUT')
+    requestConf.setBody(JSON.stringify({
+      userId,
+      userSessionId,
+      show_mention,
+      show_saved_post,
+      show_draft_posts
+    }))
+    const res = await fetch(`${SERVER_URL}/users/update/setting`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to update settings');
 
@@ -158,14 +130,11 @@ export async function updateUserBio(
   pathname: string,
 ) {
   try {
-    const res = await fetch(`${SERVER_URL}/users/update/bio`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({ bio, userId })
-    });
+    const requestConf = new RequestConfig('PUT')
+    requestConf.setBody(JSON.stringify({
+      bio, userId
+    }))
+    const res = await fetch(`${SERVER_URL}/users/update/bio`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to update bio');
 

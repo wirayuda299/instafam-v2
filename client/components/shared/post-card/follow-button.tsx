@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { getUserFollowers, getUserFollowing } from "@/helper/users";
 import { handleError } from "@/utils/error";
 import { cn } from "@/lib/utils";
+import { followUnfollow } from "@/actions/users";
 
 type Props = {
     userToFollow: string;
@@ -58,9 +59,9 @@ export default function FollowButton({ userToFollow, userId, styles }: Props) {
                 }
             }, false);
 
-            const { followUnfollow } = await import("@/actions/users");
 
             const res = await followUnfollow(userId, userToFollow);
+            console.log(res)
             if (res && "errors" in res) {
                 handleError(res, "Failed to follow or unfollow user");
                 return;

@@ -1,15 +1,11 @@
-import { SERVER_URL } from "@/constants";
+import { RequestConfig, SERVER_URL } from "@/constants";
 import { UserConversation } from "@/types";
 
-export async function getConversation(userSession: string):Promise<UserConversation[]> {
+export async function getConversation(userSession: string): Promise<UserConversation[]> {
     try {
-        const res = await fetch(`${SERVER_URL}/conversations?userId=${userSession}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'content-type': 'application/json'
-            }
-        });
+        const requestConf = new RequestConfig('GET')
+
+        const res = await fetch(`${SERVER_URL}/conversations?userId=${userSession}`, requestConf.toRequestInit());
 
         if (!res.ok) throw new Error('Failed to fetch conversation');
 
@@ -22,13 +18,9 @@ export async function getConversation(userSession: string):Promise<UserConversat
 
 export async function getPersonalMessage(userId: string) {
     try {
-        const res = await fetch(`${SERVER_URL}/conversations/messages?userId=${userId}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'content-type': 'application/json'
-            }
-        });
+        const requestConf = new RequestConfig('GET')
+
+        const res = await fetch(`${SERVER_URL}/conversations/messages?userId=${userId}`, requestConf.toRequestInit());
 
         if (!res.ok) throw new Error('Failed to fetch personal messages');
 

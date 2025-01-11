@@ -92,7 +92,6 @@ export default function CreatePostForm({
     let res: CloudinaryResponse | null = null
     try {
       res = await uploadImage(formData);
-      console.log(res)
 
       if (!res?.secure_url || !res?.public_id) {
         throw new Error("File upload failed");
@@ -106,13 +105,6 @@ export default function CreatePostForm({
         published,
         window.location.pathname
       );
-      //try {
-      //  if (res?.public_id) {
-      //    await deleDialogHeaderteFile(res.public_id);
-      //  }
-      //} catch (deleteError) {
-      //  toast.error((deleteError as Error).message)
-      //}
 
     } catch (error) {
       if (error instanceof Error) {
@@ -181,7 +173,7 @@ export default function CreatePostForm({
         </li>
       </DialogTrigger>
       <DialogContent className="aspect-square w-full max-w-screen-sm gap-0 rounded-lg border-black-1 bg-black p-0 text-white max-h-[400px] overflow-hidden">
-        <DialogTitle  className="flex h-11 flex-row items-center justify-between border-b border-black-1 p-2">
+        <DialogTitle className="flex h-11 flex-row items-center justify-between border-b border-black-1 p-2">
           <button
             onClick={
               activeField === "media"
@@ -232,7 +224,10 @@ export default function CreatePostForm({
                   <button
                     title="close"
                     name="close"
-                    onClick={reset}
+                    onClick={() => {
+                      setFiles(null);
+                      setPreview(null);
+                    }}
                     type="button"
                     className="absolute right-2 top-2 opacity-0 group-hover:opacity-100"
                   >
@@ -250,9 +245,9 @@ export default function CreatePostForm({
                           htmlFor="media"
                           className="mx-auto flex size-40 w-full max-w-64 flex-col items-center justify-center gap-3"
                         >
-                          <Upload size={50} />
+                          <Upload size={50} className="cursor-pointer" />
                           <p
-                            className="w-full cursor-pointer rounded-md bg-blue-500 p-2 text-center hover:bg-blue-500/50"
+                            className="w-full cursor-pointer rounded-md bg-blue-500 py-2 px-4 text-center hover:bg-blue-500/50 text-sm font-medium"
                             role="button"
                           >
                             Upload file from your computer
@@ -293,10 +288,10 @@ export default function CreatePostForm({
                 )}
               />
             )}
-        {activeField === "captions" && isValid && (
+            {activeField === "captions" && isValid && (
               <div className="fixed bottom-0 flex w-full items-center">
                 <Button
-                type="submit"
+                  type="submit"
                   aria-disabled={loading || !isChanged || isSubmitting || !isValid}
                   disabled={loading || !isChanged || isSubmitting || !isValid}
                   className="w-full rounded-none bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -313,11 +308,11 @@ export default function CreatePostForm({
                   {loading ? "Saving as draft" : "Save as draft"}
                 </Button>
               </div>
-            )}    
+            )}
           </form>
         </Form>
 
-        
+
       </DialogContent>
     </Dialog>
   );

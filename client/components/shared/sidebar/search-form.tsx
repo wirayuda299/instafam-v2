@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import useSearchUser from "@/hooks/useSearchUser";
 
 export default function SearchForm({ isCurrentPathMessages, }: { isCurrentPathMessages: boolean }) {
@@ -29,6 +29,7 @@ export default function SearchForm({ isCurrentPathMessages, }: { isCurrentPathMe
         side={"left"}
         className="overflow-y-auto border-black-1 bg-black text-white"
       >
+        <SheetTitle className="text-white py-2">Search user</SheetTitle>
         <input
           onChange={handleChange}
           type="text"

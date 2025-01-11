@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@clerk/nextjs/server";
-import { SERVER_URL } from "@/constants";
+import { RequestConfig, SERVER_URL } from "@/constants";
 
 export async function createComment(
   postId: string,
@@ -11,22 +11,19 @@ export async function createComment(
   path: string,
 ) {
   try {
+
     const { userId } = auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const res = await fetch(`${SERVER_URL}/comments/add`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        post_id: postId,
-        author: userId,
-        comment
-      })
-    });
+    const requestConf = new RequestConfig('POST')
+    requestConf.setBody(JSON.stringify({
+      post_id: postId,
+      author: userId,
+      comment
+    }))
 
+
+    const res = await fetch(`${SERVER_URL}/comments/add`, requestConf.toRequestInit());
     if (!res.ok) throw new Error('Failed to create comment');
 
     revalidatePath(path);
@@ -49,17 +46,14 @@ export async function likeOrDislikeComment(
         errors: "Unauthorized",
       };
 
-    const res = await fetch(`${SERVER_URL}/comments/like_or_dislike`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        commentId,
-        likedBy: userId
-      })
-    });
+
+    const requestConf = new RequestConfig('POST')
+    requestConf.setBody(JSON.stringify({
+      commentId,
+      likedBy: userId
+    }))
+
+    const res = await fetch(`${SERVER_URL}/comments/like_or_dislike`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to like or dislike comment');
 

@@ -1,4 +1,4 @@
-import { SERVER_URL } from "@/constants";
+import { RequestConfig, SERVER_URL } from "@/constants";
 import { Comment } from "@/types";
 
 export async function getAllComments(
@@ -7,18 +7,14 @@ export async function getAllComments(
   createdAt?: string,
 ): Promise<Comment[]> {
   try {
+    const requestConf = new RequestConfig('GET')
+
     const query =
       cursor && createdAt
         ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
         : `/comments/find-all?postId=${postId}`;
 
-    const res = await fetch(`${SERVER_URL}${query}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json'
-      }
-    });
+    const res = await fetch(`${SERVER_URL}${query}`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error('Failed to fetch comments');
 

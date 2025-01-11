@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createUserSchema, CreateUserType } from "@/validation";
-import { SERVER_URL } from "@/constants";
+import { RequestConfig, SERVER_URL } from "@/constants";
 
 export async function createUser(values: CreateUserType) {
   try {
@@ -12,19 +12,14 @@ export async function createUser(values: CreateUserType) {
 
     const { username, id, email, image } = validatedValue;
 
-    const res = await fetch(`${SERVER_URL}/users/create`, {
-      body: JSON.stringify({
-        username,
-        id,
-        email,
-        image,
-      }),
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-    });
+    const requestConf = new RequestConfig('POST')
+    requestConf.setBody(JSON.stringify({
+      username,
+      id,
+      email,
+      image,
+    }))
+    const res = await fetch(`${SERVER_URL}/users/create`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error("Failed to create user");
 
@@ -39,17 +34,12 @@ export async function createUser(values: CreateUserType) {
 
 export async function followUnfollow(userId: string, userToFollow: string) {
   try {
-    const res = await fetch(`${SERVER_URL}/follow_unfollow`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        userToFollow,
-      }),
-    });
+    const requestConf = new RequestConfig('POST')
+    requestConf.setBody(JSON.stringify({
+      userId,
+      userToFollow,
+    }))
+    const res = await fetch(`${SERVER_URL}/users/follow_unfollow`, requestConf.toRequestInit());
 
     if (!res.ok) throw new Error("Failed to follow or unfollow user");
 

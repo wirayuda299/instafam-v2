@@ -6,8 +6,55 @@ import {
   Search,
   SquarePlus,
 } from "lucide-react";
+import { RequestInit } from "next/dist/server/web/spec-extension/request";
 
-export const SERVER_URL=process.env.SERVER_URL+'/api/v1'
+export const SERVER_URL = process.env.SERVER_URL + '/api/v1'
+
+export class RequestConfig {
+  public method: RequestInit['method'] = 'DELETE';
+  public credentials: RequestInit['credentials'] = 'include';
+  public headers: Headers = new Headers({ 'content-type': 'application/json' });
+  private _body?: RequestInit['body'];
+
+  constructor(method: RequestInit['method']) {
+    this.method = method;
+  }
+
+  setBody(body: string | FormData) {
+    if (this.method === 'GET') {
+      delete this._body
+    }
+
+    if (body instanceof FormData) {
+      this.headers.delete('content-type'); // Remove content-type for FormData
+    } else {
+      this.headers.set('content-type', 'application/json'); // Default for JSON
+    }
+    this._body = body;
+  }
+
+  get body(): RequestInit['body'] | undefined {
+    if (this.method === 'GET' || this.method === 'HEAD') {
+      return undefined;
+    }
+    return this._body;
+  }
+
+  toRequestInit(): RequestInit {
+    const requestInit: RequestInit = {
+      method: this.method,
+      credentials: this.credentials,
+      headers: this.headers,
+    };
+
+    if (this.body !== undefined) {
+      requestInit.body = this.body;
+    }
+
+    return requestInit;
+  }
+}
+
 
 export const sidebarItems = [
   {
@@ -44,15 +91,15 @@ export const sidebarItems = [
 
 
 export const REPORT_POST_REASONS: string[] = [
-	"It's spam",
-	"Nudity or sexual content",
-	"Hate speech or symbols",
-	"Violence or dangerous organizations",
-	"Harassment or bullying",
-	"False information",
-	"Scam or fraud",
-	"Intellectual property violation",
-	"Self-harm or suicide",
-	"Sale of illegal or regulated goods"
+  "It's spam",
+  "Nudity or sexual content",
+  "Hate speech or symbols",
+  "Violence or dangerous organizations",
+  "Harassment or bullying",
+  "False information",
+  "Scam or fraud",
+  "Intellectual property violation",
+  "Self-harm or suicide",
+  "Sale of illegal or regulated goods"
 ] as const
 
