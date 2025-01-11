@@ -26,7 +26,6 @@ export default function AllUsers() {
             try {
                 const { showUsers } = await import("@/helper/users");
                 const { users, totalUser } = await showUsers(userId)
-                console.log(users)
                 setAllUsers({
                     users,
                     totalUser
@@ -55,7 +54,7 @@ export default function AllUsers() {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-3 p-2">
-                        {allUsers?.users?.map((user) => (
+                        {(allUsers?.users || [])?.map((user) => (
                             <UserListItem
                                 key={user?.id}
                                 user={user}

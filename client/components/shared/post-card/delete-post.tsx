@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { deletePost } from "@/actions/post";
-import { redirect, usePathname } from "next/navigation";
 
 const fallbackErrorMessage = "Failed to delete post";
 
@@ -12,7 +11,6 @@ type Props = { fileId: string; postId: string; postAuthor: string };
 
 export default function DeletePost({ fileId, postId, postAuthor }: Props) {
 	const [isLoading, setIsLoading] = useState(false);
-	const pathname = usePathname()
 
 	const handleDeletePost = async () => {
 		try {
@@ -24,14 +22,14 @@ export default function DeletePost({ fileId, postId, postAuthor }: Props) {
 				window.location.pathname,
 			);
 
-			if (pathname !== '/') {
-				redirect('/')
-			}
 
 			toast.success("Post successfully deleted");
 
 		} catch (error) {
-			toast.error((error as Error).message || fallbackErrorMessage);
+			if ((error as Error).message !== 'NEXT_REDIRECT') {
+				toast.error((error as Error).message || fallbackErrorMessage);
+
+			}
 		} finally {
 			setIsLoading(false);
 		}

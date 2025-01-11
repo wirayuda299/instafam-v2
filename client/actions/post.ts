@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createPostSchema, CreatePostType } from "@/validation";
 import { RequestConfig, SERVER_URL } from "@/constants";
+import { redirect } from "next/navigation";
 
 
 async function deleteImage(id: string) {
@@ -104,31 +105,30 @@ export async function deletePost(
     postAuthor: string,
     pathname: string,
 ) {
-    try {
-        const { userId } = auth();
-        if (userId !== postAuthor) {
-            throw new Error('UnAuthorized')
-        }
-        const deleteImageRes = await deleteImage(fileId)
+    const { userId } = auth();
+    if (userId !== postAuthor) {
+        throw new Error('UnAuthorized')
+    }
+    const deleteImageRes = await deleteImage(fileId)
 
-        if (deleteImageRes !== 'ok') {
-            throw new Error('Failed to delete image')
-        }
+    if (deleteImageRes !== 'ok') {
+        throw new Error('Failed to delete image')
+    }
 
-        const requestConf = new RequestConfig('DELETE')
-        requestConf.setBody(JSON.stringify({
-            postId, userSession: userId, postAuthor
-        }))
-        const deletedPostRes = await fetch(`${SERVER_URL}/posts/delete`, requestConf.toRequestInit())
+    const requestConf = new RequestConfig('DELETE')
+    requestConf.setBody(JSON.stringify({
+        postId, userSession: userId, postAuthor
+    }))
+    const deletedPostRes = await fetch(`${SERVER_URL}/posts/delete`, requestConf.toRequestInit())
 
-        if (!deletedPostRes.ok) {
-            const res = await deletedPostRes.json()
-            throw new Error(res.message ?? "Failed to delete post")
-        }
+    if (!deletedPostRes.ok) {
+        const res = await deletedPostRes.json()
+        throw new Error(res.message ?? "Failed to delete post")
+    }
 
-        revalidatePath(pathname);
-    } catch (error) {
-        throw error
+    revalidatePath(pathname);
+    if (pathname !== '/') {
+        redirect('/')
     }
 }
 
