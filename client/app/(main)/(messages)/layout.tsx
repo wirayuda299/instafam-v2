@@ -8,6 +8,14 @@ import { SocketContextProvider } from "@/context/socket";
 
 import { getConversation } from "@/helper/conversations";
 import NewChat from "@/components/messages/new-chat";
+import { Metadata } from "next/types";
+
+
+export const metadata: Metadata = {
+  title: "Message ",
+
+};
+
 
 export default async function MessagesLayout({
   children,

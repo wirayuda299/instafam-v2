@@ -5,8 +5,14 @@ import { Heart } from "lucide-react";
 import { getAllPosts } from "@/helper/posts";
 import LoadMore from "@/components/load-more/posts";
 import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: "Explore ",
+};
+
 
 export default async function Explore() {
   const { posts, totalPosts } = await getAllPosts();

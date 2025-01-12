@@ -22,12 +22,18 @@ type Props = {
   searchParams: Promise<{ tab: "mention" | "saved" | "posts" | "draft" }>;
 };
 
+
+export const metadata = {
+  title: "Profile ",
+};
+
+
 export default async function UserProfile({ searchParams, params }: Props) {
   const id = (await params).id
   const tab = (await searchParams).tab
   const user = await getUser(id);
   const userSession = await currentUser();
-  if(!userSession || !user){
+  if (!userSession || !user) {
     return notFound()
   }
 

@@ -3,7 +3,11 @@ import PostCard from "@/components/shared/post-card/index";
 import Recommendations from "@/components/shared/recommendations/recommendations";
 import { getAllPosts } from "@/helper/posts";
 import LoadMorePost from "@/components/load-more/posts";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: 'Home'
+}
 
 export default async function Home() {
   const { posts, totalPosts } = await getAllPosts();
