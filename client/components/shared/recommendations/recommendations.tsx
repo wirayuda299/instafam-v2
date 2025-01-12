@@ -9,8 +9,7 @@ import AllUsers from "./all-users";
 
 export default async function Recommendations() {
   const userSession = await currentUser();
-
-  if (!userSession) return null
+  if (!userSession || userSession === null) return null
 
   const { users } = await showUsers(userSession?.id!);
 
@@ -40,15 +39,18 @@ export default async function Recommendations() {
           </h3>
           <AllUsers />
         </div>
-        <div className="flex flex-col gap-5 divide-y divide-gray-500/50 pt-5">
-          {(users || [])?.map((user) => (
-            <UserListItem
-              user={user}
-              userSessionId={userSession?.id!}
-              key={user?.id}
-            />
-          ))}
-        </div>
+        {users && users.length > 0 && (
+          <div className="flex flex-col gap-5 divide-y divide-gray-500/50 pt-5">
+            {users?.map((user) => (
+              <UserListItem
+                user={user}
+                userSessionId={userSession?.id!}
+                key={user?.id}
+              />
+            ))}
+          </div>
+
+        )}
       </div>
     </aside>
   );

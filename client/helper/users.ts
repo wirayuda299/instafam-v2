@@ -25,12 +25,6 @@ export async function getUser(id: string) {
 
 export async function showUsers(userId: string, lastCursor?: string): Promise<ShowUsers> {
   try {
-    if (!userId) {
-      return {
-        users: [] as User[],
-        totalUser: 0
-      };
-    }
 
     const query = lastCursor ? `/users?userId=${userId}&lastCursor=${lastCursor}` : `/users?userId=${userId}`;
     const requestConf = new RequestConfig('GET')
@@ -38,10 +32,9 @@ export async function showUsers(userId: string, lastCursor?: string): Promise<Sh
     const res = await fetch(`${SERVER_URL}${query}`, requestConf.toRequestInit());
 
     if (!res.ok) {
-      return {
-        users: [],
-        totalUser: 0
-      };
+      const fetchRes = await res.json()
+      throw new Error(fetchRes.message || "Failed to fetch user"
+      )
     }
 
     return await res.json();
