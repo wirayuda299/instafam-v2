@@ -11,7 +11,7 @@ import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async createPost(data: CreatePostType) {
     try {
