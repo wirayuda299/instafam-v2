@@ -33,7 +33,7 @@ export default function Bio({ bio, userId }: { bio: string; userId: string }) {
       <textarea
         maxLength={50}
         minLength={1}
-        className="text-wrap bg-transparent focus-visible:outline-none"
+        className="text-wrap bg-transparent focus-visible:outline-hidden"
         rows={1}
         cols={50}
         placeholder="Add bio..."

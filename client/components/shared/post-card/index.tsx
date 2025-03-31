@@ -93,7 +93,7 @@ export default function PostCard({
       <div className="h-full">
         <Image
           className={cn(
-            "aspect-square h-fit !max-h-[380px] w-full rounded-lg border border-gray-600 object-cover object-center",
+            "aspect-square h-fit max-h-[380px]! w-full rounded-lg border border-gray-600 object-cover object-center",
             imageStyles,
           )}
           quality={50}

@@ -34,7 +34,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${inter.className} mx-auto max-w-screen-2xl overflow-hidden bg-black text-white`}
+          className={`${inter.className} mx-auto max-w-(--breakpoint-2xl) overflow-hidden bg-black text-white`}
         >
           {children}
         </body>

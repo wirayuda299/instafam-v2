@@ -83,7 +83,7 @@ export default function ChatItem({
                   );
                 }}
                 href={`#${repliedMessage?.parent_id ? repliedMessage.parent_id : repliedMessage.id}`}
-                className="flex !max-w-[150px] items-center gap-1 truncate text-nowrap p-1 text-left text-xs text-gray-500"
+                className="flex max-w-[150px]! items-center gap-1 truncate text-nowrap p-1 text-left text-xs text-gray-500"
               >
                 Replying to{" "}
                 <span className="min-w-fit text-nowrap capitalize">

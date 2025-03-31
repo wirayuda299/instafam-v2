@@ -86,7 +86,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
   }, [activeTab, updateStyles]);
 
   return (
-    <div className="relative mx-auto flex min-w-fit max-w-screen-md items-center justify-center gap-10 p-3">
+    <div className="relative mx-auto flex min-w-fit max-w-(--breakpoint-md) items-center justify-center gap-10 p-3">
       <div
         ref={lineRef}
         className="ease absolute top-0 h-px w-[71px] rounded-full bg-white transition-all duration-300"

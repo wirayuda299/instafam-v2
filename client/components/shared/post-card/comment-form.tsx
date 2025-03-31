@@ -53,7 +53,7 @@ export default function CommentForm({ postId, styles }: { postId: string, styles
               <FormControl>
                 <input
                   autoComplete="off"
-                  className="w-full bg-transparent text-sm focus-visible:outline-none"
+                  className="w-full bg-transparent text-sm focus-visible:outline-hidden"
                   type="text"
                   {...field}
                   placeholder="Add a comment..."

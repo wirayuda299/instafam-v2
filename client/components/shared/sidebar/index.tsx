@@ -74,7 +74,7 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "!fixed !bottom-0 !left-0 !right-0 !z-50 h-14 min-w-[250px] max-w-[250px] flex-col justify-end border-gray-600/30 bg-black max-md:max-w-full md:!static md:z-0 md:flex md:h-full md:max-h-screen md:min-h-screen md:justify-between md:overflow-y-auto md:border-r md:p-3",
+        "fixed! bottom-0! left-0! right-0! z-50! h-14 min-w-[250px] max-w-[250px] flex-col justify-end border-gray-600/30 bg-black max-md:max-w-full md:static! md:z-0 md:flex md:h-full md:max-h-screen md:min-h-screen md:justify-between md:overflow-y-auto md:border-r md:p-3",
         isCurrentPathMessages ? "md:w-min md:min-w-min md:max-w-min" : "",
       )}
     >

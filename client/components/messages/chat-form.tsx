@@ -80,7 +80,7 @@ function ChatForm({
   );
 
   return (
-    <div className="sticky bottom-0 right-0 min-h-14 w-full backdrop-blur">
+    <div className="sticky bottom-0 right-0 min-h-14 w-full backdrop-blur-sm">
       {selectedMessage && (
         <p className="relative max-w-xs truncate p-2 text-sm text-gray-500">
           Replying to {selectedMessage?.username}: {selectedMessage?.message}{" "}
@@ -111,7 +111,7 @@ function ChatForm({
                     name="message"
                     autoFocus
                     autoComplete="off"
-                    className="w-full min-w-full border-none bg-transparent text-sm focus-visible:outline-none"
+                    className="w-full min-w-full border-none bg-transparent text-sm focus-visible:outline-hidden"
                   />
                 </FormControl>
               </FormItem>

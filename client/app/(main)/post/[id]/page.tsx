@@ -23,7 +23,7 @@ export default async function PostDetail({ params }: Params) {
   const comments = await getAllComments(id);
   return (
     <div className="flex max-h-screen min-h-dvh w-full flex-col items-center justify-center gap-3 divide-y divide-gray-600 overflow-y-auto px-3 max-lg:max-h-dvh lg:min-h-screen">
-      <div className="flex h-full max-h-[510px] min-h-[510px] w-full max-w-screen-lg max-lg:max-h-full max-lg:flex-col">
+      <div className="flex h-full max-h-[510px] min-h-[510px] w-full max-w-(--breakpoint-lg) max-lg:max-h-full max-lg:flex-col">
         <Image
           className="aspect-auto max-h-[510px] w-full max-w-[450px] rounded-lg border border-gray-600 object-cover object-center max-lg:max-h-[300px] max-lg:max-w-full"
           src={post?.media_url}
@@ -45,8 +45,8 @@ export default async function PostDetail({ params }: Params) {
             actionButtonStyles="sticky bottom-0 border-t border-gray-500/50"
             rootStyles="md:justify-between w-full h-full"
             headerStyles="lg:sticky top-0 z-10 bg-black border-b border-gray-500/50 p-2"
-            imageStyles="!hidden"
-            commentStyles="!hidden"
+            imageStyles="hidden!"
+            commentStyles="hidden!"
             authorImage={post?.profile_image}
             authorUsername={post.author_name}
             captions={post?.captions}

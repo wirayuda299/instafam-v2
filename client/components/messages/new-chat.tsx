@@ -21,7 +21,7 @@ export default function NewChat() {
         <input
           onChange={handleChange}
           type="text"
-          className="h-9 w-full rounded-md border-none bg-black-1 px-3 outline-none placeholder:text-sm focus-visible:border-none"
+          className="h-9 w-full rounded-md border-none bg-black-1 px-3 outline-hidden placeholder:text-sm focus-visible:border-none"
           placeholder="Search user..."
         />
         {loading ? (

@@ -46,7 +46,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
   return (
     <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
       <div className="max-h-64 min-h-64 w-full border-b border-black-1 p-2 max-sm:max-h-max md:p-5">
-        <header className="mx-auto grid h-full w-full max-w-screen-sm grid-cols-2 items-center max-sm:grid-cols-1">
+        <header className="mx-auto grid h-full w-full max-w-(--breakpoint-sm) grid-cols-2 items-center max-sm:grid-cols-1">
           <Image
             className="size-36 rounded-full"
             loading="lazy"

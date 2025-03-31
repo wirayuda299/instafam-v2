@@ -172,7 +172,7 @@ export default function CreatePostForm({
           </button>
         </li>
       </DialogTrigger>
-      <DialogContent className="aspect-square w-full max-w-screen-sm gap-0 rounded-lg border-black-1 bg-black p-0 text-white max-h-[400px] overflow-hidden">
+      <DialogContent className="aspect-square w-full max-w-(--breakpoint-sm) gap-0 rounded-lg border-black-1 bg-black p-0 text-white max-h-[400px] overflow-hidden">
         <DialogTitle className="flex h-11 flex-row items-center justify-between border-b border-black-1 p-2">
           <button
             onClick={
@@ -280,7 +280,7 @@ export default function CreatePostForm({
                         {...field}
                         rows={15}
                         placeholder="Add captions..."
-                        className="h-full w-full bg-transparent focus-visible:outline-none"
+                        className="h-full w-full bg-transparent focus-visible:outline-hidden"
                       />
                     </FormControl>
                     <FormMessage />
