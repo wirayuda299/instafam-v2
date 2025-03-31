@@ -8,33 +8,34 @@ import {
 } from "lucide-react";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 
-export const SERVER_URL = process.env.SERVER_URL + '/api/v1'
+export const SERVER_URL = process.env.SERVER_URL + "/api/v1";
 
 export class RequestConfig {
-  public method: RequestInit['method'] = 'DELETE';
-  public credentials: RequestInit['credentials'] = 'include';
-  public headers: Headers = new Headers({ 'content-type': 'application/json' });
-  private _body?: RequestInit['body'];
+  public method: RequestInit["method"] = "GET"; // More typical default
+  public credentials: RequestInit["credentials"] = "include";
+  public headers: Headers = new Headers({ "content-type": "application/json" });
+  private _body?: RequestInit["body"];
 
-  constructor(method: RequestInit['method']) {
+  constructor(method: RequestInit["method"]) {
     this.method = method;
   }
 
   setBody(body: string | FormData) {
-    if (this.method === 'GET') {
-      this._body = undefined
+    if (this.method === "GET" || this.method === "HEAD") {
+      this._body = undefined;
+      return; // Return early for GET/HEAD methods
     }
 
     if (body instanceof FormData) {
-      this.headers.delete('content-type'); // Remove content-type for FormData
+      this.headers.delete("content-type"); // Remove content-type for FormData
     } else {
-      this.headers.set('content-type', 'application/json'); // Default for JSON
+      this.headers.set("content-type", "application/json");
     }
     this._body = body;
   }
 
-  get body(): RequestInit['body'] | undefined {
-    if (this.method === 'GET' || this.method === 'HEAD') {
+  get body(): RequestInit["body"] | undefined {
+    if (this.method === "GET" || this.method === "HEAD") {
       return undefined;
     }
     return this._body;
@@ -54,8 +55,6 @@ export class RequestConfig {
     return requestInit;
   }
 }
-
-
 export const sidebarItems = [
   {
     label: "home",
@@ -89,7 +88,6 @@ export const sidebarItems = [
   },
 ] as const;
 
-
 export const REPORT_POST_REASONS: string[] = [
   "It's spam",
   "Nudity or sexual content",
@@ -100,6 +98,5 @@ export const REPORT_POST_REASONS: string[] = [
   "Scam or fraud",
   "Intellectual property violation",
   "Self-harm or suicide",
-  "Sale of illegal or regulated goods"
-] as const
-
+  "Sale of illegal or regulated goods",
+] as const;
