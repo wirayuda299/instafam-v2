@@ -63,12 +63,8 @@ export class PostsService {
     created_at?: string,
   ): Promise<{ posts: Post[]; totalPosts: number }> {
     try {
-      console.log({ lastCursor, created_at });
-
-      // Count total posts
       const totalPosts = await this.db.pool.query(`SELECT COUNT(*) FROM posts`);
 
-      // Prepare SQL queries
       const queryWithCursor = `
       SELECT
         p.id AS post_id,
@@ -110,18 +106,15 @@ export class PostsService {
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
       const params = lastCursor ? [created_at, lastCursor] : [];
 
-      // Execute the query
       const posts = await this.db.pool.query(query, params);
 
       if (posts.rows.length > 0) {
-        // Fetch likes concurrently for all posts
         const postIds = posts.rows.map((post) => post.post_id);
         const likesPromises = postIds.map((postId) =>
           this.getPostLikes(postId),
         );
         const likesResults = await Promise.all(likesPromises);
 
-        // Attach likes data to each post
         posts.rows.forEach((post, index) => {
           post.likes = likesResults[index] || [];
         });
@@ -133,7 +126,7 @@ export class PostsService {
       };
     } catch (error) {
       console.error('Error fetching posts:', error);
-      throw new Error('Failed to retrieve posts.');
+      throw error;
     }
   }
   async getPostById(postId: string): Promise<Post> {
