@@ -11,13 +11,11 @@ import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async createPost(data: CreatePostType) {
     try {
-
       const validatedValues = createPostSchema.safeParse(data);
-      console.log(validatedValues)
       if (!validatedValues.success)
         throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
 

@@ -8,16 +8,24 @@ export async function getAllPosts(
   posts: Post[];
   totalPosts: number;
 }> {
-  const query =
-    cursor && createdAt
-      ? `/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
-      : "/posts/find-all";
-  const requestConf = new RequestConfig("GET");
+  try {
+    const query =
+      cursor && createdAt
+        ? `/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
+        : "/posts/find-all";
+    const requestConf = new RequestConfig("GET");
 
-  const res = await fetch(`${SERVER_URL}${query}`, requestConf.toRequestInit());
+    const res = await fetch(
+      `${SERVER_URL}${query}`,
+      requestConf.toRequestInit(),
+    );
 
-  if (!res.ok) throw new Error("Failed to fetch all posts");
-  return await res.json();
+    if (!res.ok) throw new Error("Failed to fetch all posts");
+    return await res.json();
+  } catch (error) {
+    console.info("error fetch all posts", error);
+    throw error;
+  }
 }
 
 export async function getSavedPosts(userId: string): Promise<Post[]> {
