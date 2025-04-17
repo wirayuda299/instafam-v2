@@ -63,14 +63,9 @@ export class PostsService {
     created_at?: string,
   ): Promise<{ posts: Post[]; totalPosts: number }> {
     try {
-      if (lastCursor && !created_at) {
-        throw new Error('created_at must be provided when using lastCursor');
-      }
+      const totalPosts = await this.db.pool.query(`SELECT COUNT(*) FROM posts`);
 
-      const totalPostsQuery = `SELECT COUNT(*) FROM posts WHERE published = true`;
-      const totalPostsResult = await this.db.pool.query(totalPostsQuery);
-
-      const baseSelect = `
+      const queryWithCursor = `
       SELECT
         p.id AS post_id,
         p.author AS author_id,
@@ -79,64 +74,61 @@ export class PostsService {
         p.captions AS captions,
         p.media_url AS media_url,
         p.created_at,
-        p.media_asset_id,
+        p.media_asset_id AS media_asset_id,
         COUNT(pl.post_id) AS likes_count
       FROM posts AS p
       JOIN users AS u ON u.id = p.author
       LEFT JOIN post_likes pl ON p.id = pl.post_id
-    `;
+      WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true
+      GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.published, p.media_url, p.created_at, p.media_asset_id
+      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      LIMIT 10`;
 
-      const whereClause = lastCursor
-        ? `WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true`
-        : `WHERE p.published = true`;
+      const queryWithoutCursor = `
+      SELECT
+        p.id AS post_id,
+        p.author AS author_id,
+        u.username AS author_name,
+        u.profile_image AS profile_image,
+        p.captions AS captions,
+        p.media_url AS media_url,
+        p.created_at,
+        COUNT(pl.post_id) AS likes_count,
+        p.media_asset_id AS media_asset_id
+      FROM posts AS p
+      JOIN users AS u ON u.id = p.author
+      LEFT JOIN post_likes pl ON p.id = pl.post_id
+      WHERE p.published = true
+      GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
+      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      LIMIT 10`;
 
-      const groupByClause = `
-      GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
-    `;
-
-      const orderAndLimit = `ORDER BY likes_count DESC, p.created_at DESC, p.id DESC LIMIT 10`;
-
-      const finalQuery = `${baseSelect} ${whereClause} ${groupByClause} ${orderAndLimit}`;
+      const query = lastCursor ? queryWithCursor : queryWithoutCursor;
       const params = lastCursor ? [created_at, lastCursor] : [];
 
-      const postsResult = await this.db.pool.query(finalQuery, params);
-      const posts = postsResult.rows;
+      const posts = await this.db.pool.query(query, params);
 
-      const postIds = posts.map((post) => post.post_id);
-      let likesMap: Record<string, any[]> = {};
-
-      if (postIds.length > 0) {
-        const likesQuery = `
-        SELECT post_id, user_id
-        FROM post_likes
-        WHERE post_id = ANY($1)
-      `;
-        const likesResult = await this.db.pool.query(likesQuery, [postIds]);
-
-        likesMap = likesResult.rows.reduce(
-          (acc, like) => {
-            if (!acc[like.post_id]) acc[like.post_id] = [];
-            acc[like.post_id].push(like.user_id);
-            return acc;
-          },
-          {} as Record<string, any[]>,
+      if (posts && posts?.rows.length > 0) {
+        const postIds = posts.rows.map((post) => post.post_id);
+        const likesPromises = postIds.map((postId) =>
+          this.getPostLikes(postId),
         );
+        const likesResults = await Promise.all(likesPromises);
+
+        posts.rows.forEach((post, index) => {
+          post.likes = likesResults[index] || [];
+        });
       }
 
-      posts.forEach((post) => {
-        post.likes = likesMap[post.post_id] || [];
-      });
-
       return {
-        posts,
-        totalPosts: parseInt(totalPostsResult.rows[0].count, 10),
+        posts: posts.rows,
+        totalPosts: parseInt(totalPosts.rows[0].count, 10),
       };
-    } catch (err) {
-      console.error(`[getAllPosts] Error: ${err.message}`, err);
-      throw new Error(err.message ?? 'Internal Server Error');
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      throw error;
     }
   }
-
   async getPostById(postId: string): Promise<Post> {
     try {
       const post = await this.db.pool.query(
