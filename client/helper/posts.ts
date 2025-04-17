@@ -9,22 +9,31 @@ export async function getAllPosts(
   totalPosts: number;
 }> {
   try {
-    const query =
-      cursor && createdAt
-        ? `/posts/find-all?cursor=${cursor}&createdAt=${createdAt}`
-        : "/posts/find-all";
+    if (cursor && !createdAt) {
+      throw new Error("createdAt is required when using cursor");
+    }
+
+    const queryParams = new URLSearchParams();
+    if (cursor) queryParams.append("cursor", cursor);
+    if (createdAt) queryParams.append("createdAt", createdAt);
+
+    const url = `${SERVER_URL}/posts/find-all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
     const requestConf = new RequestConfig("GET");
 
-    const res = await fetch(
-      `${SERVER_URL}${query}`,
-      requestConf.toRequestInit(),
-    );
+    const res = await fetch(url, requestConf.toRequestInit());
 
-    if (!res.ok) throw new Error("Failed to fetch all posts");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(
+        `Failed to fetch posts: ${res.status} ${res.statusText} - ${errorText}`,
+      );
+    }
+
     return await res.json();
-  } catch (error) {
-    console.info("error fetch all posts", error);
-    throw error;
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+    throw err;
   }
 }
 
