@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 
-export const SERVER_URL = process.env.SERVER_URL + "/api/v1";
+export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL + "/api/v1";
 
 export class RequestConfig {
   public method: RequestInit["method"] = "GET"; // More typical default
@@ -27,7 +27,7 @@ export class RequestConfig {
     }
 
     if (body instanceof FormData) {
-      this.headers.delete("content-type"); // Remove content-type for FormData
+      this.headers.delete("content-type");
     } else {
       this.headers.set("content-type", "application/json");
     }

@@ -58,22 +58,19 @@ export class PostsService {
     }
   }
 
-async getAllPosts(
-  lastCursor?: string,
-  created_at?: string,
-): Promise<{ posts: Post[]; totalPosts: number }> {
-  try {
-    // Validasi cursor
-    if (lastCursor && !created_at) {
-      throw new Error("created_at must be provided when using lastCursor");
-    }
+  async getAllPosts(
+    lastCursor?: string,
+    created_at?: string,
+  ): Promise<{ posts: Post[]; totalPosts: number }> {
+    try {
+      if (lastCursor && !created_at) {
+        throw new Error('created_at must be provided when using lastCursor');
+      }
 
-    // Total count hanya yang published
-    const totalPostsQuery = `SELECT COUNT(*) FROM posts WHERE published = true`;
-    const totalPostsResult = await this.db.pool.query(totalPostsQuery);
+      const totalPostsQuery = `SELECT COUNT(*) FROM posts WHERE published = true`;
+      const totalPostsResult = await this.db.pool.query(totalPostsQuery);
 
-    // Base SELECT fields
-    const baseSelect = `
+      const baseSelect = `
       SELECT
         p.id AS post_id,
         p.author AS author_id,
@@ -89,57 +86,56 @@ async getAllPosts(
       LEFT JOIN post_likes pl ON p.id = pl.post_id
     `;
 
-    // WHERE + GROUP BY
-    const whereClause = lastCursor
-      ? `WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true`
-      : `WHERE p.published = true`;
+      const whereClause = lastCursor
+        ? `WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true`
+        : `WHERE p.published = true`;
 
-    const groupByClause = `
+      const groupByClause = `
       GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
     `;
 
-    const orderAndLimit = `ORDER BY likes_count DESC, p.created_at DESC, p.id DESC LIMIT 10`;
+      const orderAndLimit = `ORDER BY likes_count DESC, p.created_at DESC, p.id DESC LIMIT 10`;
 
-    const finalQuery = `${baseSelect} ${whereClause} ${groupByClause} ${orderAndLimit}`;
-    const params = lastCursor ? [created_at, lastCursor] : [];
+      const finalQuery = `${baseSelect} ${whereClause} ${groupByClause} ${orderAndLimit}`;
+      const params = lastCursor ? [created_at, lastCursor] : [];
 
-    const postsResult = await this.db.pool.query(finalQuery, params);
-    const posts = postsResult.rows;
+      const postsResult = await this.db.pool.query(finalQuery, params);
+      const posts = postsResult.rows;
 
-    // Ambil semua likes dalam satu query
-    const postIds = posts.map((post) => post.post_id);
-    let likesMap: Record<string, any[]> = {};
+      const postIds = posts.map((post) => post.post_id);
+      let likesMap: Record<string, any[]> = {};
 
-    if (postIds.length > 0) {
-      const likesQuery = `
+      if (postIds.length > 0) {
+        const likesQuery = `
         SELECT post_id, user_id
         FROM post_likes
         WHERE post_id = ANY($1)
       `;
-      const likesResult = await this.db.pool.query(likesQuery, [postIds]);
+        const likesResult = await this.db.pool.query(likesQuery, [postIds]);
 
-      // Group by post_id
-      likesMap = likesResult.rows.reduce((acc, like) => {
-        if (!acc[like.post_id]) acc[like.post_id] = [];
-        acc[like.post_id].push(like.user_id);
-        return acc;
-      }, {} as Record<string, any[]>);
+        likesMap = likesResult.rows.reduce(
+          (acc, like) => {
+            if (!acc[like.post_id]) acc[like.post_id] = [];
+            acc[like.post_id].push(like.user_id);
+            return acc;
+          },
+          {} as Record<string, any[]>,
+        );
+      }
+
+      posts.forEach((post) => {
+        post.likes = likesMap[post.post_id] || [];
+      });
+
+      return {
+        posts,
+        totalPosts: parseInt(totalPostsResult.rows[0].count, 10),
+      };
+    } catch (err) {
+      console.error(`[getAllPosts] Error: ${err.message}`, err);
+      throw new Error(err.message ?? 'Internal Server Error');
     }
-
-    // Inject likes ke tiap post
-    posts.forEach((post) => {
-      post.likes = likesMap[post.post_id] || [];
-    });
-
-    return {
-      posts,
-      totalPosts: parseInt(totalPostsResult.rows[0].count, 10),
-    };
-  } catch (err) {
-    console.error(`[getAllPosts] Error: ${err.message}`, err);
-    throw new Error('Internal Server Error');
   }
-}
 
   async getPostById(postId: string): Promise<Post> {
     try {
