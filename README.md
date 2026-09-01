@@ -82,6 +82,18 @@ cd server && pnpm start:dev
 cd client && pnpm dev
 ```
 
+Or start everything at once -- Postgres, server, client, and an ngrok
+tunnel for Clerk's webhook -- with:
+
+```bash
+./scripts/dev.sh
+```
+
+Requires [ngrok](https://ngrok.com/download) installed and authenticated
+(`ngrok config add-authtoken <token>`). Prints the ngrok URL to set as the
+webhook endpoint in the Clerk Dashboard. Ctrl+C stops the server, client,
+and tunnel (Postgres keeps running).
+
 ## Project structure
 
 ```
