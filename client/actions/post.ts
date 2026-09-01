@@ -60,7 +60,7 @@ export async function createPost(
       };
     }
 
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     const { captions, media, media_asset_id } = validatedValues.data;
@@ -89,7 +89,7 @@ export async function createPost(
   }
 }
 export async function likeOrDislikePost(postId: string, pathname: string) {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   try {
     if (!userId)
@@ -122,7 +122,7 @@ export async function deletePost(
   postAuthor: string,
   pathname: string,
 ) {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (userId !== postAuthor) {
     throw new Error("UnAuthorized");
   }
@@ -168,7 +168,7 @@ export async function saveOrDeleteBookmarkedPost(
   }
 > {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     const requestConf = new RequestConfig("POST");

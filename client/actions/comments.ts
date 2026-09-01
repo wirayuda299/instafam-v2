@@ -12,7 +12,7 @@ export async function createComment(
 ) {
   try {
 
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     const requestConf = new RequestConfig('POST')
@@ -38,7 +38,7 @@ export async function likeOrDislikeComment(
   commentId: string,
   pathname: string,
 ) {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   try {
     if (!userId)
