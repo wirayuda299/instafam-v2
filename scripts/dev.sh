@@ -5,8 +5,6 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOG_DIR="$ROOT_DIR/.dev-logs"
-mkdir -p "$LOG_DIR"
 
 DB_CONTAINER="instafam"
 DB_USER="postgres"
@@ -79,17 +77,17 @@ done
 echo " ready."
 
 echo "==> NestJS server (watch mode)"
-(cd "$ROOT_DIR/server" && pnpm start:dev) >"$LOG_DIR/server.log" 2>&1 &
+(cd "$ROOT_DIR/server" && pnpm start:dev) &
 SERVER_PID=$!
-echo "server pid=$SERVER_PID, logs: $LOG_DIR/server.log"
+echo "server pid=$SERVER_PID"
 
 echo "==> Next.js client (watch mode)"
-(cd "$ROOT_DIR/client" && pnpm dev) >"$LOG_DIR/client.log" 2>&1 &
+(cd "$ROOT_DIR/client" && pnpm dev) &
 CLIENT_PID=$!
-echo "client pid=$CLIENT_PID, logs: $LOG_DIR/client.log"
+echo "client pid=$CLIENT_PID"
 
 echo "==> ngrok tunnel -> localhost:$CLIENT_PORT"
-ngrok http "$CLIENT_PORT" --log=stdout >"$LOG_DIR/ngrok.log" 2>&1 &
+ngrok http "$CLIENT_PORT" --log=stdout &
 NGROK_PID=$!
 
 echo -n "Waiting for ngrok tunnel..."
@@ -105,7 +103,7 @@ done
 echo
 
 if [[ -z "$NGROK_URL" ]]; then
-  echo "Warning: could not read ngrok's public URL from $NGROK_API -- check $LOG_DIR/ngrok.log" >&2
+  echo "Warning: could not read ngrok's public URL from $NGROK_API -- check its output above" >&2
 else
   echo
   echo "================================================================"
@@ -119,6 +117,5 @@ else
 fi
 
 echo "All processes running. Press Ctrl+C to stop server, client, and ngrok."
-echo "(logs: $LOG_DIR/server.log, $LOG_DIR/client.log, $LOG_DIR/ngrok.log)"
 
 wait "$SERVER_PID" "$CLIENT_PID" "$NGROK_PID"
