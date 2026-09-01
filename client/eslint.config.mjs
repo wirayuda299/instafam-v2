@@ -12,11 +12,7 @@ const eslintConfig = [
         "error",
         {
           protected: ["app/(main)/**", "actions/**"],
-          public: [
-            "app/(auth)/**",
-            "app/api/webhooks/**",
-            "app/api/uploadthing/**",
-          ],
+          public: ["app/(auth)/**", "app/api/webhooks/**"],
         },
       ],
     },

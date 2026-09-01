@@ -6,12 +6,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "utfs.io",
-        pathname: '/**/*',
-        port:''
-      },
-{
-        protocol: "https",
         hostname: "res.cloudinary.com",
         pathname: '/**/*',
       },
@@ -28,8 +22,6 @@ const nextConfig = {
     SERVER_URL: process.env.SERVER_URL,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
-    UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
-    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
   },
 };
 

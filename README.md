@@ -7,7 +7,7 @@ Instagram-style social app. Monorepo with a Next.js client and a NestJS API serv
 **Client** (`client/`)
 - Next.js 15 (App Router, Turbopack), React 19, TypeScript
 - Tailwind CSS, shadcn/radix UI components
-- Clerk (auth), Uploadthing (file uploads), Cloudinary (media), Socket.IO client (realtime), SWR
+- Clerk (auth), Cloudinary (media uploads), Socket.IO client (realtime), SWR
 
 **Server** (`server/`)
 - NestJS 12, TypeScript
@@ -47,7 +47,7 @@ podman run -d \
 
 ### 2. Configure environment variables
 
-Copy the example env files and fill in the blanks (Cloudinary, Clerk, Uploadthing keys):
+Copy the example env files and fill in the blanks (Cloudinary, Clerk keys):
 
 ```bash
 cp server/.env.example server/.env
