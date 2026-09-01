@@ -1,3 +1,5 @@
+-- Up Migration
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
@@ -108,3 +110,18 @@ CREATE TABLE report (
     reportedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reported_post_id FOREIGN KEY(post_id) REFERENCES posts(id)
 );
+
+-- Down Migration
+
+DROP TABLE IF EXISTS report;
+DROP TABLE IF EXISTS comment_likes;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS conversations;
+DROP TABLE IF EXISTS bookmarks;
+DROP TABLE IF EXISTS post_likes;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS following;
+DROP TABLE IF EXISTS followers;
+DROP TABLE IF EXISTS user_settings;
+DROP TABLE IF EXISTS users;
