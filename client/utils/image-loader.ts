@@ -19,6 +19,9 @@ export const toBase64 = (str: string) =>
     ? Buffer.from(str).toString("base64")
     : window.btoa(str);
 
+export const blurDataURL = (w: number, h: number): `data:image/${string}` =>
+  `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
+
 export const loadImage = async <T>(src: T) =>
   new Promise((resolve, reject) => {
     const img = new Image();

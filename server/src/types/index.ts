@@ -7,6 +7,7 @@ export type Post = {
   media_url: string;
   media_asset_id: string;
   created_at: string;
+  published: boolean;
   likes: PostLike[];
 };
 
@@ -31,4 +32,17 @@ export type Comment = {
   username: string;
   profile_image: string;
   post_id: string;
+};
+
+export type NotificationType = 'like' | 'comment' | 'follow';
+
+export type Notification = {
+  id: string;
+  type: NotificationType;
+  post_id: string | null;
+  is_read: boolean;
+  created_at: string;
+  actor_id: string;
+  actor_username: string;
+  actor_image: string;
 };

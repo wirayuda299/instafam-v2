@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -37,13 +38,12 @@ export class PostsController {
     return this.postService.getUserSavedPosts(author);
   }
   @Get(':id')
-  getPost(@Param() params: any) {
-    return this.postService.getPostById(params.id);
+  getPost(@Param('id') id: string, @Query('userId') userId?: string) {
+    return this.postService.getPostById(id, userId);
   }
 
   @Post('/create')
   createNewPost(@Req() req: Request) {
-    console.log(req.body)
     return this.postService.createPost(req.body);
   }
 
@@ -72,5 +72,19 @@ export class PostsController {
     const { postId, userSession, postAuthor } = req.body;
 
     return this.postService.deletePost(postId, postAuthor, userSession);
+  }
+
+  @Post('/publish')
+  publishPost(@Body('postId') postId: string, @Body('author') author: string) {
+    return this.postService.publishPost(postId, author);
+  }
+
+  @Put('/update/captions')
+  updateCaptions(
+    @Body('postId') postId: string,
+    @Body('author') author: string,
+    @Body('captions') captions: string,
+  ) {
+    return this.postService.updateCaptions(postId, author, captions);
   }
 }

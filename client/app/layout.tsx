@@ -8,12 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    absolute: '',
-    default: 'Instafam',
-    template: '%s - Instafam'
+    absolute: "",
+    default: "Instafam",
+    template: "%s - Instafam",
   },
   description: "Social media app ",
-
 };
 
 export const viewport: Viewport = {

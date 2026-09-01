@@ -17,7 +17,10 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
-  showUsers(@Query('userId') id: string, @Query('lastCursor') lastCursor?:string) {
+  showUsers(
+    @Query('userId') id: string,
+    @Query('lastCursor') lastCursor?: string,
+  ) {
     return this.userService.getUsers(id, lastCursor);
   }
 

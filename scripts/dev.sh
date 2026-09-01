@@ -77,12 +77,12 @@ done
 echo " ready."
 
 echo "==> NestJS server (watch mode)"
-(cd "$ROOT_DIR/server" && pnpm start:dev) &
+(cd "$ROOT_DIR/server" && pnpm start:dev) 2>&1 | sed -u 's/^/[server] /' &
 SERVER_PID=$!
 echo "server pid=$SERVER_PID"
 
 echo "==> Next.js client (watch mode)"
-(cd "$ROOT_DIR/client" && pnpm dev) &
+(cd "$ROOT_DIR/client" && pnpm dev) 2>&1 | sed -u 's/^/[client] /' &
 CLIENT_PID=$!
 echo "client pid=$CLIENT_PID"
 

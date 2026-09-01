@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ChangeEvent } from "react";
 import { toast } from "sonner";
 
@@ -10,7 +9,9 @@ export default function useSearchUser() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const debouncedSave = debounce((e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value));
+  const debouncedSave = debounce((e: ChangeEvent<HTMLInputElement>) =>
+    setSearchQuery(e.target.value),
+  );
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => debouncedSave(e);
 
@@ -49,7 +50,7 @@ export default function useSearchUser() {
   return {
     handleChange,
     searchResult,
-    loading
-
-  }
+    searchQuery,
+    loading,
+  };
 }

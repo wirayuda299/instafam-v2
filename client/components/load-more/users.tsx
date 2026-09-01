@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -9,12 +9,20 @@ import { User } from "@/types";
 import UserListItem from "../shared/recommendations/user-list-item";
 import { showUsers } from "@/helper/users";
 
-type Props = { userId: string, prevUsers: User[], totalUsers: number }
+type Props = { userId: string; prevUsers: User[]; totalUsers: number };
 
-export default function LoadMoreUsers({ prevUsers, totalUsers, userId }: Props) {
+export default function LoadMoreUsers({
+  prevUsers,
+  totalUsers,
+  userId,
+}: Props) {
   const { ref, inView } = useInView();
   const [users, setUsers] = useState<User[]>(prevUsers);
-  const [lastCursor, setLastCursor] = useState<string>(prevUsers.length ? new Date(prevUsers[prevUsers.length - 1].created_at).toISOString() : '');
+  const [lastCursor, setLastCursor] = useState<string>(
+    prevUsers.length
+      ? new Date(prevUsers[prevUsers.length - 1].created_at).toISOString()
+      : "",
+  );
   const [hasMoreUser, setHasMoreUser] = useState(prevUsers.length < totalUsers);
 
   const getAllUsers = useCallback(async () => {
@@ -27,7 +35,9 @@ export default function LoadMoreUsers({ prevUsers, totalUsers, userId }: Props) 
 
       if (res.users.length > 0) {
         const newLastUser = res.users[res.users.length - 1];
-        const lastCursorTimestamp = new Date(newLastUser.created_at).toISOString();
+        const lastCursorTimestamp = new Date(
+          newLastUser.created_at,
+        ).toISOString();
 
         setLastCursor(lastCursorTimestamp);
       } else {
@@ -46,19 +56,15 @@ export default function LoadMoreUsers({ prevUsers, totalUsers, userId }: Props) 
 
   return (
     <>
-      {users.map(user => <UserListItem user={user} key={user.id} userSessionId={userId} />)}
+      {users.map((user) => (
+        <UserListItem user={user} key={user.id} userSessionId={userId} />
+      ))}
 
       {hasMoreUser && (
-        <div ref={ref} className="w-full flex justify-center p-2">
+        <div ref={ref} className="flex w-full justify-center p-2">
           <Loader2 className="animate-spin" />
-
-
-
-
-
         </div>
       )}
     </>
   );
 }
-

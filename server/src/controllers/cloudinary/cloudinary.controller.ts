@@ -20,7 +20,7 @@ export class UploadController {
   }
 
   @Delete('delete')
-  deleteImage(@Body('id') id:string){
-    return this.cloudinaryService.deleteImage(id)
+  deleteImage(@Body('id') id: string) {
+    return this.cloudinaryService.deleteImage(id);
   }
 }

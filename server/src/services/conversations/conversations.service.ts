@@ -3,7 +3,9 @@ import {
   Injectable,
   HttpStatus,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
+import type { PoolClient } from 'pg';
 
 import { DatabaseService } from '../database/database.service';
 import { SendMessageSchema, sendMessageSchema } from '../../common/validation';
@@ -21,7 +23,7 @@ type UserConversation = {
 
 @Injectable()
 export class ConversationsService {
-  constructor(private db: DatabaseService) { }
+  constructor(private db: DatabaseService) {}
 
   async getUserConversations(userId: string): Promise<UserConversation[]> {
     try {
@@ -41,133 +43,132 @@ export class ConversationsService {
 
       const { rows } = await this.db.pool.query(conversationsQuery, [userId]);
       return rows;
-    } catch (error) {
-      throw new HttpException('Failed to get conversations', HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch {
+      throw new HttpException(
+        'Failed to get conversations',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  async editMessage(
-    messageAuthor: string,
-    currentUser: string,
-    messageId: string,
-    content: string,
-  ) {
-    try {
-      if (messageAuthor !== currentUser) {
-        throw new HttpException('You are not allowed to edit this message', HttpStatus.UNAUTHORIZED);
-      }
+  async editMessage(currentUser: string, messageId: string, content: string) {
+    const { rows } = await this.db.pool.query(
+      `SELECT * FROM messages WHERE id = $1`,
+      [messageId],
+    );
+    const message = rows[0];
 
-      const message = await this.db.pool.query(`SELECT * FROM messages WHERE id = $1`, [messageId]);
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+    if (message.author !== currentUser) {
+      throw new HttpException(
+        'You are not allowed to edit this message',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
-      if (message.rows.length < 1) {
-        throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
-      }
-
-      await this.db.pool.query(
-        `UPDATE messages
+    await this.db.pool.query(
+      `UPDATE messages
          SET content = $1, updated_at = NOW()
          WHERE id = $2`,
-        [content, messageId],
-      );
+      [content, messageId],
+    );
 
-      return {
-        message: 'Message updated successfully',
-        error: false,
-      };
-    } catch (error) {
-      throw new HttpException('Failed to update message', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return {
+      message: 'Message updated successfully',
+      error: false,
+    };
   }
 
   async sendPersonalMessage(data: SendMessageSchema) {
+    const validatedValue = sendMessageSchema.safeParse(data);
+    if (!validatedValue.success) {
+      throw new BadRequestException('Data is not valid');
+    }
+
+    const {
+      message,
+      recipient_id,
+      parent_id,
+      image_url,
+      userId,
+      image_asset_id,
+    } = validatedValue.data;
+
     try {
-      const validatedValue = sendMessageSchema.safeParse(data);
-      if (!validatedValue.success) {
-        throw new BadRequestException('Data is not valid');
-      }
-
-      const {
-        conversationId,
-        message,
-        recipient_id,
-        parent_id,
-        image_url,
-        userId,
-        image_asset_id,
-      } = validatedValue.data;
-
-      await this.db.pool.query('BEGIN');
-
-      const currentConversations = await this.getUserConversations(userId);
-      if (currentConversations.length > 0) {
-        // Send the message if the conversation already exists
-        await this.send({
-          conversationId: currentConversations[0].conversationId,
-          image_asset_id,
-          image_url,
-          message,
-          parent_id: parent_id || null,
-          recipient_id,
-          userId,
-        });
-      } else {
-        // Create a new conversation if it doesn't exist
-        const {
-          rows: [conversation],
-        } = await this.db.pool.query(
-          `INSERT INTO conversations (sender_id, recipient_id)
+      await this.db.transaction(async (client) => {
+        const currentConversations = await this.getUserConversations(userId);
+        if (currentConversations.length > 0) {
+          // Send the message if the conversation already exists
+          await this.send(client, {
+            conversationId: currentConversations[0].conversationId,
+            image_asset_id,
+            image_url,
+            message,
+            parent_id: parent_id || null,
+            recipient_id,
+            userId,
+          });
+        } else {
+          // Create a new conversation if it doesn't exist
+          const {
+            rows: [conversation],
+          } = await client.query(
+            `INSERT INTO conversations (sender_id, recipient_id)
            VALUES ($1, $2)
            RETURNING id`,
-          [userId, recipient_id],
-        );
+            [userId, recipient_id],
+          );
 
-        await this.send({
-          userId,
-          conversationId: conversation.id,
-          image_asset_id,
-          image_url,
-          message,
-          parent_id: parent_id || null,
-          recipient_id,
-        });
-      }
-
-      await this.db.pool.query('COMMIT');
-    } catch (error) {
-      await this.db.pool.query('ROLLBACK');
-      throw new HttpException('Failed to send message', HttpStatus.INTERNAL_SERVER_ERROR);
+          await this.send(client, {
+            userId,
+            conversationId: conversation.id,
+            image_asset_id,
+            image_url,
+            message,
+            parent_id: parent_id || null,
+            recipient_id,
+          });
+        }
+      });
+    } catch {
+      throw new HttpException(
+        'Failed to send message',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  async send(data: SendMessageSchema) {
-    try {
-      const validatedValue = sendMessageSchema.safeParse(data);
-      if (!validatedValue.success) {
-        throw new BadRequestException('Data is not valid');
-      }
+  async send(client: PoolClient, data: SendMessageSchema) {
+    const validatedValue = sendMessageSchema.safeParse(data);
+    if (!validatedValue.success) {
+      throw new BadRequestException('Data is not valid');
+    }
 
-      const {
-        conversationId,
-        message,
-        parent_id,
-        image_url,
-        userId,
-        image_asset_id,
-      } = validatedValue.data;
-      console.log(validatedValue.data)
+    const {
+      conversationId,
+      message,
+      parent_id,
+      image_url,
+      userId,
+      image_asset_id,
+    } = validatedValue.data;
 
-      await this.db.pool.query(
-        `INSERT INTO messages("content", author, attachment_url, attachment_id, conversation_id, parent_id)
+    await client.query(
+      `INSERT INTO messages("content", author, attachment_url, attachment_id, conversation_id, parent_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id`,
-        [message, userId, image_url, image_asset_id, conversationId, parent_id || null],
-      );
-    } catch (e) {
-      console.log(e)
-      throw new HttpException('Failed to send message', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+      [
+        message,
+        userId,
+        image_url,
+        image_asset_id,
+        conversationId,
+        parent_id || null,
+      ],
+    );
   }
-
 
   async getPersonalMessage(userId: string | null) {
     try {
@@ -224,8 +225,11 @@ export class ConversationsService {
       }
 
       return allMessages;
-    } catch (error) {
-      throw new HttpException('Failed to retrieve messages', HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch {
+      throw new HttpException(
+        'Failed to retrieve messages',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

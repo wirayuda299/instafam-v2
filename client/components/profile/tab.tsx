@@ -11,6 +11,7 @@ import {
 import { Grid, Bookmark, LockKeyhole, AtSign } from "lucide-react";
 
 import { User } from "@/types";
+import { cn } from "@/lib/utils";
 
 type Props = {
   userId: string;
@@ -85,18 +86,27 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
     };
   }, [activeTab, updateStyles]);
 
+  const activeTabName = tab ?? "posts";
+  const tabClass = (name: string) =>
+    cn(
+      "flex items-center gap-2 pb-3 transition-colors",
+      activeTabName === name
+        ? "text-white"
+        : "text-white/50 hover:text-white/80",
+    );
+
   return (
-    <div className="relative mx-auto flex min-w-fit max-w-(--breakpoint-md) items-center justify-center gap-10 p-3">
+    <div className="relative mx-auto flex max-w-(--breakpoint-md) min-w-fit items-center justify-center gap-10 p-3">
       <div
         ref={lineRef}
-        className="ease absolute top-0 h-px w-[71px] rounded-full bg-white transition-all duration-300"
+        className="ease absolute bottom-0 h-0.5 w-[71px] rounded-full bg-white transition-all duration-300"
       ></div>
       <button
         ref={ref1}
         title="posts"
         name="posts"
         onClick={() => handleChangeActiveTab(ref1.current!)}
-        className="flex items-center gap-2"
+        className={tabClass("posts")}
       >
         <Grid /> <span className="font-medium">Posts</span>
       </button>
@@ -106,7 +116,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           title="saved"
           name="saved"
           onClick={() => handleChangeActiveTab(ref2.current!)}
-          className="flex items-center gap-2"
+          className={tabClass("saved")}
         >
           <Bookmark /> <span className="font-medium">Saved</span>
         </button>
@@ -117,7 +127,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           title="draft"
           name="draft"
           onClick={() => handleChangeActiveTab(ref3.current!)}
-          className="flex items-center gap-2"
+          className={tabClass("draft")}
         >
           <LockKeyhole />
           <span className="font-medium">Draft</span>
@@ -129,7 +139,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           title="mention"
           name="mention"
           onClick={() => handleChangeActiveTab(ref4.current!)}
-          className="flex items-center gap-2"
+          className={tabClass("mention")}
         >
           <AtSign />
           <span className="font-medium">Mention</span>

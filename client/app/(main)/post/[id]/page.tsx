@@ -3,11 +3,11 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import PostCard from "@/components/shared/post-card";
-import { shimmer, toBase64 } from "@/utils/image-loader";
+import { blurDataURL } from "@/utils/image-loader";
 import { getPostById } from "@/helper/posts";
 import { getAllComments } from "@/helper/comments";
 import LoadMoreComments from "@/components/load-more/comments";
-import CommentLikeButton from "@/components/comment-like-button";
+import CommentItem from "@/components/shared/comment-item";
 
 type Params = {
   params: Promise<{
@@ -15,27 +15,26 @@ type Params = {
   }>;
 };
 
-
 export default async function PostDetail({ params }: Params) {
-  await auth.protect();
-  const id = (await params).id
-  const post = await getPostById(id);
+  const { userId } = await auth.protect();
+  const id = (await params).id;
+  const post = await getPostById(id, userId);
   if (!post) return notFound();
 
   const comments = await getAllComments(id);
   return (
-    <div className="flex max-h-screen min-h-dvh w-full flex-col items-center justify-center gap-3 divide-y divide-gray-600 overflow-y-auto px-3 max-lg:max-h-dvh lg:min-h-screen">
-      <div className="flex h-full max-h-[510px] min-h-[510px] w-full max-w-(--breakpoint-lg) max-lg:max-h-full max-lg:flex-col">
+    <div className="flex max-h-screen min-h-dvh w-full flex-col items-center justify-center overflow-y-auto px-3 py-3 max-lg:max-h-dvh lg:min-h-screen">
+      <div className="flex h-full max-h-[600px] min-h-[510px] w-full max-w-(--breakpoint-lg) overflow-hidden rounded-xl border border-gray-800 bg-zinc-950 shadow-sm max-lg:max-h-full max-lg:flex-col">
         <Image
-          className="aspect-auto max-h-[510px] w-full max-w-[450px] rounded-lg border border-gray-600 object-cover object-center max-lg:max-h-[300px] max-lg:max-w-full"
+          className="aspect-auto max-h-[600px] w-full max-w-[450px] object-cover object-center max-lg:max-h-[300px] max-lg:max-w-full"
           src={post?.media_url}
           loading="lazy"
-          placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500,500))}`}
+          placeholder={blurDataURL(500, 500)}
           width={500}
           height={500}
           alt="attachment"
         />
-        <div className="w-full relative max-lg:max-h-[500px] max-lg:max-w-full md:overflow-y-auto ">
+        <div className="relative w-full max-lg:max-h-[500px] max-lg:max-w-full">
           <PostCard
             fileId={post.media_asset_id}
             created_at={post.created_at}
@@ -44,9 +43,10 @@ export default async function PostDetail({ params }: Params) {
             priority={true}
             loading="eager"
             postId={id}
-            actionButtonStyles="sticky bottom-0 border-t border-gray-500/50"
-            rootStyles="md:justify-between w-full h-full"
-            headerStyles="lg:sticky top-0 z-10 bg-black border-b border-gray-500/50 p-2"
+            published={post.published}
+            actionButtonStyles="border-t border-gray-800 pt-3"
+            rootStyles="w-full h-full rounded-none border-none bg-transparent shadow-none"
+            headerStyles="lg:sticky top-0 z-10 bg-zinc-950 border-b border-gray-800"
             imageStyles="hidden!"
             commentStyles="hidden!"
             authorImage={post?.profile_image}
@@ -54,47 +54,20 @@ export default async function PostDetail({ params }: Params) {
             captions={post?.captions}
             media={post?.media_url}
           >
-            <div className="flex max-h-[500px] flex-col justify-items-start gap-5 justify-self-start overflow-y-auto px-2">
-              {comments?.map((comment) => (
-                <div
-                  key={comment.comment_id}
-                  className="flex w-full justify-between gap-2 rounded-md p-1 hover:bg-black-1/50"
-                >
-                  <div className="flex gap-2">
-                    <Image
-                      loading="lazy"
-                      placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(50, 50))}`}
-                      className="aspect-auto size-12 min-w-12 rounded-full object-cover"
-                      src={comment.profile_image}
-                      width={45}
-                      height={45}
-                      alt="profile"
-                    />
-                    <div>
-                      <div className="flex flex-wrap gap-2">
-                        <h3 className="text-sm font-semibold">
-                          {comment.username}
-                        </h3>
-                        <div>
-                          <p className="text-xs">{comment.comment}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 pt-1 text-xs text-gray-500">
-                        <p>1m</p>
-                        <p>5 like</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CommentLikeButton
-                    likes={comment.likes}
-                    commentId={comment.comment_id}
-                  />
-                </div>
-              ))}
+            <div className="flex flex-col gap-2 p-3 md:p-4">
+              {comments.length < 1 ? (
+                <p className="py-6 text-center text-sm text-white/50">
+                  No comments yet. Be the first to comment.
+                </p>
+              ) : (
+                comments.map((comment) => (
+                  <CommentItem key={comment.comment_id} comment={comment} />
+                ))
+              )}
               <LoadMoreComments
                 prevComments={comments}
                 postId={id}
-                createdAt={comments[comments.length - 1]?.createdat}
+                createdAt={comments[comments.length - 1]?.created_at}
                 cursor={comments[comments.length - 1]?.comment_id}
               />
             </div>

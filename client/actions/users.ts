@@ -1,14 +1,11 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
 
+import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 import { createUserSchema, CreateUserType } from "@/validation";
-import { RequestConfig, SERVER_URL } from "@/constants";
+import { apiFetch } from "@/lib/http";
 
-// Called only from app/api/webhooks/route.ts (Clerk's user.created webhook),
-// a server-to-server call verified by svix signature, not a user session --
-// eslint-disable-next-line @clerk/next/require-auth-protection -- see above
 export async function createUser(values: CreateUserType) {
   try {
     const validatedValue = createUserSchema.parse(values);
@@ -16,14 +13,16 @@ export async function createUser(values: CreateUserType) {
 
     const { username, id, email, image } = validatedValue;
 
-    const requestConf = new RequestConfig('POST')
-    requestConf.setBody(JSON.stringify({
-      username,
-      id,
-      email,
-      image,
-    }))
-    const res = await fetch(`${SERVER_URL}/users/create`, requestConf.toRequestInit());
+    const res = await apiFetch("/users/create", {
+      method: "POST",
+      credentials: "include",
+      json: {
+        username,
+        id,
+        email,
+        image,
+      },
+    });
 
     if (!res.ok) throw new Error("Failed to create user");
 
@@ -32,6 +31,7 @@ export async function createUser(values: CreateUserType) {
       error: false,
     };
   } catch (error) {
+    console.log("failed to create user -> ", error);
     throw error;
   }
 }
@@ -39,12 +39,14 @@ export async function createUser(values: CreateUserType) {
 export async function followUnfollow(userId: string, userToFollow: string) {
   await auth.protect();
   try {
-    const requestConf = new RequestConfig('POST')
-    requestConf.setBody(JSON.stringify({
-      userId,
-      userToFollow,
-    }))
-    const res = await fetch(`${SERVER_URL}/users/follow_unfollow`, requestConf.toRequestInit());
+    const res = await apiFetch("/users/follow_unfollow", {
+      method: "POST",
+      credentials: "include",
+      json: {
+        userId,
+        userToFollow,
+      },
+    });
 
     if (!res.ok) throw new Error("Failed to follow or unfollow user");
 
@@ -55,4 +57,3 @@ export async function followUnfollow(userId: string, userToFollow: string) {
     };
   }
 }
-

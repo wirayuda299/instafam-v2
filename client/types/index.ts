@@ -7,6 +7,7 @@ export type Post = {
   media_url: string;
   media_asset_id: string;
   created_at: string;
+  published: boolean;
   likes: Like[];
 };
 
@@ -54,8 +55,8 @@ export interface Comment {
   comment_id: string;
   author: string;
   comment: string;
-  createdat: string;
-  updatedat: string;
+  created_at: string;
+  updated_at: string;
   username: string;
   profile_image: string;
   post_id: string;
@@ -69,7 +70,7 @@ export type User = {
   id: string;
   username: string;
   email: string;
-    created_at:string
+  created_at: string;
   profile_image: string;
   bio: string;
   settings: {
@@ -91,4 +92,17 @@ export type ConversationMessage = {
   level: number;
   created_at: string;
   updated_at: string;
+};
+
+export type NotificationType = "like" | "comment" | "follow";
+
+export type Notification = {
+  id: string;
+  type: NotificationType;
+  post_id: string | null;
+  is_read: boolean;
+  created_at: string;
+  actor_id: string;
+  actor_username: string;
+  actor_image: string;
 };

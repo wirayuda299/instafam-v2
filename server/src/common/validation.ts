@@ -21,7 +21,6 @@ export const addCommentSchema = z.object({
   post_id: z.string().min(1, 'Post id is required'),
 });
 
-
 export const sendMessageSchema = z.object({
   conversationId: z.string().optional(),
   message: z.string().min(1, 'Please add message'),

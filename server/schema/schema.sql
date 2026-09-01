@@ -5,8 +5,9 @@ id varchar(100) not null primary key,
 username varchar(50) not null,
 email varchar(100) not null,
 profile_image text not null,
-bio varchar(100) default ''
-) 
+bio varchar(100) default '',
+created_at timestamptz not null default now()
+)
 
 
 create index username_index on users using gin(to_tsvector('indonesian',username))
@@ -44,7 +45,7 @@ author varchar(100) not null,
 captions text default '',
 media_url text,
 media_asset_id varchar(50),
-createdAt timestamp default CURRENT_TIMESTAMP,
+createdAt timestamptz default now(),
  published boolean default true,
 constraint fk_author_id foreign key(author) references users(id) on delete cascade
 )
@@ -85,8 +86,8 @@ CREATE TABLE messages (
     content TEXT NOT NULL,
     attachment_url text,
     attachment_id varchar(100),
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    createdAt timestamptz DEFAULT now(),
+    updatedAt timestamptz DEFAULT now(),
     parent_id uuid REFERENCES messages(id) ON DELETE CASCADE,
     author varchar(100) REFERENCES users(id) ON DELETE cascade,
     conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE
@@ -97,8 +98,8 @@ id uuid default uuid_generate_v4() primary key,
 message text default '',
 post_id uuid not null,
 author varchar(100) not null,
-createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+createdAt timestamptz DEFAULT now(),
+updatedAt timestamptz DEFAULT now(),
 parent_id uuid REFERENCES comments(id) ON DELETE CASCADE,
 constraint fk_comment_post_id foreign key (post_id) references posts(id) on delete cascade,
 constraint fk_comment_author foreign key(author) references users(id) on delete cascade
@@ -117,10 +118,25 @@ create table report(
 id uuid default uuid_generate_v4() primary key,
 post_id uuid not null,
 reason varchar(50)[],
-reportedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+reportedAt timestamptz DEFAULT now(),
 constraint fk_reported_post_id foreign key(post_id) references posts(id)
 
 )
+
+create table notifications(
+id uuid default uuid_generate_v4() primary key,
+recipient_id varchar(100) not null,
+actor_id varchar(100) not null,
+type varchar(20) not null,
+post_id uuid,
+is_read boolean not null default false,
+created_at timestamptz not null default now(),
+constraint fk_notification_recipient foreign key(recipient_id) references users(id) on delete cascade,
+constraint fk_notification_actor foreign key(actor_id) references users(id) on delete cascade,
+constraint fk_notification_post foreign key(post_id) references posts(id) on delete cascade
+)
+
+create index notifications_recipient_idx on notifications(recipient_id, created_at desc)
 
 
 

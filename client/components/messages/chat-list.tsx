@@ -49,22 +49,28 @@ export default function ChatList() {
     };
   }, [params.id, socket]);
 
-  const handleSelectMessage = (message: ConversationMessage | null) => setSelectedMessage(message)
+  const handleSelectMessage = (message: ConversationMessage | null) =>
+    setSelectedMessage(message);
 
   return (
     <>
       <ol className="flex min-h-svh flex-col gap-5 p-5">
-        {loading
-          ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, i) => (
+        {loading ? (
+          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, i) => (
             <div
               key={i}
               className={cn(
-                "h-7 w-full max-w-xs animate-pulse rounded-md bg-black-1/50",
+                "bg-black-1/50 h-7 w-full max-w-xs animate-pulse rounded-md",
                 i % 2 === 0 ? "self-end" : "self-start",
               )}
             ></div>
           ))
-          : messages.map((c) => (
+        ) : messages.length < 1 ? (
+          <p className="py-6 text-center text-sm text-white/50">
+            No messages yet. Say hi!
+          </p>
+        ) : (
+          messages.map((c) => (
             <ChatItem
               messages={messages}
               selectMessage={handleSelectMessage}
@@ -72,7 +78,8 @@ export default function ChatList() {
               key={c.id}
               userId={userId!}
             />
-          ))}
+          ))
+        )}
       </ol>
       <ChatForm
         userId={userId!}

@@ -7,12 +7,16 @@ import {
 } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { createUserSchema, CreateUserType } from 'src/common/validation';
 import { User } from 'src/types';
 
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) { }
+  constructor(
+    private db: DatabaseService,
+    private notifications: NotificationsService,
+  ) {}
   async createUser(values: CreateUserType) {
     try {
       const validatedValue = createUserSchema.safeParse(values);
@@ -24,21 +28,24 @@ export class UsersService {
 
       const { id, username, email, image } = validatedValue.data;
 
-      await this.db.pool.query(`begin`);
-      await this.db.pool.query(
-        `insert into users(id, email, username, profile_image)
+      await this.db.transaction(async (client) => {
+        await client.query(
+          `insert into users(id, email, username, profile_image)
                      values($1,$2,$3,$4)`,
-        [id, email, username, image]);
+          [id, email, username, image],
+        );
 
-      await this.db.pool.query(`insert into user_settings (userId) values($1)`, [id]);
-      await this.db.pool.query(`commit`);
+        await client.query(`insert into user_settings (userId) values($1)`, [
+          id,
+        ]);
+      });
 
       return {
         messages: 'User created',
         error: false,
       };
     } catch (error) {
-      await this.db.pool.query(`rollback`);
+      console.log('failed to create user -> ', error);
       throw error;
     }
   }
@@ -59,23 +66,14 @@ export class UsersService {
 
       return users.rows;
     } catch (e) {
-
       throw e;
     }
   }
 
   async updateBio(bio: string, userId: string) {
-    try {
-      await this.db.pool.query(`begin`);
-      await this.db.pool.query(`update users set bio= $1 where id = $2`, [bio, userId])
-        .then(() => {
-          return { messages: 'bio updated' };
-        });
-      await this.db.pool.query(`commit`);
-    } catch (error) {
-      await this.db.pool.query(`rollback`);
-      throw error;
-    }
+    await this.db.transaction((client) =>
+      client.query(`update users set bio= $1 where id = $2`, [bio, userId]),
+    );
   }
 
   async updateUserSetting(
@@ -85,37 +83,38 @@ export class UsersService {
     show_saved_post: boolean,
     show_draft_posts: boolean,
   ) {
-    try {
-      if (userId !== userSessionId) throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-      await this.db.pool.query(`begin`);
+    if (userId !== userSessionId)
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
-      await this.db.pool.query(
+    await this.db.transaction((client) =>
+      client.query(
         `update user_settings
 			     set show_mention = $1,
            show_draft_posts = $2,
            show_saved_post = $3
            where userid=$4`,
         [show_mention, show_draft_posts, show_saved_post, userId],
-      );
-      await this.db.pool.query(`commit`);
+      ),
+    );
 
-      return {
-        message: 'User setting has been updated',
-      };
-    } catch (e) {
-
-      await this.db.pool.query(`rollback`);
-      throw e;
-    }
+    return {
+      message: 'User setting has been updated',
+    };
   }
 
   async getUserById(id: string) {
     try {
-      const user = await this.db.pool.query(`select * from users where id = $1`, [id]);
+      const user = await this.db.pool.query(
+        `select * from users where id = $1`,
+        [id],
+      );
 
-      if (user.rows.length < 0) return new NotFoundException('User not found')
+      if (user.rows.length < 0) return new NotFoundException('User not found');
 
-      const userSettings = await this.db.pool.query(`select * from user_settings where userId= $1`, [user.rows[0].id]);
+      const userSettings = await this.db.pool.query(
+        `select * from user_settings where userId= $1`,
+        [user.rows[0].id],
+      );
 
       user.rows[0].settings = userSettings.rows[0];
 
@@ -127,7 +126,10 @@ export class UsersService {
 
   async getUserFollowers(userId: string): Promise<{ follower_id: string }[]> {
     try {
-      const followers = await this.db.pool.query(`select follower_id from followers where user_id = $1`, [userId]);
+      const followers = await this.db.pool.query(
+        `select follower_id from followers where user_id = $1`,
+        [userId],
+      );
       return followers.rows;
     } catch (e) {
       throw e;
@@ -136,7 +138,10 @@ export class UsersService {
 
   async getUserFollowing(userId: string): Promise<{ follower_id: string }[]> {
     try {
-      const followings = await this.db.pool.query(`select following_id from following where user_id = $1`, [userId]);
+      const followings = await this.db.pool.query(
+        `select following_id from following where user_id = $1`,
+        [userId],
+      );
       return followings.rows;
     } catch (e) {
       throw e;
@@ -144,23 +149,35 @@ export class UsersService {
   }
 
   async followOrUnfollow(userToFollow: string, currentUser: string) {
-    try {
-      const followers = await this.getUserFollowers(userToFollow);
-      const isFollowed = followers.find((follower) => follower.follower_id === currentUser);
+    const followers = await this.getUserFollowers(userToFollow);
+    const isFollowed = followers.find(
+      (follower) => follower.follower_id === currentUser,
+    );
 
-      await this.db.pool.query(`begin`);
-
+    await this.db.transaction(async (client) => {
       if (isFollowed) {
-        await this.db.pool.query(`delete from followers where follower_id = $1 and user_id = $2`, [currentUser, userToFollow]);
-        await this.db.pool.query(`delete from following where user_id = $1 and following_id = $2`, [currentUser, userToFollow]);
+        await client.query(
+          `delete from followers where follower_id = $1 and user_id = $2`,
+          [currentUser, userToFollow],
+        );
+        await client.query(
+          `delete from following where user_id = $1 and following_id = $2`,
+          [currentUser, userToFollow],
+        );
       } else {
-        await this.db.pool.query(`insert into followers(user_id, follower_id) values($1,$2)`, [userToFollow, currentUser]);
-        await this.db.pool.query(`insert into following(user_id, following_id) values($1,$2)`, [currentUser, userToFollow]);
+        await client.query(
+          `insert into followers(user_id, follower_id) values($1,$2)`,
+          [userToFollow, currentUser],
+        );
+        await client.query(
+          `insert into following(user_id, following_id) values($1,$2)`,
+          [currentUser, userToFollow],
+        );
       }
-      await this.db.pool.query(`commit`);
-    } catch (e) {
-      await this.db.pool.query(`rollback`);
-      throw e;
+    });
+
+    if (!isFollowed) {
+      await this.notifications.notify(userToFollow, currentUser, 'follow');
     }
   }
 
@@ -171,13 +188,15 @@ export class UsersService {
 
       const params = lastCursor ? [userId, lastCursor] : [userId];
 
-      const totalUsersResult = await this.db.pool.query('SELECT COUNT(*) FROM users');
+      const totalUsersResult = await this.db.pool.query(
+        'SELECT COUNT(*) FROM users',
+      );
 
       const usersResult = await this.db.pool.query(query, params);
 
       return {
         users: usersResult.rows,
-        totalUser: parseInt(totalUsersResult.rows[0].count, 10)
+        totalUser: parseInt(totalUsersResult.rows[0].count, 10),
       };
     } catch (error) {
       throw error;

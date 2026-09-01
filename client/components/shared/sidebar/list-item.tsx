@@ -8,6 +8,7 @@ type Props = {
   path: string;
   label: string;
   isCurrentPathMessages: boolean;
+  isActive?: boolean;
 };
 
 export default function ListItem({
@@ -15,20 +16,29 @@ export default function ListItem({
   Icon,
   label,
   isCurrentPathMessages,
+  isActive = false,
 }: Props) {
   return (
     <li
       className={cn(
-        "group rounded-md p-2 hover:bg-black-1/30 md:w-full",
+        "group rounded-md border-l-2 border-transparent p-2 transition-colors hover:bg-white/5 md:w-full",
+        isActive && "border-blue-500 bg-white/10",
         label === "messages" && "hidden md:block",
       )}
     >
-      <Link href={path} className="flex items-center gap-3">
+      <Link
+        href={path}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          "flex items-center gap-3 transition-colors",
+          isActive ? "text-white" : "text-white/60 hover:text-white",
+        )}
+      >
         {Icon}
         <span
           className={cn(
-            "prose prose-sm capitalize text-white 2xl:prose-lg group-hover:brightness-110",
-
+            "prose prose-sm 2xl:prose-lg capitalize",
+            isActive ? "font-semibold text-white" : "text-inherit",
             isCurrentPathMessages ? "hidden" : "hidden md:block",
           )}
         >

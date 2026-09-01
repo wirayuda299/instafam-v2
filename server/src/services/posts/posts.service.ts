@@ -6,39 +6,35 @@ import {
 } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { createPostSchema, CreatePostType } from 'src/common/validation';
 import { Post, PostLike } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private notifications: NotificationsService,
+  ) {}
 
   async createPost(data: CreatePostType) {
+    const validatedValues = createPostSchema.safeParse(data);
+    if (!validatedValues.success)
+      throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
+
+    const { captions, author, media_asset_id, media_url, published } =
+      validatedValues.data;
+
     try {
-      const validatedValues = createPostSchema.safeParse(data);
-      if (!validatedValues.success)
-        throw new HttpException('Invalid data', HttpStatus.BAD_REQUEST);
-
-      const { captions, author, media_asset_id, media_url, published } =
-        validatedValues.data;
-
-      await this.db.pool.query(`begin`);
-      await this.db.pool
-        .query(
+      await this.db.transaction((client) =>
+        client.query(
           `INSERT INTO posts (author, captions, media_url, media_asset_id, published)
                      VALUES ($1, $2, $3, $4, $5)`,
           [author, captions, media_url, media_asset_id, published],
-        )
-        .then(() => {
-          return {
-            messages: 'Post has been created',
-            error: false,
-          };
-        });
-
-      await this.db.pool.query(`commit`);
+        ),
+      );
     } catch (error) {
-      await this.db.pool.query(`rollback`);
+      console.log('error create post', error);
       throw error;
     }
   }
@@ -73,15 +69,15 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.created_at,
+        p.createdAt AS created_at,
         p.media_asset_id AS media_asset_id,
         COUNT(pl.post_id) AS likes_count
       FROM posts AS p
       JOIN users AS u ON u.id = p.author
       LEFT JOIN post_likes pl ON p.id = pl.post_id
-      WHERE (p.created_at, p.id) < ($1, $2) AND p.published = true
-      GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.published, p.media_url, p.created_at, p.media_asset_id
-      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      WHERE (p.createdAt, p.id) < ($1, $2) AND p.published = true
+      GROUP BY p.id, p.author, u.username, u.profile_image, p.captions, p.published, p.media_url, p.createdAt, p.media_asset_id
+      ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
       LIMIT 10`;
 
       const queryWithoutCursor = `
@@ -92,15 +88,15 @@ export class PostsService {
         u.profile_image AS profile_image,
         p.captions AS captions,
         p.media_url AS media_url,
-        p.created_at,
+        p.createdAt AS created_at,
         COUNT(pl.post_id) AS likes_count,
         p.media_asset_id AS media_asset_id
       FROM posts AS p
       JOIN users AS u ON u.id = p.author
       LEFT JOIN post_likes pl ON p.id = pl.post_id
       WHERE p.published = true
-      GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.created_at, p.media_asset_id
-      ORDER BY likes_count DESC, p.created_at DESC, p.id DESC
+      GROUP BY p.id, p.published, p.author, u.username, u.profile_image, p.captions, p.media_url, p.createdAt, p.media_asset_id
+      ORDER BY likes_count DESC, p.createdAt DESC, p.id DESC
       LIMIT 10`;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
@@ -129,7 +125,8 @@ export class PostsService {
       throw error;
     }
   }
-  async getPostById(postId: string): Promise<Post> {
+
+  async getPostById(postId: string, viewerId?: string): Promise<Post | null> {
     try {
       const post = await this.db.pool.query(
         ` SELECT
@@ -139,13 +136,16 @@ export class PostsService {
                     u.profile_image AS profile_image,
                     p.captions AS captions,
                     p.media_url AS media_url,
-                    p.created_at,
-                    p.media_asset_id AS media_asset_id
+                    p.createdAt AS created_at,
+                    p.media_asset_id AS media_asset_id,
+                    p.published AS published
                     FROM posts AS p
                     JOIN users AS u ON u.id = p.author
-                    where p.id = $1 and p.published =true`,
-        [postId],
+                    where p.id = $1 and (p.published = true or p.author = $2)`,
+        [postId, viewerId ?? null],
       );
+
+      if (post.rows.length < 1) return null;
 
       const likes = await this.getPostLikes(post.rows[0].post_id);
       post.rows[0].likes = likes || [];
@@ -156,30 +156,46 @@ export class PostsService {
   }
 
   async deletePost(postId: string, postAuthor: string, userSession: string) {
-    try {
-      if (postAuthor !== userSession)
-        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    if (postAuthor !== userSession)
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
-      const post = await this.db.pool.query(
-        `select exists(select * from posts where id =$1)`,
-        [postId],
+    const post = await this.db.pool.query(
+      `select exists(select * from posts where id =$1)`,
+      [postId],
+    );
+    if (!post.rows[0].exists) throw new NotFoundException('Post not found');
+
+    await this.db.transaction((client) =>
+      client.query(`delete from posts where id = $1`, [postId]),
+    );
+  }
+
+  async publishPost(postId: string, author: string) {
+    const result = await this.db.pool.query(
+      `update posts set published = true where id = $1 and author = $2`,
+      [postId, author],
+    );
+    if (result.rowCount === 0) {
+      throw new HttpException(
+        'Post not found or you are not the author',
+        HttpStatus.UNAUTHORIZED,
       );
-      if (!post.rows[0].exists) throw new NotFoundException('Post not found');
-
-      await this.db.pool.query(`begin`);
-      await this.db.pool
-        .query(`delete from posts where id = $1`, [postId])
-        .then(() => {
-          return {
-            messages: 'Post successfully deleted',
-            error: false,
-          };
-        });
-      await this.db.pool.query(`commit`);
-    } catch (error) {
-      await this.db.pool.query(`rollback`);
-      throw error;
     }
+    return { message: 'Post has been published' };
+  }
+
+  async updateCaptions(postId: string, author: string, captions: string) {
+    const result = await this.db.pool.query(
+      `update posts set captions = $1 where id = $2 and author = $3`,
+      [captions, postId, author],
+    );
+    if (result.rowCount === 0) {
+      throw new HttpException(
+        'Post not found or you are not the author',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return { message: 'Post updated' };
   }
 
   async getPostLikes(postId: string): Promise<PostLike[]> {
@@ -199,28 +215,34 @@ export class PostsService {
   }
 
   async likeOrDislikePost(postId: string, liked_by: string) {
-    try {
-      await this.db.pool.query(`begin`);
-      const isLiked = await this.db.pool.query(
+    let postAuthor: string | null = null;
+
+    await this.db.transaction(async (client) => {
+      const isLiked = await client.query(
         `select * from post_likes as pl where pl.post_id = $1 and pl.liked_by = $2`,
         [postId, liked_by],
       );
 
       if (isLiked.rows.length > 0) {
-        await this.db.pool.query(
+        await client.query(
           `delete from post_likes where post_id = $1 and liked_by = $2`,
           [postId, liked_by],
         );
       } else {
-        await this.db.pool.query(
+        await client.query(
           `insert into post_likes (post_id, liked_by) values($1,$2)`,
           [postId, liked_by],
         );
+        const author = await client.query(
+          `select author from posts where id = $1`,
+          [postId],
+        );
+        postAuthor = author.rows[0]?.author ?? null;
       }
-      await this.db.pool.query(`commit`);
-    } catch (error) {
-      await this.db.pool.query(`rollback`);
-      throw error;
+    });
+
+    if (postAuthor) {
+      await this.notifications.notify(postAuthor, liked_by, 'like', postId);
     }
   }
 
@@ -243,12 +265,12 @@ export class PostsService {
                     u.profile_image AS profile_image,
                     p.captions AS captions,
                     p.media_url AS media_url,
-                    p.created_at,
+                    p.createdAt AS created_at,
                     p.media_asset_id AS media_asset_id
                     FROM posts AS p
                     JOIN users AS u ON u.id = p.author
-                    WHERE (p.created_at, p.id) < ($1, $2) and p.author = $3 and p.published= $4
-                    ORDER BY p.created_at DESC, p.id DESC
+                    WHERE (p.createdAt, p.id) < ($1, $2) and p.author = $3 and p.published= $4
+                    ORDER BY p.createdAt DESC, p.id DESC
                     LIMIT 10 `;
 
       const queryWithoutCursor = `
@@ -259,12 +281,12 @@ export class PostsService {
                 u.profile_image AS profile_image,
                 p.captions AS captions,
                 p.media_url AS media_url,
-                p.created_at,
+                p.createdAt AS created_at,
                 p.media_asset_id AS media_asset_id
                 FROM posts AS p
                 JOIN users AS u ON u.id = p.author
                 where p.author = $1 and p.published=$2
-                ORDER BY p.created_at DESC
+                ORDER BY p.createdAt DESC
                 LIMIT 10 `;
 
       const query = lastCursor ? queryWithCursor : queryWithoutCursor;
@@ -291,15 +313,14 @@ export class PostsService {
   }
 
   async savePost(author: string, post_id: string) {
-    try {
-      await this.db.pool.query(`begin`);
-      const isSaved = await this.db.pool.query(
+    return this.db.transaction(async (client) => {
+      const isSaved = await client.query(
         `select * from bookmarks where author = $1 and post_id = $2`,
         [author, post_id],
       );
 
       if (isSaved.rows.length > 0) {
-        await this.db.pool.query(
+        await client.query(
           `delete from bookmarks where author = $1 and post_id = $2`,
           [author, post_id],
         );
@@ -307,20 +328,16 @@ export class PostsService {
           message: 'Post has been removed from your bookmarks',
         };
       } else {
-        await this.db.pool.query(
+        await client.query(
           `insert into bookmarks(author, post_id)
                       values($1,$2)`,
           [author, post_id],
         );
-        await this.db.pool.query(`commit`);
         return {
           message: 'Post saved',
         };
       }
-    } catch (error) {
-      await this.db.pool.query(`rollback`);
-      throw error;
-    }
+    });
   }
 
   async getUserSavedPosts(author: string) {
@@ -332,7 +349,7 @@ export class PostsService {
                   u.profile_image AS profile_image,
                   p.captions AS captions,
                   p.media_url AS media_url,
-                  p.created_at,
+                  p.createdAt AS created_at,
                   p.media_asset_id AS media_asset_id,
                   post_id,
                   u.id as author

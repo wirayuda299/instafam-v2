@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Comment } from "@/types";
 import { likeOrDislikeComment } from "@/actions/comments";
 import { handleError } from "@/utils/error";
+import { cn } from "@/lib/utils";
 
 export default function CommentLikeButton({
   likes,
@@ -39,10 +40,18 @@ export default function CommentLikeButton({
   };
 
   return (
-    <button onClick={handleLikeOrDislikeComment} title="like" name="like">
+    <button
+      onClick={handleLikeOrDislikeComment}
+      title="like"
+      name="like"
+      className="group shrink-0 pt-1"
+    >
       <Heart
         size={15}
-        className={isLiked ? "fill-red-600 stroke-red-600" : ""}
+        className={cn(
+          "transition-[color,transform] duration-150 group-hover:text-gray-500 group-active:scale-90",
+          isLiked ? "fill-red-600 stroke-red-600" : "",
+        )}
       />
     </button>
   );

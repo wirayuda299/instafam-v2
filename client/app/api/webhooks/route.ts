@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ user }, { status: 201 });
     } catch (error) {
-			console.log("Webhook error", error)
+      console.log("Webhook error", error);
       throw error;
     }
   }

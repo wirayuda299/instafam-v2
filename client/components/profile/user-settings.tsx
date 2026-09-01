@@ -1,11 +1,16 @@
 "use client";
 
-import { Cog } from "lucide-react";
+import { Cog, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Label } from "../ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -27,9 +32,11 @@ export default function UserSetting({
     defaultValues: {
       show_draft_posts: settings.show_draft_posts,
       show_mention: settings.show_mention,
-      show_saved_post: settings.show_draft_posts,
+      show_saved_post: settings.show_saved_post,
     },
   });
+
+  const isSubmitting = form.formState.isSubmitting;
 
   const handleUpdateProfile = async (data: UpdateSettingSchema) => {
     try {
@@ -51,24 +58,24 @@ export default function UserSetting({
     <Dialog>
       <DialogTrigger asChild>
         <button
-          className="bg-black-1/50 hover:bg-black-1/60"
+          className="text-white/60 transition-colors hover:text-white"
           title="Setting"
           name="setting"
         >
           <Cog />
         </button>
       </DialogTrigger>
-      <DialogContent className="border-none bg-black-1 p-0">
+      <DialogContent className="border border-gray-800 bg-zinc-950 p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleUpdateProfile)}>
-            <h3 className="py-2 text-center text-2xl font-semibold">
+            <DialogTitle className="border-b border-gray-800 py-3 text-center text-lg font-semibold text-white">
               Settings
-            </h3>
+            </DialogTitle>
             <FormField
               control={form.control}
               name="show_mention"
               render={({ field }) => (
-                <FormItem className="flex w-full items-center justify-between p-3 hover:bg-black-1/50 hover:brightness-110">
+                <FormItem className="flex w-full items-center justify-between p-3 transition-colors hover:bg-white/5">
                   <Label>Show mention</Label>
                   <FormControl>
                     <Switch
@@ -84,7 +91,7 @@ export default function UserSetting({
               control={form.control}
               name="show_saved_post"
               render={({ field }) => (
-                <FormItem className="flex w-full items-center justify-between p-3 hover:bg-black-1/50 hover:brightness-110">
+                <FormItem className="flex w-full items-center justify-between p-3 transition-colors hover:bg-white/5">
                   <Label>Show saved posts</Label>
                   <FormControl>
                     <Switch
@@ -100,7 +107,7 @@ export default function UserSetting({
               control={form.control}
               name="show_draft_posts"
               render={({ field }) => (
-                <FormItem className="flex w-full items-center justify-between p-3 hover:bg-black-1/50 hover:brightness-110">
+                <FormItem className="flex w-full items-center justify-between p-3 transition-colors hover:bg-white/5">
                   <Label>Show draft posts</Label>
                   <FormControl>
                     <Switch
@@ -115,8 +122,10 @@ export default function UserSetting({
             <button
               name="save"
               title="save"
-              className="w-full rounded-md bg-blue-600 p-2 hover:bg-blue-500"
+              disabled={isSubmitting}
+              className="flex w-full items-center justify-center gap-2 rounded-b-md bg-blue-600 p-2.5 font-medium transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
+              {isSubmitting && <Loader2 className="size-4 animate-spin" />}
               Save
             </button>
           </form>

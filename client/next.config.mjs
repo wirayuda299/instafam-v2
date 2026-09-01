@@ -2,22 +2,22 @@
 const nextConfig = {
   agentRules: false,
   images: {
-    dangerouslyAllowSVG:true,
+    dangerouslyAllowSVG: true,
     remotePatterns: [
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        pathname: '/**/*',
+        pathname: "/**/*",
       },
 
       {
         protocol: "https",
         hostname: "img.clerk.com",
-        pathname: '/*',
-      }
+        pathname: "/*",
+      },
     ],
   },
-  
+
   env: {
     SERVER_URL: process.env.SERVER_URL,
   },

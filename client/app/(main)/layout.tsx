@@ -4,17 +4,20 @@ import { Toaster } from "sonner";
 
 import Sidebar from "@/components/shared/sidebar";
 import MainHeader from "@/components/shared/main-header";
+import { SocketContextProvider } from "@/context/socket";
 
 export default async function Main({ children }: { children: ReactNode }) {
   await auth.protect();
   return (
-    <div className="flex gap-2">
-      <Sidebar />
-      <div className="w-full">
-        <MainHeader />
-        {children}
+    <SocketContextProvider>
+      <div className="flex gap-2">
+        <Sidebar />
+        <div className="w-full">
+          <MainHeader />
+          {children}
+        </div>
+        <Toaster />
       </div>
-      <Toaster />
-    </div>
+    </SocketContextProvider>
   );
 }

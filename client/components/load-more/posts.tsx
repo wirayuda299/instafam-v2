@@ -3,39 +3,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
-import Link from "next/link";
-import Image from "next/image";
 
 import { Post } from "@/types";
-import { shimmer, toBase64 } from "@/utils/image-loader";
 import PostCard from "../shared/post-card";
+import PostCardImage from "../shared/post-card-image";
+import ExploreTile from "../shared/explore-tile";
 
-
-const RenderComponentBasedOnType = (type: string, post: Post) => {
+const RenderComponentBasedOnType = (
+  type: string,
+  post: Post,
+  index: number,
+) => {
   switch (type) {
     case "profile":
-      return (
-        <Link
-          className="min-w-[400px] max-w-[400px]"
-          href={`/post/${post?.post_id}`}
-          key={post.post_id}
-        >
-          <Image
-            className="aspect-square h-full max-h-[300px] w-full min-w-[300px] max-w-full rounded-lg border border-gray-600 object-cover object-center"
-            sizes="400px"
-            onError={(e) =>
-              (e.currentTarget.src = "/assets/shared/images/placeholder.png")
-            }
-            src={post.media_url ?? "/assets/shared/images/placeholder.png"}
-            priority={true}
-            loading={"eager"}
-            placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(400, 400))}`}
-            width={500}
-            height={500}
-            alt="attachment"
-          />
-        </Link>
-      );
+      return <PostCardImage key={post.post_id} post={post} />;
+
+    case "explore":
+      return <ExploreTile key={post.post_id} post={post} index={index} />;
 
     default:
       return (
@@ -119,7 +103,7 @@ export default function LoadMore({
 
   return (
     <>
-      {posts?.map((post) => RenderComponentBasedOnType(type, post))}
+      {posts?.map((post, i) => RenderComponentBasedOnType(type, post, i))}
 
       {hasMorePosts && prevPosts.length >= 10 && (
         <div
@@ -127,9 +111,9 @@ export default function LoadMore({
           ref={ref}
         >
           <div className="w-full animate-pulse space-y-3">
-            <div className="h-40 w-full rounded-md bg-black-1"></div>
-            <div className="h-5 w-full rounded-full bg-black-1"></div>
-            <div className="h-4 w-[calc(100%-50px)] rounded-full bg-black-1"></div>
+            <div className="bg-black-1 h-40 w-full rounded-md"></div>
+            <div className="bg-black-1 h-5 w-full rounded-full"></div>
+            <div className="bg-black-1 h-4 w-[calc(100%-50px)] rounded-full"></div>
           </div>
         </div>
       )}

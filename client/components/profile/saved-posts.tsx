@@ -6,6 +6,8 @@ export default async function SavedPosts({ userId }: { userId: string }) {
   return savedPosts.length > 0 ? (
     savedPosts?.map((post) => <PostCardImage post={post} key={post.post_id} />)
   ) : (
-    <p>Nothing here</p>
+    <p className="w-full py-10 text-center text-sm text-white/50">
+      No saved posts yet.
+    </p>
   );
 }

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 
-import { shimmer, toBase64 } from "@/utils/image-loader";
+import { blurDataURL } from "@/utils/image-loader";
 import ChatList from "@/components/messages/chat-list";
 import { getUser } from "@/helper/users";
 
@@ -13,12 +13,12 @@ type Props = {
 
 export default async function MessageDetail({ params }: Props) {
   await auth.protect();
-  const id = (await params).id
+  const id = (await params).id;
   const user = await getUser(id);
 
   return (
     <div className="no-scrollbar fixed left-0 z-50 h-full max-h-screen w-full overflow-y-auto bg-black md:static">
-      <header className="sticky top-0 flex h-20 w-full items-center justify-between border-b border-black-1 bg-black p-5">
+      <header className="sticky top-0 z-10 flex h-20 w-full items-center justify-between border-b border-gray-800 bg-zinc-950 p-5">
         <div className="flex items-center gap-3 rounded-md p-1">
           <Image
             src={user?.profile_image}
@@ -26,13 +26,20 @@ export default async function MessageDetail({ params }: Props) {
             height={45}
             alt="user"
             loading="lazy"
-            placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(45, 45))}`}
-            className="size-12 min-w-12 rounded-full object-cover"
+            placeholder={blurDataURL(45, 45)}
+            className="size-12 min-w-12 rounded-full border border-gray-700 object-cover"
           />
-          <p className="text-sm font-semibold">{user?.username} </p>
+          <p className="text-sm font-semibold text-white capitalize">
+            {user?.username}
+          </p>
         </div>
-        <Link href={"/messages"}>
-          <LogOut />
+        <Link
+          href={"/messages"}
+          title="close"
+          aria-label="close conversation"
+          className="rounded-md p-2 text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+        >
+          <LogOut size={20} />
         </Link>
       </header>
       <ChatList />

@@ -15,7 +15,13 @@ import { AddCommentSchema, addCommentSchema } from "@/validation";
 import { handleError } from "@/utils/error";
 import { cn } from "@/lib/utils";
 
-export default function CommentForm({ postId, styles }: { postId: string, styles?: string },) {
+export default function CommentForm({
+  postId,
+  styles,
+}: {
+  postId: string;
+  styles?: string;
+}) {
   const form = useForm<AddCommentSchema>({
     resolver: zodResolver(addCommentSchema),
     defaultValues: {
@@ -42,18 +48,28 @@ export default function CommentForm({ postId, styles }: { postId: string, styles
     }
   };
 
+  const isSubmitting = form.formState.isSubmitting;
+  const canSubmit = form.watch("comment")?.trim().length > 0;
+
   return (
     <Form {...form}>
-      <form className={cn('pt-2', styles)} onSubmit={form.handleSubmit(handleCreateComment)}>
+      <form
+        className={cn(
+          "flex items-center gap-2 border-t border-gray-800 pt-2",
+          styles,
+        )}
+        onSubmit={form.handleSubmit(handleCreateComment)}
+      >
         <FormField
           control={form.control}
           name="comment"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-full">
               <FormControl>
                 <input
                   autoComplete="off"
-                  className="w-full bg-transparent text-sm focus-visible:outline-hidden"
+                  disabled={isSubmitting}
+                  className="w-full bg-transparent text-sm placeholder:text-white/40 focus-visible:outline-hidden disabled:opacity-50"
                   type="text"
                   {...field}
                   placeholder="Add a comment..."
@@ -63,6 +79,13 @@ export default function CommentForm({ postId, styles }: { postId: string, styles
             </FormItem>
           )}
         />
+        <button
+          type="submit"
+          disabled={!canSubmit || isSubmitting}
+          className="shrink-0 text-sm font-semibold text-blue-500 transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {isSubmitting ? "Posting..." : "Post"}
+        </button>
       </form>
     </Form>
   );

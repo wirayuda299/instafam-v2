@@ -1,19 +1,27 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { Post } from "@/types";
-import { shimmer, toBase64 } from "@/utils/image-loader";
+import { blurDataURL } from "@/utils/image-loader";
 
 export default function PostCardImage({ post }: { post: Post }) {
   return (
-    <Link href={`/post/${post.post_id}`} className="min-w-36 flex-1 basis-36 max-w-[300px]">
+    <Link
+      href={`/post/${post.post_id}`}
+      className="max-w-[300px] min-w-36 flex-1 basis-36"
+    >
       <Image
-        className="aspect-square h-full w-full rounded-lg border border-gray-600 object-cover object-center"
+        className="aspect-square h-full w-full rounded-lg border border-gray-800 object-cover object-center transition-opacity hover:opacity-90"
         sizes="400px"
-        src={post.media_url}
+        onError={(e) =>
+          (e.currentTarget.src = "/assets/shared/images/placeholder.png")
+        }
+        src={post.media_url ?? "/assets/shared/images/placeholder.png"}
         priority={true}
         loading={"eager"}
-        placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(500, 400))}`}
+        placeholder={blurDataURL(500, 400)}
         width={500}
         height={500}
         alt="attachment"

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 
-import { shimmer, toBase64 } from "@/utils/image-loader";
+import { blurDataURL } from "@/utils/image-loader";
 import Captions from "./captions";
 import CommentForm from "./comment-form";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import { formatMessageTimestamp } from "@/utils/date";
 import Bookmarks from "./bookmarks";
 
 type Props = {
-  styles?: string
+  styles?: string;
   authorImage: string;
   fileId: string;
   likes: Like[];
@@ -32,7 +32,21 @@ type Props = {
   commentStyles?: string;
   children?: ReactNode;
   loading?: "eager" | "lazy";
+  published?: boolean;
 };
+
+function CommentsSkeleton() {
+  return (
+    <div className="flex animate-pulse flex-col gap-3 px-2">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="bg-black-1/60 size-8 shrink-0 rounded-full" />
+          <div className="bg-black-1/60 h-3 w-2/3 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function PostCard({
   captions,
@@ -52,24 +66,28 @@ export default function PostCard({
   authorId,
   created_at,
   fileId,
-  styles
+  styles,
+  published,
 }: Props) {
   return (
     <article
       className={cn(
-        "flex h-full min-h-max w-full max-w-full flex-col gap-4 p-2 max-md:max-w-full",
+        "bg-black-1/30 flex h-full min-h-max w-full max-w-full flex-col rounded-xl border border-gray-800 shadow-sm max-md:max-w-full",
         rootStyles,
       )}
     >
       <header
-        className={cn("flex w-full items-center justify-between", headerStyles)}
+        className={cn(
+          "flex w-full shrink-0 items-center justify-between p-3 md:p-4",
+          headerStyles,
+        )}
       >
         <div className="flex items-center gap-3">
           <Image
             loading="lazy"
-            placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(50, 50))}`}
+            placeholder={blurDataURL(50, 50)}
             sizes="45px"
-            className="aspect-auto size-10 min-w-10 rounded-full object-cover md:size-12 md:min-w-12 2xl:size-14 2xl:min-w-14"
+            className="aspect-auto size-10 min-w-10 rounded-full border border-gray-700 object-cover md:size-12 md:min-w-12 2xl:size-14 2xl:min-w-14"
             src={authorImage ?? "/next.svg"}
             width={45}
             height={45}
@@ -78,26 +96,37 @@ export default function PostCard({
           <div>
             <Link
               href={`/profile/${authorId}?tab=posts`}
-              className="prose prose-sm font-semibold capitalize text-white lg:prose-lg"
+              className="prose prose-sm lg:prose-lg font-semibold text-white capitalize transition-colors hover:text-white/80"
             >
               {authorUsername}
             </Link>
-            <small className="block text-xs opacity-50">
+            <small
+              title={new Date(created_at).toLocaleString()}
+              className="block text-xs text-white/50"
+            >
               {formatMessageTimestamp(created_at)}
             </small>
           </div>
         </div>
-        <Menu postId={postId} postAuthor={authorId} fileId={fileId} />
+        <Menu
+          postId={postId}
+          postAuthor={authorId}
+          fileId={fileId}
+          captions={captions}
+          published={published}
+        />
       </header>
-      <Suspense fallback={"loading..."}>{children}</Suspense>
-      <div className="h-full">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <Suspense fallback={<CommentsSkeleton />}>{children}</Suspense>
+      </div>
+      <div className="flex shrink-0 flex-col gap-3 p-3 md:p-4">
         <Image
           className={cn(
             "aspect-square h-fit max-h-[380px]! w-full rounded-lg border border-gray-600 object-cover object-center",
             imageStyles,
           )}
           quality={50}
-          placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(400, 400))}`}
+          placeholder={blurDataURL(400, 400)}
           sizes="400px"
           src={media}
           fetchPriority={priority ? "high" : "low"}
@@ -109,7 +138,7 @@ export default function PostCard({
         />
         <div
           className={cn(
-            "flex items-center justify-between gap-2 pt-2",
+            "flex items-center justify-between gap-2",
             actionButtonStyles,
           )}
         >
@@ -121,20 +150,26 @@ export default function PostCard({
               aria-label="comment"
               className="group"
             >
-              <MessageCircle size={30} className="group-hover:text-gray-500" />
+              <MessageCircle
+                size={30}
+                className="transition-colors group-hover:text-gray-500"
+              />
             </Link>
           </div>
           <Bookmarks authorId={authorId} postId={postId} />
         </div>
-        <div className="flex flex-wrap items-center gap-2 pt-3">
-          <p className="prose prose-sm font-semibold capitalize text-white lg:prose-lg">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="prose prose-sm lg:prose-lg font-semibold text-white capitalize">
             {authorUsername}
           </p>
           <Captions captions={captions} />
         </div>
         <Link
           href={`/post/${postId}`}
-          className={cn("py-2 text-sm text-gray-500", commentStyles)}
+          className={cn(
+            "block text-sm text-gray-500 transition-colors hover:text-gray-300",
+            commentStyles,
+          )}
         >
           View all comments
         </Link>

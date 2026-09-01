@@ -14,6 +14,8 @@ import { ConversationsService } from './services/conversations/conversations.ser
 import { ConversationsController } from './controllers/conversations/conversations.controller';
 import { CloudinaryModule } from './cloudinary/cloudinary/cloudinary.module';
 import { UploadController } from './controllers/cloudinary/cloudinary.controller';
+import { NotificationsService } from './services/notifications/notifications.service';
+import { NotificationsController } from './controllers/notifications/notifications.controller';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { UploadController } from './controllers/cloudinary/cloudinary.controller
     CommentsController,
     ConversationsController,
     UploadController,
+    NotificationsController,
   ],
   providers: [
     SocketGateway,
@@ -38,6 +41,7 @@ import { UploadController } from './controllers/cloudinary/cloudinary.controller
     PostsService,
     CommentsService,
     ConversationsService,
+    NotificationsService,
   ],
 })
 export class AppModule {}

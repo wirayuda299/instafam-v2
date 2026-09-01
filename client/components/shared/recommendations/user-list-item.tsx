@@ -2,10 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { User } from "@/types";
-import { shimmer, toBase64 } from "@/utils/image-loader";
+import { blurDataURL } from "@/utils/image-loader";
 import FollowButton from "../post-card/follow-button";
 import { cn } from "@/lib/utils";
-
 
 type Props = { user: User; userSessionId: string; styles?: string };
 
@@ -22,24 +21,24 @@ export default function UserListItem({ user, userSessionId, styles }: Props) {
           height={45}
           alt="user"
           loading="lazy"
-          placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(45, 45))}`}
-          className="size-12 min-w-12 rounded-full object-cover"
+          placeholder={blurDataURL(45, 45)}
+          className="size-12 min-w-12 rounded-full border border-gray-700 object-cover"
         />
         <div>
           <Link
-						aria-label="profile"
+            aria-label="profile"
             href={`/profile/${user?.id}?tab=posts`}
-            className="prose-base font-semibold capitalize text-white lg:prose-lg"
+            className="prose-base lg:prose-lg font-semibold text-white capitalize transition-colors hover:text-white/80"
           >
             {user?.username}
           </Link>
-          <p className="text-sm text-gray-500/55">Suggested for you</p>
+          <p className="text-sm text-white/40">Suggested for you</p>
         </div>
       </div>
       <FollowButton
         userToFollow={user?.id!}
         userId={userSessionId}
-        styles="bg-transparent text-blue-700 w-min"
+        styles="bg-transparent text-blue-500 hover:text-blue-400 w-min"
       />
     </div>
   );

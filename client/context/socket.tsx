@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { type Socket, io } from "socket.io-client";
+import { useAuth } from "@clerk/nextjs";
 
 export type SocketContextType = {
   socket: Socket | null;
@@ -25,6 +26,7 @@ const SocketContext = createContext<SocketContextType>({
 export const SocketContextProvider: FC<ContextProviderProps> = ({
   children,
 }) => {
+  const { userId } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
@@ -44,15 +46,16 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
 
     socket.on("connect", () => {
       console.log("Connected to WebSocket server");
+      if (userId) socket.emit("join", userId);
     });
 
     // Disconnection event
     socket.on("disconnect", (reason) => {
       console.log("Disconnected from WebSocket server:", reason);
       if (reason === "io server disconnect") {
-        console.log(reason)
+        console.log(reason);
       } else if (reason === "ping timeout") {
-        console.log(reason)
+        console.log(reason);
       }
     });
 
@@ -83,7 +86,12 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
       socket.off("reconnect_failed");
       socket.off("reconnect");
     };
-  }, [socket]);
+  }, [socket, userId]);
+
+  useEffect(() => {
+    if (!socket || !userId) return;
+    socket.emit("join", userId);
+  }, [socket, userId]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

@@ -1,4 +1,4 @@
-import {  SERVER_URL } from "@/constants";
+import { apiFetch } from "@/lib/http";
 import { Post } from "@/types";
 
 export async function getAllPosts(
@@ -17,23 +17,18 @@ export async function getAllPosts(
     if (cursor) queryParams.append("cursor", cursor);
     if (createdAt) queryParams.append("createdAt", createdAt);
 
-    const url = `${SERVER_URL}/posts/find-all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const query = `/posts/find-all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
 
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await apiFetch(query, { method: "GET" });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(
-        `Failed to fetch posts: ${res.status} ${res.statusText} - ${errorText}`,
-      );
+      const err = await res.json();
+      console.log(err);
     }
 
-    return await res.json();
+    const data = await res.json();
+    console.log(data);
+    return data;
   } catch (err) {
     console.error("Error fetching posts:", err);
     throw err;
@@ -42,15 +37,9 @@ export async function getAllPosts(
 
 export async function getSavedPosts(userId: string): Promise<Post[]> {
   try {
-    const res = await fetch(
-      `${SERVER_URL}/posts/bookmarked_post?author=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const res = await apiFetch(`/posts/bookmarked_post?author=${userId}`, {
+      method: "GET",
+    });
 
     if (!res.ok) throw new Error("Failed to fetch saved posts");
     return await res.json();
@@ -75,12 +64,7 @@ export async function getUserPosts(
         ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}&published=${published}`
         : `/posts?userId=${userId}&published=${published}`;
 
-    const res = await fetch(`${SERVER_URL}${query}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await apiFetch(query, { method: "GET" });
 
     if (!res.ok) throw new Error("Failed to fetch user posts");
     return await res.json();
@@ -90,14 +74,15 @@ export async function getUserPosts(
   }
 }
 
-export async function getPostById(postId: string): Promise<Post> {
+export async function getPostById(
+  postId: string,
+  viewerId?: string,
+): Promise<Post | null> {
   try {
-    const res = await fetch(`${SERVER_URL}/posts/${postId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const query = viewerId
+      ? `/posts/${postId}?userId=${viewerId}`
+      : `/posts/${postId}`;
+    const res = await apiFetch(query, { method: "GET" });
 
     if (!res.ok) throw new Error("Failed to fetch post by ID");
     return await res.json();

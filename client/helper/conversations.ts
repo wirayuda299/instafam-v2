@@ -1,33 +1,34 @@
-import { RequestConfig, SERVER_URL } from "@/constants";
+import { apiFetch } from "@/lib/http";
 import { UserConversation } from "@/types";
 
-export async function getConversation(userSession: string): Promise<UserConversation[]> {
-    try {
-        const requestConf = new RequestConfig('GET')
+export async function getConversation(
+  userSession: string,
+): Promise<UserConversation[]> {
+  try {
+    const res = await apiFetch(`/conversations?userId=${userSession}`, {
+      credentials: "include",
+    });
 
-        const res = await fetch(`${SERVER_URL}/conversations?userId=${userSession}`, requestConf.toRequestInit());
+    if (!res.ok) throw new Error("Failed to fetch conversation");
 
-        if (!res.ok) throw new Error('Failed to fetch conversation');
-
-        const conversation = await res.json();
-        return conversation;
-    } catch (error) {
-        throw error;
-    }
+    const conversation = await res.json();
+    return conversation;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function getPersonalMessage(userId: string) {
-    try {
-        const requestConf = new RequestConfig('GET')
+  try {
+    const res = await apiFetch(`/conversations/messages?userId=${userId}`, {
+      credentials: "include",
+    });
 
-        const res = await fetch(`${SERVER_URL}/conversations/messages?userId=${userId}`, requestConf.toRequestInit());
+    if (!res.ok) throw new Error("Failed to fetch personal messages");
 
-        if (!res.ok) throw new Error('Failed to fetch personal messages');
-
-        const messages = await res.json();
-        return messages;
-    } catch (e) {
-        throw e;
-    }
+    const messages = await res.json();
+    return messages;
+  } catch (e) {
+    throw e;
+  }
 }
-

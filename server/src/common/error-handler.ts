@@ -1,4 +1,4 @@
-import { ZodError } from 'zod'
+import { ZodError } from 'zod';
 import {
   ArgumentsHost,
   BadRequestException,
@@ -48,7 +48,6 @@ export class ValidationFilter implements ExceptionFilter {
   }
 }
 
-
 @Catch(WsException)
 export class WebSocketExceptionFilter implements WsExceptionFilter {
   catch(exception: WsException, host: ArgumentsHost) {
@@ -60,4 +59,3 @@ export class WebSocketExceptionFilter implements WsExceptionFilter {
     client.emit('error', errorResponse);
   }
 }
-
