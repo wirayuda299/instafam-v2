@@ -10,6 +10,7 @@ export async function createComment(
   comment: string,
   path: string,
 ) {
+  await auth.protect();
   try {
 
     const { userId } = await auth();
@@ -38,7 +39,7 @@ export async function likeOrDislikeComment(
   commentId: string,
   pathname: string,
 ) {
-  const { userId } = await auth();
+  const { userId } = await auth.protect();
 
   try {
     if (!userId)

@@ -29,6 +29,7 @@ async function deleteImage(id: string) {
 }
 
 export async function reportPost(postId: string, reasons: string[]) {
+  await auth.protect();
   try {
     const requestConf = new RequestConfig("POST");
     requestConf.setBody(JSON.stringify({ postId, reasons }));
@@ -52,6 +53,7 @@ export async function createPost(
   published: boolean,
   pathname: string,
 ) {
+  await auth.protect();
   try {
     const validatedValues = createPostSchema.safeParse(value);
     if (!validatedValues.success) {
@@ -89,7 +91,7 @@ export async function createPost(
   }
 }
 export async function likeOrDislikePost(postId: string, pathname: string) {
-  const { userId } = await auth();
+  const { userId } = await auth.protect();
 
   try {
     if (!userId)
@@ -122,7 +124,7 @@ export async function deletePost(
   postAuthor: string,
   pathname: string,
 ) {
-  const { userId } = await auth();
+  const { userId } = await auth.protect();
   if (userId !== postAuthor) {
     throw new Error("UnAuthorized");
   }
@@ -167,6 +169,7 @@ export async function saveOrDeleteBookmarkedPost(
     message: string;
   }
 > {
+  await auth.protect();
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");

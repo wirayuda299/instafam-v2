@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default async function MessageDetail({ params }: Props) {
+  await auth.protect();
   const id = (await params).id
   const user = await getUser(id);
 

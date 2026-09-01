@@ -3,7 +3,7 @@ import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, auth } from "@clerk/nextjs/server";
 import dynamic from "next/dynamic";
 
 import ProfileTab from "@/components/profile/tab";
@@ -29,6 +29,7 @@ export const metadata = {
 
 
 export default async function UserProfile({ searchParams, params }: Props) {
+  await auth.protect();
   const id = (await params).id
   const tab = (await searchParams).tab
   const user = await getUser(id);

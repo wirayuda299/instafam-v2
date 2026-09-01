@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, auth } from "@clerk/nextjs/server";
 
 import { shimmer, toBase64 } from "@/utils/image-loader";
 import { SocketContextProvider } from "@/context/socket";
@@ -22,6 +22,7 @@ export default async function MessagesLayout({
 }: {
   children: ReactNode;
 }) {
+  await auth.protect();
   const user = await currentUser();
 
   if (!user) return null;

@@ -1,10 +1,14 @@
 "use server";
+import { auth } from "@clerk/nextjs/server";
 
 import { revalidatePath } from "next/cache";
 
 import { createUserSchema, CreateUserType } from "@/validation";
 import { RequestConfig, SERVER_URL } from "@/constants";
 
+// Called only from app/api/webhooks/route.ts (Clerk's user.created webhook),
+// a server-to-server call verified by svix signature, not a user session --
+// eslint-disable-next-line @clerk/next/require-auth-protection -- see above
 export async function createUser(values: CreateUserType) {
   try {
     const validatedValue = createUserSchema.parse(values);
@@ -33,6 +37,7 @@ export async function createUser(values: CreateUserType) {
 }
 
 export async function followUnfollow(userId: string, userToFollow: string) {
+  await auth.protect();
   try {
     const requestConf = new RequestConfig('POST')
     requestConf.setBody(JSON.stringify({

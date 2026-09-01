@@ -1,11 +1,13 @@
 
 'use server'
+import { auth } from "@clerk/nextjs/server";
 
 import { RequestConfig, SERVER_URL } from "@/constants";
 import { CloudinaryResponse } from "@/types";
 
 
 export async function uploadImage(formData: FormData): Promise<CloudinaryResponse> {
+  await auth.protect();
   try {
     const requestConf = new RequestConfig('POST')
     requestConf.setBody(formData)
@@ -27,6 +29,7 @@ export async function uploadImage(formData: FormData): Promise<CloudinaryRespons
 
 
 export async function deleteImage(id: string) {
+  await auth.protect();
   try {
     const requestConf = new RequestConfig('DELETE')
     requestConf.setBody(JSON.stringify({ id }))

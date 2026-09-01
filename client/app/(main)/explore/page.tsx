@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 
 
 export default async function Explore() {
+  await auth.protect();
   const { posts, totalPosts } = await getAllPosts();
 
   return (

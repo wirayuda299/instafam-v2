@@ -1,6 +1,8 @@
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 
-export default function Messages() {
+export default async function Messages() {
+  await auth.protect();
   return (
     <div className="hidden min-h-screen w-full items-center justify-center overflow-y-auto md:flex">
       <Image

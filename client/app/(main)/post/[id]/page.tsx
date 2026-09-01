@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
@@ -16,6 +17,7 @@ type Params = {
 
 
 export default async function PostDetail({ params }: Params) {
+  await auth.protect();
   const id = (await params).id
   const post = await getPostById(id);
   if (!post) return notFound();

@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import PostCard from "@/components/shared/post-card/index";
 import Recommendations from "@/components/shared/recommendations/recommendations";
 import { getAllPosts } from "@/helper/posts";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  await auth.protect();
   const { posts = [], totalPosts } = await getAllPosts();
 
   if (posts.length < 1) return null;
