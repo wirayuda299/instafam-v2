@@ -29,12 +29,19 @@ export default async function Explore() {
   }
 
   return (
-    <div className="grid max-h-screen min-h-screen w-full grid-cols-2 content-start gap-0.5 overflow-y-auto md:grid-cols-3">
-      {posts.map((post, i) => (
-        <ExploreTile key={post.post_id} post={post} index={i} priority />
-      ))}
+    <div className="min-h-screen w-full overflow-y-auto p-1 md:p-2">
+      <div className="columns-2 gap-1 sm:columns-3 md:gap-2 lg:columns-4 xl:columns-5">
+        {posts.map((post, i) => (
+          <ExploreTile
+            key={post.post_id}
+            post={post}
+            index={i}
+            priority={i < 8}
+          />
+        ))}
 
-      <LoadMore totalPosts={totalPosts} type="explore" prevPosts={posts} />
+        <LoadMore totalPosts={totalPosts} type="explore" prevPosts={posts} />
+      </div>
     </div>
   );
 }
