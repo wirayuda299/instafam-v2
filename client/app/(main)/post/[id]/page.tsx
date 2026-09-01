@@ -54,7 +54,7 @@ export default async function PostDetail({ params }: Params) {
             captions={post?.captions}
             media={post?.media_url}
           >
-            <div className="flex max-h-[500px] min-h-[280px] flex-col justify-items-start gap-5 justify-self-start overflow-y-auto px-2">
+            <div className="flex max-h-[500px] flex-col justify-items-start gap-5 justify-self-start overflow-y-auto px-2">
               {comments?.map((comment) => (
                 <div
                   key={comment.comment_id}

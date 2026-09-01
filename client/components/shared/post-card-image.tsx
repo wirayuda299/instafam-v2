@@ -6,9 +6,9 @@ import { shimmer, toBase64 } from "@/utils/image-loader";
 
 export default function PostCardImage({ post }: { post: Post }) {
   return (
-    <Link href={`/post/${post.post_id}`}>
+    <Link href={`/post/${post.post_id}`} className="min-w-36 flex-1 basis-36 max-w-[300px]">
       <Image
-        className="aspect-square h-full max-h-[300px] w-full max-w-[300px] rounded-lg border border-gray-600 object-cover object-center"
+        className="aspect-square h-full w-full rounded-lg border border-gray-600 object-cover object-center"
         sizes="400px"
         src={post.media_url}
         priority={true}

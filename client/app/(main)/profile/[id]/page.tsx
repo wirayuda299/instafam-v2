@@ -46,8 +46,8 @@ export default async function UserProfile({ searchParams, params }: Props) {
   ]);
   return (
     <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
-      <div className="max-h-64 min-h-64 w-full border-b border-black-1 p-2 max-sm:max-h-max md:p-5">
-        <header className="mx-auto grid h-full w-full max-w-(--breakpoint-sm) grid-cols-2 items-center max-sm:grid-cols-1">
+      <div className="max-h-64 min-h-64 w-full border-b border-black-1 p-2 max-lg:max-h-max md:p-5">
+        <header className="mx-auto grid h-full w-full max-w-(--breakpoint-sm) grid-cols-1 items-center lg:grid-cols-2">
           <Image
             className="size-36 rounded-full"
             loading="lazy"
@@ -81,7 +81,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
                 </>
               )}
             </div>
-            <div className="flex items-center gap-10">
+            <div className="flex flex-wrap items-center gap-6 sm:gap-10">
               <p>
                 <span className="font-semibold">{totalPosts}</span> Posts
               </p>

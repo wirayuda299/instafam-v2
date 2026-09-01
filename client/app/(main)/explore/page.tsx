@@ -20,7 +20,7 @@ export default async function Explore() {
   const { posts, totalPosts } = await getAllPosts();
 
   return (
-    <div className="grid max-h-screen min-h-screen w-full grid-cols-2 gap-0 overflow-y-auto md:grid-cols-3">
+    <div className="grid max-h-screen min-h-screen w-full content-start grid-cols-2 gap-0 overflow-y-auto md:grid-cols-3">
       {posts?.map((post, i) => (
         <Link
           href={`/post/${post?.post_id}`}
@@ -29,7 +29,7 @@ export default async function Explore() {
         >
           <Image
             className={cn(
-              "h-full w-full object-cover object-center",
+              "w-full object-cover object-center",
               i % 2 === 0 ? "aspect-square" : "aspect-video",
             )}
             sizes="400px"
