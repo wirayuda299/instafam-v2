@@ -1,7 +1,6 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -14,13 +13,14 @@ import { cn } from "@/lib/utils";
 export default function CommentLikeButton({
   likes,
   commentId,
+  postId,
 }: {
   likes: Comment["likes"];
   commentId: string;
+  postId: string;
 }) {
   const { userId } = useAuth();
 
-  const pathname = usePathname();
   const isLiked = useMemo(
     () => likes.map((like) => like.liked_by).includes(userId!),
     [likes, userId],
@@ -28,7 +28,7 @@ export default function CommentLikeButton({
 
   const handleLikeOrDislikeComment = async () => {
     try {
-      const res = await likeOrDislikeComment(commentId, pathname);
+      const res = await likeOrDislikeComment(commentId, postId);
       if (res && "errors" in res) {
         handleError(res, "Failed to like or dislike comment");
       }

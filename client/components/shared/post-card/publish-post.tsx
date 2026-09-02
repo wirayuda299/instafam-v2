@@ -16,7 +16,7 @@ export default function PublishPost({ postId }: Props) {
   const handlePublishPost = async () => {
     try {
       setIsLoading(true);
-      const res = await publishPost(postId, window.location.pathname);
+      const res = await publishPost(postId);
       if (res && "errors" in res) {
         toast.error(res.errors || fallbackErrorMessage);
         return;

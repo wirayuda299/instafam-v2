@@ -12,7 +12,10 @@ export async function getAllComments(
         ? `/comments/find-all?postId=${postId}&cursor=${cursor}&createdAt=${createdAt}`
         : `/comments/find-all?postId=${postId}`;
 
-    const res = await apiFetch(query, { credentials: "include" });
+    const res = await apiFetch(query, {
+      credentials: "include",
+      next: { tags: [`comments:${postId}`] },
+    });
 
     if (!res.ok) throw new Error("Failed to fetch comments");
 

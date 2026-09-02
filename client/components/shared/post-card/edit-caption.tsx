@@ -24,11 +24,7 @@ export default function EditCaption({ postId, captions }: Props) {
 
     try {
       setIsSubmitting(true);
-      const res = await updatePostCaptions(
-        postId,
-        value,
-        window.location.pathname,
-      );
+      const res = await updatePostCaptions(postId, value);
       if (res && "errors" in res) {
         toast.error(res.errors || "Failed to update caption");
         return;

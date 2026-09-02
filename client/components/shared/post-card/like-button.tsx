@@ -1,7 +1,6 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useMemo, useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
@@ -13,13 +12,14 @@ import { likeOrDislikePost } from "@/actions/post";
 
 export default function LikeButton({
   postId,
+  postAuthor,
   likes,
 }: {
   postId: string;
+  postAuthor: string;
   likes: Like[];
 }) {
   const { userId } = useAuth();
-  const pathname = usePathname();
   const [likesData, setLikesData] = useOptimistic(likes);
   const [pending, startTransition] = useTransition();
 
@@ -40,7 +40,7 @@ export default function LikeButton({
         });
       });
 
-      const res = await likeOrDislikePost(postId, pathname);
+      const res = await likeOrDislikePost(postId, postAuthor);
       if (res && "errors" in res) {
         handleError(res, "Something wrong when like or dislike post");
       }

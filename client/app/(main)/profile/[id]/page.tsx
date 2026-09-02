@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect, unauthorized } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,16 +40,19 @@ function PostsGridSkeleton() {
   );
 }
 
+// eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function UserProfile({ searchParams, params }: Props) {
-  await auth.protect();
   const id = (await params).id;
   const tab = (await searchParams).tab;
+
   const user = await getUser(id);
   const userSession = await currentUser();
 
-  if (!userSession || !user) {
-    return notFound();
+  if (!userSession) {
+    redirect("/sign-in");
   }
+
+  if (!user) return notFound();
 
   const [followers, following, { posts, totalPosts }] = await Promise.all([
     getUserFollowers(id),
@@ -76,11 +79,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
                 {user?.username}
               </h2>
               {userSession?.id === id ? (
-                <UserSetting
-                  settings={user.settings}
-                  userId={id}
-                  userSessionId={userSession?.id}
-                />
+                <UserSetting settings={user.settings} userId={id} />
               ) : (
                 <>
                   <FollowButton

@@ -1,11 +1,12 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 
 import { createUserSchema, CreateUserType } from "@/validation";
 import { apiFetch } from "@/lib/http";
 
+// eslint-disable-next-line @clerk/next/require-auth-protection
 export async function createUser(values: CreateUserType) {
   try {
     const validatedValue = createUserSchema.parse(values);
@@ -37,7 +38,10 @@ export async function createUser(values: CreateUserType) {
 }
 
 export async function followUnfollow(userId: string, userToFollow: string) {
-  await auth.protect();
+  const { userId: sessionUserId } = await auth.protect();
+  if (sessionUserId !== userId) return { errors: "Unauthorized" };
+
+  const fallback = "Failed to follow or unfollow user";
   try {
     const res = await apiFetch("/users/follow_unfollow", {
       method: "POST",
@@ -48,12 +52,67 @@ export async function followUnfollow(userId: string, userToFollow: string) {
       },
     });
 
-    if (!res.ok) throw new Error("Failed to follow or unfollow user");
+    if (!res.ok) return { errors: fallback };
 
-    revalidatePath(`/profile/${userId}`);
+    updateTag(`following:${userId}`);
+    updateTag(`followers:${userToFollow}`);
+    return null;
   } catch (e) {
     return {
-      errors: (e as Error).message || "Failed to follow or unfollow user",
+      errors: (e as Error).message || fallback,
     };
+  }
+}
+
+export async function updateUserSetting(
+  userId: string,
+  show_mention: boolean,
+  show_saved_post: boolean,
+  show_draft_posts: boolean,
+) {
+  const { userId: sessionUserId } = await auth.protect();
+  if (sessionUserId !== userId) return { errors: "Unauthorized" };
+
+  const fallback = "Failed to update settings";
+  try {
+    const res = await apiFetch("/users/update/setting", {
+      method: "PUT",
+      credentials: "include",
+      json: {
+        userId,
+        userSessionId: sessionUserId,
+        show_mention,
+        show_saved_post,
+        show_draft_posts,
+      },
+    });
+
+    if (!res.ok) return { errors: fallback };
+
+    updateTag(`user:${userId}`);
+    return null;
+  } catch (e) {
+    return { errors: (e as Error).message ?? fallback };
+  }
+}
+
+export async function updateUserBio(bio: string, userId: string) {
+  const { userId: sessionUserId } = await auth.protect();
+  if (sessionUserId !== userId) return { errors: "Unauthorized" };
+
+  const fallback = "Failed to update bio";
+  try {
+    const res = await apiFetch("/users/update/bio", {
+      method: "PUT",
+      credentials: "include",
+      json: { bio, userId },
+    });
+
+    if (!res.ok) return { errors: fallback };
+
+    updateTag(`user:${userId}`);
+    return null;
+  } catch (error) {
+    return { errors: (error as Error).message ?? fallback };
   }
 }

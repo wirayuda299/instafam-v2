@@ -37,7 +37,11 @@ export default function CommentItem({ comment }: { comment: Comment }) {
           </div>
         </div>
       </div>
-      <CommentLikeButton likes={comment.likes} commentId={comment.comment_id} />
+      <CommentLikeButton
+        likes={comment.likes}
+        commentId={comment.comment_id}
+        postId={comment.post_id}
+      />
     </div>
   );
 }

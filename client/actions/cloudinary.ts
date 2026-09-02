@@ -7,28 +7,32 @@ import { CloudinaryResponse } from "@/types";
 export async function uploadImage(
   formData: FormData,
 ): Promise<CloudinaryResponse> {
-  await auth.protect();
-  try {
-    const uploadResponse = await apiFetch("/image/upload", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    });
+  const { userId } = await auth.protect();
+  if (!userId) throw new Error("unauthorized");
 
-    if (!uploadResponse.ok) {
-      const res = await uploadResponse.json();
-      console.log(res);
-      throw new Error(res.message || "Upload failed");
-    }
+  const uploadResponse = await apiFetch("/image/upload", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
 
-    return await uploadResponse.json();
-  } catch (error) {
-    throw error;
+  if (!uploadResponse.ok) {
+    const res = await uploadResponse.json();
+    throw new Error(res.message || "Upload failed");
   }
+
+  return await uploadResponse.json();
 }
 
 export async function deleteImage(id: string) {
-  await auth.protect();
+  const { userId } = await auth.protect();
+
+  if (!userId)
+    return {
+      errors: "unauthorized",
+    };
+
+  const fallback = "failed to delete image";
   try {
     const deleteRes = await apiFetch("/image/delete", {
       method: "DELETE",
@@ -38,11 +42,13 @@ export async function deleteImage(id: string) {
 
     if (!deleteRes.ok) {
       const errorData = await deleteRes.json();
-      throw new Error(errorData.message || "Delete failed");
+      return {
+        errors: errorData.message ?? fallback,
+      };
     }
 
-    return "success";
+    return null;
   } catch (error) {
-    throw error;
+    return { errors: (error as Error).message ?? fallback };
   }
 }

@@ -21,7 +21,7 @@ export async function getAllPosts(
 
     const res = await apiFetch(query, {
       method: "GET",
-      next: { revalidate: 30, tags: ["posts"] },
+      next: { tags: ["posts"] },
     });
 
     if (!res.ok) {
@@ -29,9 +29,7 @@ export async function getAllPosts(
       console.log(err);
     }
 
-    const data = await res.json();
-    console.log(data);
-    return data;
+    return await res.json();
   } catch (err) {
     console.error("Error fetching posts:", err);
     throw err;
@@ -42,6 +40,9 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
   try {
     const res = await apiFetch(`/posts/bookmarked_post?author=${userId}`, {
       method: "GET",
+      next: {
+        tags: [`saved-post:${userId}`],
+      },
     });
 
     if (!res.ok) throw new Error("Failed to fetch saved posts");
@@ -67,7 +68,15 @@ export async function getUserPosts(
         ? `/posts?userId=${userId}&cursor=${cursor}&createdAt=${createdAt}&published=${published}`
         : `/posts?userId=${userId}&published=${published}`;
 
-    const res = await apiFetch(query, { method: "GET" });
+    const res = await apiFetch(query, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: {
+        tags: [`posts:${userId}`],
+      },
+    });
 
     if (!res.ok) throw new Error("Failed to fetch user posts");
     return await res.json();
@@ -85,7 +94,12 @@ export async function getPostById(
     const query = viewerId
       ? `/posts/${postId}?userId=${viewerId}`
       : `/posts/${postId}`;
-    const res = await apiFetch(query, { method: "GET" });
+    const res = await apiFetch(query, {
+      method: "GET",
+      next: {
+        tags: [`post:${postId}`],
+      },
+    });
 
     if (!res.ok) throw new Error("Failed to fetch post by ID");
     return await res.json();

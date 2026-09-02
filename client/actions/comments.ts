@@ -1,20 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 
 import { auth } from "@clerk/nextjs/server";
 import { apiFetch } from "@/lib/http";
 
-export async function createComment(
-  postId: string,
-  comment: string,
-  path: string,
-) {
-  await auth.protect();
-  try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+export async function createComment(postId: string, comment: string) {
+  const { userId } = await auth.protect();
+  if (!userId) return { errors: "Unauthorized" };
 
+  const fallback = "Failed to create comment";
+  try {
     const res = await apiFetch("/comments/add", {
       method: "POST",
       credentials: "include",
@@ -24,28 +20,23 @@ export async function createComment(
         comment,
       },
     });
-    if (!res.ok) throw new Error("Failed to create comment");
+    if (!res.ok) return { errors: fallback };
 
-    revalidatePath(path);
+    updateTag(`comments:${postId}`);
+    return null;
   } catch (error) {
     return {
-      errors: (error as Error).message,
+      errors: (error as Error).message ?? fallback,
     };
   }
 }
 
-export async function likeOrDislikeComment(
-  commentId: string,
-  pathname: string,
-) {
+export async function likeOrDislikeComment(commentId: string, postId: string) {
   const { userId } = await auth.protect();
+  if (!userId) return { errors: "Unauthorized" };
 
+  const fallback = "Failed to like or dislike comment";
   try {
-    if (!userId)
-      return {
-        errors: "Unauthorized",
-      };
-
     const res = await apiFetch("/comments/like_or_dislike", {
       method: "POST",
       credentials: "include",
@@ -55,12 +46,13 @@ export async function likeOrDislikeComment(
       },
     });
 
-    if (!res.ok) throw new Error("Failed to like or dislike comment");
+    if (!res.ok) return { errors: fallback };
 
-    revalidatePath(pathname);
+    updateTag(`comments:${postId}`);
+    return null;
   } catch (error) {
     return {
-      errors: (error as Error).message,
+      errors: (error as Error).message ?? fallback,
     };
   }
 }

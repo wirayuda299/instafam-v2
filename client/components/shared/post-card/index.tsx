@@ -143,7 +143,12 @@ export default function PostCard({
           )}
         >
           <div className="flex items-center gap-3">
-            <LikeButton likes={likes} postId={postId} key={postId} />
+            <LikeButton
+              likes={likes}
+              postId={postId}
+              postAuthor={authorId}
+              key={postId}
+            />
             <Link
               href={`/post/${postId}`}
               title="comment"

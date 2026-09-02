@@ -32,11 +32,7 @@ export default function CommentForm({
   const handleCreateComment = async (value: AddCommentSchema) => {
     try {
       const { createComment } = await import("@/actions/comments");
-      const res = await createComment(
-        postId,
-        value.comment,
-        window.location.pathname,
-      );
+      const res = await createComment(postId, value.comment);
 
       if (res && "errors" in res) {
         handleError(res, "Failed to publish comment");

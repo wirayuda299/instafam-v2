@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import useSwr from "swr";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
 
 import { handleError } from "@/utils/error";
 import { getSavedPosts } from "@/helper/posts";
@@ -18,7 +17,6 @@ type Props = {
 };
 
 export default function Bookmarks({ postId, authorId }: Props) {
-  const pathname = usePathname();
   const { userId } = useAuth();
 
   const { data, isLoading, isValidating, mutate } = useSwr(
@@ -49,7 +47,7 @@ export default function Bookmarks({ postId, authorId }: Props) {
         }
       }, false);
 
-      const res = await saveOrDeleteBookmarkedPost(postId, pathname);
+      const res = await saveOrDeleteBookmarkedPost(postId);
       if (res && "errors" in res) {
         handleError(res, "Something wrong");
         mutate();

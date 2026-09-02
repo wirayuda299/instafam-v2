@@ -90,20 +90,24 @@ export default function CreatePostFormContent({
       if (!res?.secure_url || !res?.public_id) {
         throw new Error("File upload failed");
       }
-      await createPost(
+      const createRes = await createPost(
         {
           media: res.secure_url,
           captions: data.captions,
           media_asset_id: res.asset_id,
         },
         published,
-        window.location.pathname,
       );
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
+
+      if (createRes && "errors" in createRes) {
+        throw new Error(
+          typeof createRes.errors === "string"
+            ? createRes.errors
+            : "failed to create post",
+        );
       }
-      toast.error("failed to create post");
+    } catch (error) {
+      toast.error((error as Error).message || "failed to create post");
     }
   };
 

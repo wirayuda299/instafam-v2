@@ -17,9 +17,13 @@ export default function Bio({ bio, userId }: { bio: string; userId: string }) {
 
     setIsSubmitting(true);
     try {
-      const { updateUserBio } = await import("@/helper/users");
+      const { updateUserBio } = await import("@/actions/users");
+      const res = await updateUserBio(bio, userId);
 
-      await updateUserBio(bio, userId, window.location.pathname);
+      if (res && "errors" in res) {
+        toast.error(res.errors || "Failed to update bio");
+        return;
+      }
     } catch (error) {
       toast.error((error as Error).message || "Failed to update bio");
     } finally {

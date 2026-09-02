@@ -18,15 +18,10 @@ import { updateSettingSchema, UpdateSettingSchema } from "@/validation";
 
 type Props = {
   userId: string;
-  userSessionId: string;
   settings: UpdateSettingSchema;
 };
 
-export default function UserSetting({
-  userId,
-  settings,
-  userSessionId,
-}: Props) {
+export default function UserSetting({ userId, settings }: Props) {
   const form = useForm<UpdateSettingSchema>({
     resolver: zodResolver(updateSettingSchema),
     defaultValues: {
@@ -40,15 +35,20 @@ export default function UserSetting({
 
   const handleUpdateProfile = async (data: UpdateSettingSchema) => {
     try {
-      const { updateUserSetting } = await import("@/helper/users");
-      await updateUserSetting(
+      const { updateUserSetting } = await import("@/actions/users");
+      const res = await updateUserSetting(
         userId,
-        userSessionId,
         data.show_mention,
         data.show_saved_post,
         data.show_draft_posts,
-        window.location.pathname,
       );
+
+      if (res && "errors" in res) {
+        toast.error(res.errors || "Failed to update setting");
+        return;
+      }
+
+      toast.success("User setting has been updated");
     } catch (e) {
       toast.error((e as Error).message || "Failed to update setting");
     }

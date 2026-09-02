@@ -5,7 +5,10 @@ import { auth } from "@clerk/nextjs/server";
 import { apiFetch } from "@/lib/http";
 
 export async function markNotificationsRead(userId: string) {
-  await auth.protect();
+  const { userId: sessionUserId } = await auth.protect();
+  if (sessionUserId !== userId) return { errors: "Unauthorized" };
+
+  const fallback = "Failed to mark notifications as read";
   try {
     const res = await apiFetch("/notifications/mark-read", {
       method: "PUT",
@@ -13,8 +16,9 @@ export async function markNotificationsRead(userId: string) {
       json: { userId },
     });
 
-    if (!res.ok) throw new Error("Failed to mark notifications as read");
+    if (!res.ok) return { errors: fallback };
+    return null;
   } catch (error) {
-    return { errors: (error as Error).message };
+    return { errors: (error as Error).message ?? fallback };
   }
 }
