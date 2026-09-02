@@ -72,7 +72,7 @@ export default function PostCard({
   return (
     <article
       className={cn(
-        "bg-black-1/30 flex h-full min-h-max w-full max-w-full flex-col rounded-xl border border-gray-800 shadow-sm max-md:max-w-full",
+        "bg-black-1/30 flex h-full w-full max-w-full flex-col rounded-xl border border-gray-800 shadow-sm max-md:max-w-full",
         rootStyles,
       )}
     >

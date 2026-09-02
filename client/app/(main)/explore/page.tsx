@@ -5,8 +5,6 @@ import LoadMore from "@/components/load-more/posts";
 import ExploreTile from "@/components/shared/explore-tile";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Explore ",
 };

@@ -1,21 +1,18 @@
-import { notFound, redirect, unauthorized } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
-import { currentUser, auth } from "@clerk/nextjs/server";
-import dynamic from "next/dynamic";
+import { currentUser } from "@clerk/nextjs/server";
 
-import ProfileTab from "@/components/profile/tab";
 import FollowButton from "@/components/shared/post-card/follow-button";
 import UserSetting from "@/components/profile/user-settings";
-const SavedPosts = dynamic(() => import("@/components/profile/saved-posts"));
-const UserPosts = dynamic(() => import("@/components/profile/user-posts"));
+import ProfileBody from "@/components/profile/profile-body";
 
 import { blurDataURL } from "@/utils/image-loader";
 import { getUser, getUserFollowers, getUserFollowing } from "@/helper/users";
-import { getUserPosts } from "@/helper/posts";
+import { getSavedPosts, getUserPosts } from "@/helper/posts";
 import Bio from "@/components/profile/bio";
+import { Post } from "@/types";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -26,24 +23,10 @@ export const metadata = {
   title: "Profile ",
 };
 
-function PostsGridSkeleton() {
-  return (
-    <div className="flex w-full flex-wrap gap-3">
-      {[...Array(6)].map((_, i) => (
-        <div
-          key={i}
-          className="bg-black-1/40 max-w-[300px] min-w-36 flex-1 basis-36 animate-pulse rounded-lg border border-gray-800"
-          style={{ aspectRatio: "1 / 1" }}
-        />
-      ))}
-    </div>
-  );
-}
-
 // eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function UserProfile({ searchParams, params }: Props) {
   const id = (await params).id;
-  const tab = (await searchParams).tab;
+  const tab = (await searchParams).tab ?? "posts";
 
   const user = await getUser(id);
   const userSession = await currentUser();
@@ -54,11 +37,24 @@ export default async function UserProfile({ searchParams, params }: Props) {
 
   if (!user) return notFound();
 
-  const [followers, following, { posts, totalPosts }] = await Promise.all([
-    getUserFollowers(id),
-    getUserFollowing(id),
-    getUserPosts(id, tab === "draft" ? false : true),
-  ]);
+  const canSeeDraft = userSession.id === id || user.settings.show_draft_posts;
+  const canSeeSaved = userSession.id === id || user.settings.show_saved_post;
+
+  const emptyPosts: { posts: Post[]; totalPosts: number } = {
+    posts: [],
+    totalPosts: 0,
+  };
+
+  const [followers, following, { posts, totalPosts }, draft, savedPosts] =
+    await Promise.all([
+      getUserFollowers(id),
+      getUserFollowing(id),
+      getUserPosts(id, true),
+      canSeeDraft ? getUserPosts(id, false) : Promise.resolve(emptyPosts),
+      canSeeSaved
+        ? getSavedPosts(id)
+        : Promise.resolve<Post[]>([]),
+    ]);
 
   return (
     <main className="no-scrollbar h-[calc(100dvh-3.5rem)] overflow-y-auto p-5 md:h-screen">
@@ -119,36 +115,17 @@ export default async function UserProfile({ searchParams, params }: Props) {
           </div>
         </header>
       </div>
-      <div className="overflow-x-auto border-b border-gray-800">
-        <ProfileTab
-          userSession={userSession.id!}
-          userId={id}
-          settings={user.settings}
-        />
-      </div>
-      <div className="flex flex-wrap gap-3 p-3 md:p-4">
-        {tab === "posts" && (
-          <Suspense fallback={<PostsGridSkeleton />} key={tab}>
-            <UserPosts totalPosts={totalPosts} posts={posts} />
-          </Suspense>
-        )}
-
-        {tab === "saved" && (
-          <Suspense fallback={<PostsGridSkeleton />} key={tab}>
-            <SavedPosts userId={id} />
-          </Suspense>
-        )}
-        {tab === "draft" && (
-          <Suspense fallback={<PostsGridSkeleton />} key={tab}>
-            <UserPosts totalPosts={totalPosts} posts={posts} />
-          </Suspense>
-        )}
-        {tab === "mention" && (
-          <p className="w-full py-10 text-center text-sm text-white/50">
-            No mentions yet.
-          </p>
-        )}
-      </div>
+      <ProfileBody
+        userId={id}
+        userSession={userSession.id!}
+        settings={user.settings}
+        initialTab={tab}
+        posts={posts}
+        totalPosts={totalPosts}
+        draftPosts={draft.posts}
+        draftTotalPosts={draft.totalPosts}
+        savedPosts={savedPosts}
+      />
     </main>
   );
 }

@@ -1,98 +1,67 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  startTransition,
-} from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { Grid, Bookmark, LockKeyhole, AtSign } from "lucide-react";
 
 import { User } from "@/types";
 import { cn } from "@/lib/utils";
 
+export type ProfileTabName = "posts" | "saved" | "draft" | "mention";
+
 type Props = {
   userId: string;
   settings: Pick<User, "settings">["settings"];
   userSession: string;
+  tab: ProfileTabName;
+  onTabChange: (tab: ProfileTabName) => void;
 };
 
-export default function ProfileTab({ settings, userSession, userId }: Props) {
+export default function ProfileTab({
+  settings,
+  userSession,
+  userId,
+  tab,
+  onTabChange,
+}: Props) {
   const ref1 = useRef<HTMLButtonElement>(null);
   const ref2 = useRef<HTMLButtonElement>(null);
   const ref3 = useRef<HTMLButtonElement>(null);
   const ref4 = useRef<HTMLButtonElement>(null);
-
   const lineRef = useRef<HTMLDivElement>(null);
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab");
-
-  const [activeTab, setActiveTab] = useState<HTMLButtonElement | null>(
-    ref1?.current,
-  );
-
-  const handleChangeActiveTab = (tab: HTMLButtonElement) => {
-    setActiveTab(tab);
-    startTransition(() => {
-      router.push(`?tab=${tab.title}`);
-    });
-  };
+  const refForTab = useCallback((name: ProfileTabName) => {
+    switch (name) {
+      case "posts":
+        return ref1;
+      case "saved":
+        return ref2;
+      case "draft":
+        return ref3;
+      case "mention":
+        return ref4;
+    }
+  }, []);
 
   const updateStyles = useCallback(() => {
+    const activeTab = refForTab(tab).current;
     if (activeTab && lineRef.current) {
       const tabRect = activeTab.getBoundingClientRect();
       const containerRect = activeTab.parentElement!.getBoundingClientRect();
-      const leftPosition = tabRect.left - containerRect.left;
-      lineRef.current.style.left = `${leftPosition}px`;
-      lineRef.current.style.width = activeTab.clientWidth + "px";
+      lineRef.current.style.left = `${tabRect.left - containerRect.left}px`;
+      lineRef.current.style.width = `${activeTab.clientWidth}px`;
     }
-  }, [activeTab]);
+  }, [tab, refForTab]);
 
   useEffect(() => {
-    let activeRef;
-
-    switch (tab) {
-      case "posts":
-        activeRef = ref1.current;
-        break;
-      case "saved":
-        activeRef = ref2.current;
-        break;
-      case "draft":
-        activeRef = ref3.current;
-        break;
-      case "mention":
-        activeRef = ref4.current;
-        break;
-      default:
-        activeRef = ref1.current;
-    }
-    setActiveTab(activeRef);
-  }, [tab]);
-
-  useEffect(() => {
-    if (activeTab && lineRef.current) {
-      updateStyles();
-    }
-
+    updateStyles();
     window.addEventListener("resize", updateStyles);
+    return () => window.removeEventListener("resize", updateStyles);
+  }, [updateStyles]);
 
-    return () => {
-      window.removeEventListener("resize", updateStyles);
-    };
-  }, [activeTab, updateStyles]);
-
-  const activeTabName = tab ?? "posts";
-  const tabClass = (name: string) =>
+  const tabClass = (name: ProfileTabName) =>
     cn(
       "flex items-center gap-2 pb-3 transition-colors",
-      activeTabName === name
-        ? "text-white"
-        : "text-white/50 hover:text-white/80",
+      tab === name ? "text-white" : "text-white/50 hover:text-white/80",
     );
 
   return (
@@ -105,7 +74,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
         ref={ref1}
         title="posts"
         name="posts"
-        onClick={() => handleChangeActiveTab(ref1.current!)}
+        onClick={() => onTabChange("posts")}
         className={tabClass("posts")}
       >
         <Grid /> <span className="font-medium">Posts</span>
@@ -115,7 +84,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           ref={ref2}
           title="saved"
           name="saved"
-          onClick={() => handleChangeActiveTab(ref2.current!)}
+          onClick={() => onTabChange("saved")}
           className={tabClass("saved")}
         >
           <Bookmark /> <span className="font-medium">Saved</span>
@@ -126,7 +95,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           ref={ref3}
           title="draft"
           name="draft"
-          onClick={() => handleChangeActiveTab(ref3.current!)}
+          onClick={() => onTabChange("draft")}
           className={tabClass("draft")}
         >
           <LockKeyhole />
@@ -138,7 +107,7 @@ export default function ProfileTab({ settings, userSession, userId }: Props) {
           ref={ref4}
           title="mention"
           name="mention"
-          onClick={() => handleChangeActiveTab(ref4.current!)}
+          onClick={() => onTabChange("mention")}
           className={tabClass("mention")}
         >
           <AtSign />
