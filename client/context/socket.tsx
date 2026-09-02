@@ -31,7 +31,7 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const server = io(process.env.SERVER_URL!, {
+    const server = io(process.env.NEXT_PUBLIC_SERVER_URL!, {
       reconnectionAttempts: 5,
       timeout: 10000,
     });

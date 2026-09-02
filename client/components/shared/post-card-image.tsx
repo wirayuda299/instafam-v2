@@ -6,7 +6,13 @@ import Link from "next/link";
 import { Post } from "@/types";
 import { blurDataURL } from "@/utils/image-loader";
 
-export default function PostCardImage({ post }: { post: Post }) {
+export default function PostCardImage({
+  post,
+  priority = false,
+}: {
+  post: Post;
+  priority?: boolean;
+}) {
   return (
     <Link
       href={`/post/${post.post_id}`}
@@ -19,8 +25,8 @@ export default function PostCardImage({ post }: { post: Post }) {
           (e.currentTarget.src = "/assets/shared/images/placeholder.png")
         }
         src={post.media_url ?? "/assets/shared/images/placeholder.png"}
-        priority={true}
-        loading={"eager"}
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
         placeholder={blurDataURL(500, 400)}
         width={500}
         height={500}

@@ -45,10 +45,14 @@ export default function LoadMore({
   prevPosts = [],
   type,
   totalPosts,
+  userId,
+  published = true,
 }: {
   prevPosts: Post[];
   type: string;
   totalPosts: number;
+  userId?: string;
+  published?: boolean;
 }) {
   const { ref, inView } = useInView();
 
@@ -79,8 +83,14 @@ export default function LoadMore({
     if (!lastCursor || !lastCreatedAt) return;
 
     try {
-      const { getAllPosts } = await import("@/helper/posts");
-      const res = await getAllPosts(lastCursor, lastCreatedAt);
+      const res =
+        type === "profile" && userId
+          ? await (
+              await import("@/helper/posts")
+            ).getUserPosts(userId, published, lastCursor, lastCreatedAt)
+          : await (
+              await import("@/helper/posts")
+            ).getAllPosts(lastCursor, lastCreatedAt);
 
       setPosts((prev) => [...prev, ...res.posts]);
 
@@ -93,7 +103,7 @@ export default function LoadMore({
     } catch (error) {
       toast.error((error as Error).message);
     }
-  }, [lastCreatedAt, lastCursor]);
+  }, [lastCreatedAt, lastCursor, type, userId, published]);
 
   useEffect(() => {
     if (inView && hasMorePosts && prevPosts.length >= 10) {

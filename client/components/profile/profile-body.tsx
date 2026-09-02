@@ -22,9 +22,13 @@ type Props = {
 function PostsGrid({
   posts,
   totalPosts,
+  userId,
+  published,
 }: {
   posts: Post[];
   totalPosts: number;
+  userId: string;
+  published: boolean;
 }) {
   if (posts.length < 1) {
     return (
@@ -36,10 +40,16 @@ function PostsGrid({
 
   return (
     <>
-      {posts.map((post) => (
-        <PostCardImage key={post.post_id} post={post} />
+      {posts.map((post, i) => (
+        <PostCardImage key={post.post_id} post={post} priority={i < 6} />
       ))}
-      <LoadMore totalPosts={totalPosts} type="profile" prevPosts={posts} />
+      <LoadMore
+        totalPosts={totalPosts}
+        type="profile"
+        prevPosts={posts}
+        userId={userId}
+        published={published}
+      />
     </>
   );
 }
@@ -76,15 +86,27 @@ export default function ProfileBody({
       </div>
       <div className="flex flex-wrap gap-3 p-3 md:p-4">
         {tab === "posts" && (
-          <PostsGrid posts={posts} totalPosts={totalPosts} />
+          <PostsGrid
+            key="posts"
+            posts={posts}
+            totalPosts={totalPosts}
+            userId={userId}
+            published={true}
+          />
         )}
         {tab === "draft" && (
-          <PostsGrid posts={draftPosts} totalPosts={draftTotalPosts} />
+          <PostsGrid
+            key="draft"
+            posts={draftPosts}
+            totalPosts={draftTotalPosts}
+            userId={userId}
+            published={false}
+          />
         )}
         {tab === "saved" &&
           (savedPosts.length > 0 ? (
-            savedPosts.map((post) => (
-              <PostCardImage post={post} key={post.post_id} />
+            savedPosts.map((post, i) => (
+              <PostCardImage post={post} key={post.post_id} priority={i < 6} />
             ))
           ) : (
             <p className="w-full py-10 text-center text-sm text-white/50">

@@ -27,15 +27,15 @@ export default async function Home() {
           </div>
         ) : (
           <>
-            {posts.map((post) => (
+            {posts.map((post, i) => (
               <PostCard
                 key={post.post_id}
                 fileId={post.media_asset_id}
                 created_at={post.created_at}
                 authorId={post.author_id}
                 likes={post.likes || []}
-                priority={true}
-                loading="eager"
+                priority={i < 2}
+                loading={i < 2 ? "eager" : "lazy"}
                 postId={post.post_id}
                 media={post.media_url}
                 authorImage={post.profile_image}
