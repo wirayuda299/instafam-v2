@@ -58,7 +58,7 @@ export default async function UserProfile({ searchParams, params }: Props) {
   ]);
 
   return (
-    <main className="no-scrollbar max-h-screen min-h-screen overflow-y-auto p-5">
+    <main className="no-scrollbar h-[calc(100dvh-3.5rem)] overflow-y-auto p-5 md:h-screen">
       <div className="max-h-64 min-h-64 w-full border-b border-gray-800 p-2 max-lg:max-h-max md:p-5">
         <header className="mx-auto grid h-full w-full max-w-(--breakpoint-sm) grid-cols-1 items-center gap-4 lg:grid-cols-2">
           <Image

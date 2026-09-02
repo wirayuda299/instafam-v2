@@ -17,7 +17,7 @@ export default async function Home() {
 
   return (
     <main className="no-scrollbar flex h-full" id="test">
-      <div className="flex h-auto max-h-screen w-full flex-col gap-4 overflow-y-auto p-2 max-md:max-h-dvh">
+      <div className="flex h-[calc(100dvh-3.5rem)] w-full flex-col gap-4 overflow-y-auto p-2 md:h-auto md:max-h-screen">
         {posts.length < 1 ? (
           <div className="flex h-full min-h-[60vh] w-full flex-col items-center justify-center gap-2 text-center">
             <p className="prose prose-lg font-semibold text-white">

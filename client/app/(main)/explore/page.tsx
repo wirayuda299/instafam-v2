@@ -29,7 +29,7 @@ export default async function Explore() {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto p-1 md:p-2">
+    <div className="h-[calc(100dvh-3.5rem)] w-full overflow-y-auto p-1 md:h-screen md:p-2">
       <div className="columns-2 gap-1 sm:columns-3 md:gap-2 lg:columns-4 xl:columns-5">
         {posts.map((post, i) => (
           <ExploreTile
