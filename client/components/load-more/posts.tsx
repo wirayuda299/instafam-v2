@@ -107,7 +107,7 @@ export default function LoadMore({
 
       {hasMorePosts && prevPosts.length >= 10 && (
         <div
-          className="flex w-full min-w-[400px] items-center justify-center pt-5"
+          className="flex w-full items-center justify-center pt-5"
           ref={ref}
         >
           <div className="w-full animate-pulse space-y-3">
