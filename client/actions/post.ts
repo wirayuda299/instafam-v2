@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { createPostSchema, CreatePostType } from "@/validation";
 import { apiFetch } from "@/lib/http";
@@ -58,6 +58,7 @@ export async function createPost(
     });
 
     if (!res.ok) throw new Error("Failed to create post");
+    updateTag("posts");
     revalidatePath(pathname);
   } catch (error) {
     return {
@@ -84,6 +85,7 @@ export async function likeOrDislikePost(postId: string, pathname: string) {
     });
 
     if (!res.ok) throw new Error("Failed to like or dislike post");
+    updateTag("posts");
     revalidatePath(pathname);
   } catch (error) {
     return { errors: (error as Error).message };
@@ -103,6 +105,7 @@ export async function publishPost(postId: string, pathname: string) {
     });
 
     if (!res.ok) throw new Error("Failed to publish post");
+    updateTag("posts");
     revalidatePath(pathname);
   } catch (error) {
     return { errors: (error as Error).message };
@@ -127,6 +130,7 @@ export async function updatePostCaptions(
     });
 
     if (!res.ok) throw new Error("Failed to update caption");
+    updateTag("posts");
     revalidatePath(pathname);
   } catch (error) {
     return { errors: (error as Error).message };
@@ -160,6 +164,7 @@ export async function deletePost(
     throw new Error(res.message ?? "Failed to delete post");
   }
 
+  updateTag("posts");
   revalidatePath(pathname);
   if (pathname !== "/") {
     redirect("/");

@@ -81,6 +81,24 @@ export async function getUserFollowing(
   }
 }
 
+export async function getFollowStatus(
+  userId: string,
+  targetId: string,
+): Promise<{ is_following: boolean; is_follower: boolean }> {
+  try {
+    const res = await apiFetch(
+      `/users/follow_status?userId=${userId}&targetId=${targetId}`,
+      { credentials: "include" },
+    );
+
+    if (!res.ok) throw new Error("Failed to fetch follow status");
+
+    return await res.json();
+  } catch (e) {
+    throw e;
+  }
+}
+
 export async function searchUser(
   query: string,
 ): Promise<User[] | { errors: string }> {

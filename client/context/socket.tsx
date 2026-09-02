@@ -6,6 +6,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { type Socket, io } from "socket.io-client";
@@ -93,10 +94,10 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
     socket.emit("join", userId);
   }, [socket, userId]);
 
+  const value = useMemo(() => ({ socket }), [socket]);
+
   return (
-    <SocketContext.Provider value={{ socket }}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };
 export const useSocketContext = () => useContext(SocketContext);

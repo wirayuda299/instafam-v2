@@ -22,36 +22,37 @@ export default function Bookmarks({ postId, authorId }: Props) {
   const { userId } = useAuth();
 
   const { data, isLoading, isValidating, mutate } = useSwr(
-    "bookmarks",
+    userId ? `bookmarks/${userId}` : null,
     () => getSavedPosts(userId!),
     { fallbackData: [] },
   );
 
-  const [bookmarks, setBookmarks] = useState(
-    data.length > 0 ? data.map((bookmark) => bookmark.post_id) : [],
-  );
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isSaved = useMemo(
-    () => bookmarks.includes(postId!),
-    [bookmarks, postId],
+    () => data.some((bookmark) => bookmark.post_id === postId),
+    [data, postId],
   );
 
   const handleSaveOrDeletePost = async () => {
     if (!postId) return;
 
     try {
-      setBookmarks((prevData) => {
+      mutate((prevData) => {
         if (isSaved) {
-          return prevData?.filter((post) => post !== postId);
+          return prevData?.filter((bookmark) => bookmark.post_id !== postId);
         } else {
-          return prevData?.concat(postId);
+          return [
+            ...(prevData || []),
+            { post_id: postId } as unknown as (typeof data)[number],
+          ];
         }
-      });
+      }, false);
 
       const res = await saveOrDeleteBookmarkedPost(postId, pathname);
       if (res && "errors" in res) {
         handleError(res, "Something wrong");
+        mutate();
       } else {
         mutate();
       }

@@ -2,10 +2,10 @@
 
 import { toast } from "sonner";
 import useSWR from "swr";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { getUserFollowers, getUserFollowing } from "@/helper/users";
+import { getFollowStatus } from "@/helper/users";
 import { handleError } from "@/utils/error";
 import { cn } from "@/lib/utils";
 import { followUnfollow } from "@/actions/users";
@@ -19,46 +19,25 @@ type Props = {
 export default function FollowButton({ userToFollow, userId, styles }: Props) {
   const [pending, setPending] = useState(false);
 
-  const {
-    data: followings,
-    isLoading: followingLoading,
-    error: followingError,
-  } = useSWR(`/following/${userToFollow}`, () =>
-    getUserFollowing(userToFollow),
-  );
-  const {
-    data: followers,
-    isLoading,
-    error,
-    mutate,
-  } = useSWR(`followers/${userToFollow}`, () => getUserFollowers(userToFollow));
-
-  const isFollowing = useMemo(
-    () => followers?.find((follower) => follower.follower_id === userId),
-    [followers, userId],
+  const { data, isLoading, error, mutate } = useSWR(
+    `follow-status/${userId}/${userToFollow}`,
+    () => getFollowStatus(userId, userToFollow),
   );
 
-  const isFollowCurrentUser = useMemo(
-    () => followings?.map((foll) => foll.following_id).includes(userId),
-    [followings, userId],
-  );
+  const isFollowing = data?.is_following;
+  const isFollowCurrentUser = data?.is_follower;
 
-  if (error || followingLoading || followingError || isLoading) return null;
+  if (error || isLoading) return null;
 
   const handleFollowUnfollow = async () => {
     try {
       setPending(true);
 
-      mutate((prevData) => {
-        if (isFollowing) {
-          return (
-            prevData?.filter((follower) => follower.follower_id !== userId) ||
-            []
-          );
-        } else {
-          return [...(prevData || []), { follower_id: userId! }];
-        }
-      }, false);
+      mutate(
+        (prev) =>
+          prev && { ...prev, is_following: !prev.is_following },
+        false,
+      );
 
       const res = await followUnfollow(userId, userToFollow);
       if (res && "errors" in res) {

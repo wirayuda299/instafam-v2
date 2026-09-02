@@ -39,6 +39,14 @@ export class UsersController {
     return this.userService.getUserFollowing(userId);
   }
 
+  @Get('/follow_status')
+  getFollowStatus(
+    @Query('userId') userId: string,
+    @Query('targetId') targetId: string,
+  ) {
+    return this.userService.getFollowStatus(userId, targetId);
+  }
+
   @Get('/:id')
   getUser(@Param('id') id: string) {
     return this.userService.getUserById(id);

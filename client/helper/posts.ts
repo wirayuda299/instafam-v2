@@ -19,7 +19,10 @@ export async function getAllPosts(
 
     const query = `/posts/find-all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
 
-    const res = await apiFetch(query, { method: "GET" });
+    const res = await apiFetch(query, {
+      method: "GET",
+      next: { revalidate: 30, tags: ["posts"] },
+    });
 
     if (!res.ok) {
       const err = await res.json();

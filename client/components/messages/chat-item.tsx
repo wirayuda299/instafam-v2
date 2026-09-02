@@ -3,7 +3,7 @@
 import { Check, Pencil, Reply, X } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { ConversationMessage } from "@/types";
@@ -13,17 +13,12 @@ import { useSocketContext } from "@/context/socket";
 
 type Props = {
   selectMessage: (message: ConversationMessage | null) => void;
-  messages: ConversationMessage[];
+  messagesById: Map<string, ConversationMessage>;
   userId: string;
   c: ConversationMessage;
 };
 
-export default function ChatItem({
-  selectMessage,
-  c,
-  userId,
-  messages,
-}: Props) {
+function ChatItem({ selectMessage, c, userId, messagesById }: Props) {
   const params = useParams();
   const recipientId = params.id as string;
   const { socket } = useSocketContext();
@@ -31,9 +26,7 @@ export default function ChatItem({
   const [draft, setDraft] = useState(c.message);
 
   const repliedMessage =
-    c.parent_id !== null
-      ? messages.find((message) => message.id === c.parent_id)
-      : null;
+    c.parent_id !== null ? messagesById.get(c.parent_id) : null;
 
   const wasEdited = c.updated_at && c.created_at !== c.updated_at;
 
@@ -184,3 +177,5 @@ export default function ChatItem({
     </li>
   );
 }
+
+export default memo(ChatItem);

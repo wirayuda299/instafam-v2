@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { toast } from "sonner";
 
 import { handleError } from "@/utils/error";
@@ -9,9 +9,13 @@ export default function useSearchUser() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const debouncedSave = debounce((e: ChangeEvent<HTMLInputElement>) =>
-    setSearchQuery(e.target.value),
-  );
+  const debouncedSave = useRef(
+    debounce((e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchQuery(value);
+      if (!value) setSearchResult([]);
+    }),
+  ).current;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => debouncedSave(e);
 
@@ -40,11 +44,6 @@ export default function useSearchUser() {
         setLoading(false);
       }
     })();
-
-    return () => {
-      setSearchQuery("");
-      setSearchResult([]);
-    };
   }, [searchQuery]);
 
   return {

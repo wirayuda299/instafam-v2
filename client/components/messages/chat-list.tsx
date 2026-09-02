@@ -2,7 +2,7 @@
 
 import { useSocketContext } from "@/context/socket";
 import { useParams, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
@@ -49,8 +49,15 @@ export default function ChatList() {
     };
   }, [params.id, socket]);
 
-  const handleSelectMessage = (message: ConversationMessage | null) =>
-    setSelectedMessage(message);
+  const handleSelectMessage = useCallback(
+    (message: ConversationMessage | null) => setSelectedMessage(message),
+    [],
+  );
+
+  const messagesById = useMemo(
+    () => new Map(messages.map((m) => [m.id, m])),
+    [messages],
+  );
 
   return (
     <>
@@ -72,7 +79,7 @@ export default function ChatList() {
         ) : (
           messages.map((c) => (
             <ChatItem
-              messages={messages}
+              messagesById={messagesById}
               selectMessage={handleSelectMessage}
               c={c}
               key={c.id}

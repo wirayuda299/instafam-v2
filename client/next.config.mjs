@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   agentRules: false,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   images: {
     dangerouslyAllowSVG: true,
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

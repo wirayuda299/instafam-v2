@@ -148,6 +148,23 @@ export class UsersService {
     }
   }
 
+  async getFollowStatus(
+    userId: string,
+    targetId: string,
+  ): Promise<{ is_following: boolean; is_follower: boolean }> {
+    try {
+      const result = await this.db.pool.query(
+        `select
+          exists(select 1 from followers where user_id = $1 and follower_id = $2) as is_following,
+          exists(select 1 from followers where user_id = $2 and follower_id = $1) as is_follower`,
+        [targetId, userId],
+      );
+      return result.rows[0];
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async followOrUnfollow(userToFollow: string, currentUser: string) {
     const followers = await this.getUserFollowers(userToFollow);
     const isFollowed = followers.find(

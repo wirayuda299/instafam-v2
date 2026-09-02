@@ -24,7 +24,7 @@ export default function LikeButton({
   const [pending, startTransition] = useTransition();
 
   const isLiked = useMemo(
-    () => likesData.map((like) => like.liked_by).includes(userId!),
+    () => likesData.some((like) => like.liked_by === userId),
     [likesData, userId],
   );
 
