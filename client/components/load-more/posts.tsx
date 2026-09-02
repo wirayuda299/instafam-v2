@@ -106,14 +106,13 @@ export default function LoadMore({
       {posts?.map((post, i) => RenderComponentBasedOnType(type, post, i))}
 
       {hasMorePosts && prevPosts.length >= 10 && (
-        <div
-          className="flex w-full items-center justify-center pt-5"
-          ref={ref}
-        >
-          <div className="w-full animate-pulse space-y-3">
-            <div className="bg-black-1 h-40 w-full rounded-md"></div>
-            <div className="bg-black-1 h-5 w-full rounded-full"></div>
-            <div className="bg-black-1 h-4 w-[calc(100%-50px)] rounded-full"></div>
+        <div ref={ref} className="w-full pt-5 [column-span:all]">
+          <div className="flex w-full items-center justify-center">
+            <div className="w-full animate-pulse space-y-3">
+              <div className="bg-black-1 h-40 w-full rounded-md"></div>
+              <div className="bg-black-1 h-5 w-full rounded-full"></div>
+              <div className="bg-black-1 h-4 w-[calc(100%-50px)] rounded-full"></div>
+            </div>
           </div>
         </div>
       )}
